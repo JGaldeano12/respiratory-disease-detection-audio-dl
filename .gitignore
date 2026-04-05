@@ -1,0 +1,15 @@
+# First, we ignore the raw data and processed data, but mantaining the folders.
+data/raw/*
+data/processed/*
+
+# Logs from experiments
+experiments/*
+
+# Exclude the trained models
+models/checkpoints/*
+models/pretrained/*
+
+# Exclude cache files from data
+src/data/__pycache__
+src/features/__pycache__
+src/training/__pycache__
