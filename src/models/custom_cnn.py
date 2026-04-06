@@ -43,7 +43,7 @@ def create_custom_cnn(input_shape = (64, 193, 3), num_classes = 4):
     layers.Dropout(0.4),
 
     # Output layer with softmax activation for multi-class classification.
-    layers.Dense(4, activation = num_classes)])
+    layers.Dense(num_classes, activation = 'softmax')])
 
     # Finally, I will return the created model.
     return model

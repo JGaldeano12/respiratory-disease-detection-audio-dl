@@ -9,12 +9,19 @@ def get_label(file_path):
     """
     Function to extract the label from the file path, specifically from the folder.
     """
-    # Split the file path into its components using the OS-specific path separator and extract the relevant part to determine the label.
+    # Split the file path into its components and extract the label string from the appropriate position (5th index).
     elements = tf.strings.split(file_path, os.path.sep)
+    label_str = elements[5]
 
-    # Map the extracted label to a numerical value based on the folder name.
-    mapping = {'Healthy': 0, 'Crackle': 1, 'Wheeze': 2, 'Wheeze & Crackle': 3}
-    label = mapping.get(elements[5], 4)
+    # Create a lookup table to convert the label strings into numerical labels.
+    keys = tf.constant(['Healthy', 'Crackle', 'Wheeze', 'Wheeze & Crackle'])
+    values = tf.constant([0, 1, 2, 3], dtype=tf.int32)
+
+    # Create a static hash table for the label lookup, with a default value of 4 for any unknown labels.
+    table = tf.lookup.StaticHashTable( tf.lookup.KeyValueTensorInitializer(keys, values), default_value=4)
+
+    # Use the lookup table to convert the label string into its corresponding numerical label.
+    label = table.lookup(label_str)
 
     # Return the numerical label corresponding to the class of the image.
     return label
@@ -100,11 +107,11 @@ def train(model, train_dataset, val_dataset, epochs=100):
 
     # Compile the model with the Adam optimizer, categorical cross-entropy loss function, and the defined metrics.
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3, clipnorm=1.0),
-                  loss = 'CategoricalCrossentropy',
-                  callbacks=[ICBHI_Score_PrintingCallback()])
+                  loss = 'CategoricalCrossentropy')
+    # model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3, clipnorm=1.0), loss = 'CategoricalCrossentropy')
 
     # Train the model using the fit method.
-    history = model.fit(train_dataset, epochs = epochs, validation_data = val_dataset, class_weight = alpha_dict, verbose = 2)
+    history = model.fit(train_dataset, epochs = epochs, validation_data = val_dataset, class_weight = alpha_dict, verbose = 2, callbacks=[ICBHI_Score_PrintingCallback(val_dataset)])
 
     # Save the model after training is complete.
     model.save(os.path.join('models', datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.h5'))
@@ -112,11 +119,20 @@ def train(model, train_dataset, val_dataset, epochs=100):
     # Return the training history, which contains information about the loss and metrics for each epoch.
     return history
 
+# Set warning level to ignore to suppress TensorFlow warnings during execution.
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+print("Loading datasets...")
+
 # Load the training and validation datasets.
 train_dataset, val_dataset = load_datasets('/app/data/processed')
 
+print("Creating model...")
+
 # Create the model using the create_custom_cnn function, which defines a custom CNN architecture.
 model = create_custom_cnn()
+
+print("Training model...")
 
 # Train the model using the defined train function, which includes class weights to handle class imbalance.
 history = train(model = model, train_dataset = train_dataset, val_dataset = val_dataset, epochs = 100)
