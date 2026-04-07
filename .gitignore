@@ -2,6 +2,10 @@
 data/raw/*
 data/processed/*
 
+# However, do not ignore the created folders, as they are needed for the project structure.
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
 # Logs from experiments
 experiments/*
 
