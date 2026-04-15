@@ -55,19 +55,19 @@ def check_balanced_dataset(data_path):
     # Return the number of records that need to be augmented for each class to achieve a balanced dataset.
     return num_reg_aug_healthy, num_reg_aug_crackle, num_reg_aug_wheeze, num_reg_aug_both
 
-def select_random_respiratory_cycles(category, control_file_path = '/app/src/data/ciclos_respiratorios_train.npy'):
+def select_random_respiratory_cycles(category, seed, train_test_split, control_file_path = '/app/src/data/ciclos_respiratorios.npy'):
     """
     Function to select two random respiratory cycles.
     """
-    # Load the file with the labeled cycles
-    cycles = np.load(control_file_path)
+    # Since the augmentation will be applied to the training set only, we are filtering the patients by the seed used.
+    train_cycles, _ = split_patients_by_train_test(control_file_path, seed, train_test_split)
 
     # Filter the respiratory cycles based on the specified class and a 
     # duration threshold of 4.5 seconds to ensure that only relevant cycles are selected for augmentation.
-    cycles_healthy = cycles[ (cycles[:, 6] == 'Healthy') & (cycles[:, 11].astype(float) < 4.5)]
-    cycles_crackle = cycles[ (cycles[:, 6] == 'Crackle') & (cycles[:, 11].astype(float) < 4.5)]
-    cycles_wheeze= cycles[ (cycles[:, 6] == 'Wheeze') & (cycles[:, 11].astype(float) < 4.5)]
-    cycles_both= cycles[ (cycles[:, 6] == 'Wheeze & Crackle') & (cycles[:, 11].astype(float) < 4.5)]
+    cycles_healthy = train_cycles[ (train_cycles[:, 6] == 'Healthy') & (train_cycles[:, 11].astype(float) < 4.5)]
+    cycles_crackle = train_cycles[ (train_cycles[:, 6] == 'Crackle') & (train_cycles[:, 11].astype(float) < 4.5)]
+    cycles_wheeze = train_cycles[ (train_cycles[:, 6] == 'Wheeze') & (train_cycles[:, 11].astype(float) < 4.5)]
+    cycles_both = train_cycles[ (train_cycles[:, 6] == 'Wheeze & Crackle') & (train_cycles[:, 11].astype(float) < 4.5)]
 
     # Depending on the specified class, select two random respiratory cycles from the corresponding filtered list of cycles.
     if category == 'Healthy':
@@ -126,7 +126,6 @@ def select_random_respiratory_cycles(category, control_file_path = '/app/src/dat
     # Finally, for the "Wheeze & Crackle" class, we can generate a random combination of cycles from the crackle, wheeze, healthy, and both classes for augmentation,
     # or select two random cycles from the "Wheeze & Crackle" class for augmentation, depending on the available cycles in each class and a random choice.
     elif category == 'Wheeze & Crackle':
-        
         # Generate a list of possible combinations.
         opciones = []
 
@@ -209,13 +208,13 @@ def select_random_respiratory_cycles(category, control_file_path = '/app/src/dat
     # Return the indices and records of the selected respiratory cycles for augmentation based on the specified class and random selection criteria.
     return indices, regs
 
-def CBA(category, duration, input_path, output_path):
+def CBA(category, duration, input_path, output_path, seed = 20251231, train_test_split = 80, control_file_path = '/app/src/data/ciclos_respiratorios.npy'):
     """
     Function to perform Class-Based Augmentation (CBA) for a specified class by selecting random respiratory cycles, applying augmentation techniques, 
     and generating augmented spectrograms for the selected class.
     """
     # Obtain the indices and records for the selected respiratory cycles
-    indices, regs = select_random_respiratory_cycles(category)
+    indices, regs = select_random_respiratory_cycles(category, seed = seed, train_test_split = train_test_split, control_file_path = control_file_path)
 
     # Create list to store the audio segments.
     audios = []
@@ -257,7 +256,7 @@ def CBA(category, duration, input_path, output_path):
     # Generate the Mel Spectrogram for the audio segment:
     extract_features(concat_audio_padded, output_path, label = category, patient = index_generated, index_cycle = index_generated, type = "CBA")
 
-def apply_CBA_by_category(raw_audio_path = '/app/data/raw', output_path = '/app/data/processed/Train', duration = 6, number = 1, category = 'Default'):
+def apply_CBA_by_category(raw_audio_path = '/app/data/raw', output_path = '/app/data/processed/Train', duration = 6, number = 1, category = 'Default', seed = 20251231, train_test_split = 80, control_file_path = '/app/src/data/ciclos_respiratorios.npy'):
     """
     Function to apply Class-Based Augmentation (CBA) for a specified class by calling the CBA function a certain number of times 
     to generate augmented spectrograms for the selected class.
@@ -265,10 +264,13 @@ def apply_CBA_by_category(raw_audio_path = '/app/data/raw', output_path = '/app/
     # For the specified number of times, call the CBA function to perform Class-Based Augmentation (CBA) for the specified class and 
     # generate augmented spectrograms for that class.
     for i in range(number):
-        # Aplico el aumento para la clase 'Healthy'
-        CBA(category = category, duration = duration, input_path = raw_audio_path, output_path = output_path)
+        # Apply Class-Based Augmentation (CBA) for the specified class
+        CBA(category, duration, raw_audio_path, output_path, seed, train_test_split, control_file_path)
+        print(f"CBA applied for {category} class - Iteration {i+1}/{number}")
 
-def apply_CBA(raw_audio_path = '/app/data/raw', output_path = '/app/data/processed/Train', duration = 6):
+    return f"CBA applied for {category} class. Augmented spectrograms generated and saved to the specified output path."
+
+def apply_CBA(raw_audio_path = '/app/data/raw', output_path = '/app/data/processed/Train', duration = 6, seed = 20251231, train_test_split = 80, control_file_path = '/app/src/data/ciclos_respiratorios.npy'):
     """
     Function to apply Class-Based Augmentation (CBA) for all classes by calling the apply_CBA_by_category function for each class with the corresponding parameters.
     """
@@ -276,10 +278,10 @@ def apply_CBA(raw_audio_path = '/app/data/raw', output_path = '/app/data/process
     num_healthy, num_crackle, num_wheeze, num_both = check_balanced_dataset(output_path)
 
     # Now, apply Class-Based Augmentation (CBA) for each class by calling the apply_CBA_by_category function:
-    apply_CBA_by_category(raw_audio_path, output_path, duration, num_healthy, category = 'Healthy')
-    apply_CBA_by_category(raw_audio_path, output_path, duration, num_crackle, category = 'Crackle')
-    apply_CBA_by_category(raw_audio_path, output_path, duration, num_wheeze, category = 'Wheeze')
-    apply_CBA_by_category(raw_audio_path, output_path, duration, num_both, category = 'Wheeze & Crackle')
+    apply_CBA_by_category(raw_audio_path, output_path, duration, num_healthy, category = 'Healthy', seed = seed, train_test_split = train_test_split, control_file_path = control_file_path)
+    apply_CBA_by_category(raw_audio_path, output_path, duration, num_crackle, category = 'Crackle', seed = seed, train_test_split = train_test_split, control_file_path = control_file_path)
+    apply_CBA_by_category(raw_audio_path, output_path, duration, num_wheeze, category = 'Wheeze', seed = seed, train_test_split = train_test_split, control_file_path = control_file_path)
+    apply_CBA_by_category(raw_audio_path, output_path, duration, num_both, category = 'Wheeze & Crackle', seed = seed, train_test_split = train_test_split, control_file_path = control_file_path)
 
     return "CBA applied for all classes. Augmented spectrograms generated and saved to the specified output path."
 
@@ -423,23 +425,16 @@ def apply_traditional_augmentation(raw_audio, sample_rate = 4096, length = 6, cy
     # Free memory after processing the audio file
     gc.collect()
 
-# # Example usage of the apply_CBA function to perform Class-Based Augmentation (CBA) for all classes and generate augmented spectrograms.
-# num_healthy, num_crackle, num_wheeze, num_both = check_balanced_dataset('/app/data/processed/Train')
-# print(f"Number of spectrograms to be augmented for each class: Healthy: {num_healthy}, Crackle: {num_crackle}, Wheeze: {num_wheeze}, Wheeze & Crackle: {num_both}")
+# Example usage of the apply_CBA function to perform Class-Based Augmentation (CBA) for all classes and generate augmented spectrograms.
+num_healthy, num_crackle, num_wheeze, num_both = check_balanced_dataset('/app/data/processed/Train')
+print(f"Number of spectrograms to be augmented for each class: Healthy: {num_healthy}, Crackle: {num_crackle}, Wheeze: {num_wheeze}, Wheeze & Crackle: {num_both}")
 
-# # Now, exec the function to select two random respiratory cycles.
-# indices, regs = select_random_respiratory_cycles(category = 'Crackle')
-# print(f"Selected indices for augmentation: {indices}; Selected records for augmentation: {regs}")
+# Finally, apply Class-Based Augmentation (CBA) for all classes and generate augmented spectrograms.
+apply_CBA(raw_audio_path = '/app/data/raw', output_path = '/app/data/processed/Train', duration = 6, seed = 20251231, train_test_split = 80, control_file_path = '/app/src/data/ciclos_respiratorios.npy')
 
-# # Finally, apply Class-Based Augmentation (CBA) for all classes and generate augmented spectrograms.
-# CBA(category = 'Crackle', duration = 6, input_path = '/app/data/raw', output_path = '/app/data/processed/Train')
+# After that, we apply traditional augmentation techniques to augment the training set. 
+# We start by selecting the respiratory cycles to be augmented, which will be the same number for each class to keep the dataset balanced.
+cycles_selected = select_balanced_and_random_respiratory_cycles(control_file_path = '/app/src/data/ciclos_respiratorios.npy', seed = 20251231, train_test_split = 80)
 
-# # Finally, apply Class-Based Augmentation (CBA) for all classes and generate augmented spectrograms.
-# apply_CBA(raw_audio_path = '/app/data/raw', output_path = '/app/data/processed/Train', duration = 6)
-
-# # After that, we apply traditional augmentation techniques to augment the training set. 
-# # We start by selecting the respiratory cycles to be augmented, which will be the same number for each class to keep the dataset balanced.
-# cycles_selected = select_balanced_and_random_respiratory_cycles(control_file_path = '/app/src/data/ciclos_respiratorios.npy', seed = 20251231, train_test_split = 80)
-
-# # Now, we apply the traditional augmentation techniques to the selected respiratory cycles in parallel.
-# apply_traditional_augmentation_lectura_datos_parallel(input_path = '/app/data/raw', output_path = '/app/data/processed/Train', length = 6, cycles = cycles_selected)
+# Now, we apply the traditional augmentation techniques to the selected respiratory cycles in parallel.
+apply_traditional_augmentation_lectura_datos_parallel(input_path = '/app/data/raw', output_path = '/app/data/processed/Train', length = 6, cycles = cycles_selected)

@@ -42,11 +42,11 @@ def split_patients_by_train_test(aux_file, seed, train_test_split):
     # Then, obtain the unique patient IDs from the respiratory cycles data
     list_id_patients = np.unique(aux_file[:, 0])
 
-    # After that, set the random seed for reproducibility and shuffle the unique patient IDs to ensure a random distribution of patients in the training and testing sets.
-    np.random.seed(seed)
-    np.random.shuffle(list_id_patients)
+    # Use a local random generator for the train/test split so we don't reset the global NumPy RNG state.
+    rng = np.random.default_rng(seed)
+    rng.shuffle(list_id_patients)
 
-    # Split the patient IDs into training and testing sets based on the specified train_test_split ratio. 
+    # Split the patient IDs into training and testing sets based on the specified train_test_split ratio.
     # The first portion of the shuffled patient IDs will be assigned to the training set, while the remaining portion will be assigned to the testing set.
     random_train = list_id_patients[:int(112 * train_test_split / 100)]
     random_test = list_id_patients[int(112 * train_test_split / 100):]
