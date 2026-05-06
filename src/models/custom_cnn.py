@@ -1,49 +1,41 @@
-from tensorflow.keras import layers, models
+from tensorflow.keras import layers, models, regularizers
 
-def create_custom_cnn(input_shape = (64, 193, 3), num_classes = 4):
-    """
-    Function to create a custom Convolutional Neural Network (CNN) architecture for classifying spectrogram images into different classes based on the input shape and number of classes.
-
-    input_shape: the shape of the input data (e.g., (64, 64, 1) for grayscale spectrogram images).
-    num_classes: the number of output classes for classification (e.g., 4 for Crackle, Wheeze, Wheeze & Crackle, Healthy).
-    """
+def create_custom_cnn(input_shape=(128, 501, 1), num_classes=4):
     model = models.Sequential([
-    layers.Input(input_shape),
-    
-    # First convolutional block with 32 filters, kernel size of (3,3), batch normalization, ReLU activation, and max pooling with strides of (2,4).
-    layers.Conv2D(filters = 64, kernel_size = (3,3), padding='same'),
-    layers.BatchNormalization(),
-    layers.Activation('relu'), 
-    layers.MaxPooling2D(strides=(2,4)),
+        layers.Input(input_shape),
 
-    # Second convolutional block with 64 filters, kernel size of (3,3), batch normalization, ReLU activation, and max pooling with strides of (2,4).
-    layers.Conv2D(filters = 80, kernel_size = (3,3), padding='same'),
-    layers.BatchNormalization(),
-    layers.Activation('relu'), 
-    layers.MaxPooling2D(strides=(3,3)),
+        # Bloque 1
+        layers.Conv2D(32, (3,3), padding='same', kernel_regularizer=regularizers.l2(1e-4)),
+        layers.BatchNormalization(),
+        layers.Activation('relu'),
+        layers.MaxPooling2D((2,2)),
 
-    # Third convolutional block with 128 filters, kernel size of (5,5), batch normalization, ReLU activation, and max pooling with strides of (3,3).
-    layers.Conv2D(filters = 128, kernel_size = (5,5), padding='same'),
-    layers.BatchNormalization(),
-    layers.Activation('relu'), 
-    layers.MaxPooling2D(strides=(3,3)),
+        # Bloque 2
+        layers.Conv2D(64, (3,3), padding='same', kernel_regularizer=regularizers.l2(1e-4)),
+        layers.BatchNormalization(),
+        layers.Activation('relu'),
+        layers.MaxPooling2D((2,2)),
 
-    # Now, I will flatten the output of the convolutional blocks and add fully connected layers with batch normalization, ReLU activation, and dropout for regularization.
-    layers.BatchNormalization(),
-    layers.Flatten(),
+        # Bloque 3
+        layers.Conv2D(128, (3,3), padding='same', kernel_regularizer=regularizers.l2(1e-4)),
+        layers.BatchNormalization(),
+        layers.Activation('relu'),
+        layers.MaxPooling2D((2,2)),
 
-    # First fully connected layer with 1024 units, batch normalization, ReLU activation, and dropout with a rate of 0.4 for regularization.
-    layers.Dense(1024, activation = 'relu'),
-    layers.BatchNormalization(),
-    layers.Dropout(0.4),
+        # Bloque 4 — más abstracción sin aumentar params
+        layers.Conv2D(128, (3,3), padding='same', kernel_regularizer=regularizers.l2(1e-4)),
+        layers.BatchNormalization(),
+        layers.Activation('relu'),
 
-    # Second fully connected layer with 4 units (corresponding to the number of classes) and softmax activation for multi-class classification.
-    layers.Dense(1024, activation = 'relu'),
-    layers.BatchNormalization(),
-    layers.Dropout(0.4),
+        # GlobalAveragePooling en lugar de Flatten
+        # 16×62×128 → 128  (elimina 65M parámetros de golpe)
+        layers.GlobalAveragePooling2D(),
 
-    # Output layer with softmax activation for multi-class classification.
-    layers.Dense(num_classes, activation = 'softmax')])
+        # Cabeza de clasificación ligera
+        layers.Dense(128, activation='relu', kernel_regularizer=regularizers.l2(1e-4)),
+        layers.BatchNormalization(),
+        layers.Dropout(0.4),
 
-    # Finally, I will return the created model.
+        layers.Dense(num_classes, activation='softmax')
+    ])
     return model

@@ -70,13 +70,14 @@ class ICBHI_Score_PrintingCallback(tf.keras.callbacks.Callback):
         mean_specificity = np.mean(specificity_per_class)
         icbhi_score = (mean_recall + mean_specificity) / 2
 
-        print("\nRecall per class:", recall_per_class)
-        print("Specificity per class:", specificity_per_class)
+        # Now, round the calculated recall and specificity to 4 decimal places.
+        print("\nRecall per class: ", [round(r, 4) for r in recall_per_class])
+        print("Specificity per class:", [round(s, 4) for s in specificity_per_class])
         print(f"ICBHI Score: {round(icbhi_score, 5)} - Sensitivity: {round(mean_recall, 5)} - Specificity: {round(mean_specificity, 5)}")
 
         if icbhi_score > self.best_icbhi_score:
             self.best_icbhi_score = icbhi_score
-            self.model.save("/app/models/checkpoints/best_model_epoch.keras")
+            self.model.save("/app/models/custom_cnn/best_model_epoch.keras")
 
         cm = confusion_matrix(labels_np, predictions_np)
 
@@ -96,6 +97,9 @@ class ICBHI_Score_PrintingCallback(tf.keras.callbacks.Callback):
                 f"{cm}\n"
                 "--------------------------------------\n"
             )
+
+        # Al final de on_epoch_end en ICBHI_Score_PrintingCallback:
+        logs['icbhi_score'] = icbhi_score
     
     def on_train_end(self, logs=None):
         final_msg = f"\nBest ICBHI Score during training: {round(self.best_icbhi_score, 5)}"

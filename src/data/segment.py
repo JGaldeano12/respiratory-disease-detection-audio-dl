@@ -1,11 +1,11 @@
 # Import funcionts from file extract_features.py and preprocess.py
 from src.features.extract_features import extract_features, save_features
-from src.data.preprocess import butter_bandpass_filter, standardize_audio, check_length_and_padding
+from src.data.preprocess import butter_bandpass_filter, check_length_and_padding
 
 # Import other necessary libraries
 import os, gc, multiprocessing, librosa, numpy as np, cv2
 
-def divide_audio(duration, sample_rate, raw_audio, output_path, patient, cycles, cycles_train):
+def divide_audio(duration, sample_rate, raw_audio, output_path, patient, cycles):
     """
     Function to divide the audio into segments based on the respiratory cycles and generate spectrograms for each segment.
 
@@ -19,8 +19,6 @@ def divide_audio(duration, sample_rate, raw_audio, output_path, patient, cycles,
     """
     # Define the target duration in number of samples
     target_length = int(duration * sample_rate)
-
-    print(f"Processing patient: {patient} - Target length in samples: {target_length}")
 
     # Obtain the respiratory cycles for the specific patient
     cycles_filtered = cycles[np.isin(cycles[:, 1], patient)]
@@ -38,11 +36,10 @@ def divide_audio(duration, sample_rate, raw_audio, output_path, patient, cycles,
         segm = raw_audio[start:end]
 
         # Apply the Butterworth bandpass filter and standardize the audio segment
-        segmented_audio = butter_bandpass_filter(segm, 50, 2000, sample_rate, order=5)
-        segmented_audio = standardize_audio(segmented_audio)
+        segmented_audio = butter_bandpass_filter(segm, 50, 2500, sample_rate, order=5)
 
         # Check wether the audio segment is shorter than the target duration. If so, we will apply padding to reach the desired length.
-        segmented_audio = check_length_and_padding(segmented_audio, start, target_length)
+        segmented_audio = check_length_and_padding(segmented_audio, target_length)
 
         # Generate the Mel Spectrogram for the audio segment:
         extract_features(segmented_audio, output_path, label = index_cycle[6], patient = patient, index_cycle = aux_index_cycle, type = "Original")

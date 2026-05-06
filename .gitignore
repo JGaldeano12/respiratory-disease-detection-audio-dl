@@ -10,10 +10,15 @@ data/processed/*
 experiments/*
 
 # Exclude the trained models
-models/checkpoints/*
+models/custom_cnn/*
 models/pretrained/*
+models/*
 
 # Exclude cache files from data
 src/data/__pycache__
 src/features/__pycache__
 src/training/__pycache__
+src/notebooks/models/*
+
+# Not include any model
+*/*.h5

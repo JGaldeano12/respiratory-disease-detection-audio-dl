@@ -1,6 +1,6 @@
 from scipy.signal import butter, lfilter
 
-import librosa, numpy as np, os, gc, multiprocessing, cv2
+import librosa, numpy as np, os, gc, multiprocessing, cv2, math
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
     """
@@ -30,37 +30,86 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
     # Return the filtered audio data
     return y
 
-def standardize_audio(audio):
+# def check_length_and_padding(audio, target_length, sample_rate=8000, crossfade_ms=10):
+#     """
+#     Ensure audio has EXACT target_length using Repeat/Tile Padding.
+
+#     Repeats the audio cyclically until reaching target_length, applying
+#     a short crossfade at each repetition boundary to avoid discontinuities.
+
+#     Args:
+#         audio        : np.ndarray — input audio signal
+#         target_length: int        — desired number of samples
+#         sample_rate  : int        — used to compute crossfade length in samples
+#         crossfade_ms : int        — crossfade duration in milliseconds (default: 10ms)
+#     """
+#     current_length = len(audio)
+
+#     # TRUNCATE
+#     if current_length > target_length:
+#         audio = audio[:target_length]
+
+#     # REPEAT/TILE PADDING
+#     elif current_length < target_length:
+#         crossfade_samples = int(sample_rate * crossfade_ms / 1000)
+#         crossfade_samples = min(crossfade_samples, current_length // 2)
+
+#         # Número de repeticiones necesarias
+#         repeats = math.ceil(target_length / current_length)
+#         tiled = np.tile(audio, repeats)
+
+#         # Aplicar crossfade en cada punto de costura
+#         for i in range(1, repeats):
+#             join = i * current_length  # índice del punto de unión
+
+#             if join >= len(tiled):
+#                 break
+
+#             # Ventanas de fade-out y fade-in
+#             fade_out = np.linspace(1.0, 0.0, crossfade_samples)
+#             fade_in  = np.linspace(0.0, 1.0, crossfade_samples)
+
+#             # Zona antes de la costura (final del bloque anterior)
+#             start_out = join - crossfade_samples
+#             end_out   = join
+
+#             # Zona después de la costura (inicio del bloque siguiente)
+#             start_in  = join
+#             end_in    = join + crossfade_samples
+
+#             if end_in <= len(tiled):
+#                 tiled[start_out:end_out] *= fade_out
+#                 tiled[start_in:end_in]   *= fade_in
+#                 # Mezcla: suma ambas zonas solapadas
+#                 tiled[start_out:end_out] += tiled[start_in:end_in] * fade_out[::-1]
+
+#         audio = tiled[:target_length]
+
+#     return audio
+
+def check_length_and_padding(audio, target_length, sample_rate=8000):
     """
-    Function to standardize the audio data by removing the mean and scaling to unit variance.
+    Ensure audio has EXACT target_length using Wrap Padding.
+
+    Treats the audio as a circular buffer, filling the missing samples
+    by cycling back to the beginning of the signal. This avoids artificial
+    silence (zero padding) and phase inversion (reflect padding), while
+    being simpler and more efficient than manual tiling.
+
+    Args:
+        audio         : np.ndarray — input audio signal
+        target_length : int        — desired number of samples
+        sample_rate   : int        — retained for API consistency
     """
-    # Standardize the audio data by removing the mean and scaling to unit variance
-    standardized_audio = (audio - -1.4100063212550931e-07) / 0.03260556890932612
+    current_length = len(audio)
 
-    # Return the standardized audio data
-    return standardized_audio
+    # TRUNCATE
+    if current_length > target_length:
+        audio = audio[:target_length]
 
-def check_length_and_padding(audio, start_sample, target_length):
-    """
-    Function to ensure that the audio data has a specific target length by applying padding or truncation as needed.
-    """
-    # Check if the audio data is shorter than the target length and apply padding if necessary
-    if len(audio) < target_length:
-        # Randomly choose between constant padding and reflect padding to ensure the audio data reaches the target length
-        if np.random.rand() > 0.5:
-            padding = target_length - len(audio)
-            segmented_audio = np.pad(audio, (0, padding), mode = 'constant')
-        else:
-            padding = target_length - len(audio)
-            segmented_audio = np.pad(audio, (0, padding), mode = 'reflect')
+    # WRAP PADDING
+    elif current_length < target_length:
+        padding = target_length - current_length
+        audio = np.pad(audio, (0, padding), mode='wrap')
 
-    # Check if the audio data is longer than the target length and apply truncation if necessary
-    elif len(audio) > target_length:
-        segmented_audio = audio[:start_sample + target_length]
-
-    # If the audio data is already of the target length, return it as is
-    else:
-        segmented_audio = audio
-
-    # Return the audio data with the ensured target length
-    return segmented_audio
+    return audio
