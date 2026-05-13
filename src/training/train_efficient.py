@@ -3,6 +3,7 @@ import glob
 
 from datetime import datetime
 from sklearn.utils.class_weight import compute_class_weight
+from src.models.efficientnet import create_efficientnet_model
 from src.training.custom_callback import ICBHI_Score_PrintingCallback
 from src.models.custom_cnn import create_custom_cnn
 
@@ -68,31 +69,7 @@ def get_label(file_path):
     # Return the numerical label corresponding to the class of the image.
     return label
 
-def process_image(file_path):
-    """
-    Function to process an image file, including reading the image, decoding it, resizing it, and extracting the label.
-    """
-    # Extract the label from the file path using the get_label function.
-    label = get_label(file_path)
-
-    # Convert the label to a one-hot encoded vector with a depth of 4 (for 4 classes).
-    label = tf.one_hot(label, depth=4)
-
-    # Read the image file and decode it into a tensor with 3 color channels (RGB).
-    img = tf.io.read_file(file_path)
-    img = tf.image.decode_image(img, channels=3)
-
-    # Set the shape of the image tensor to ensure it has 3 channels.
-    img.set_shape([None, None, 3])
-
-    # Resize the image to a fixed size of 64x193 pixels.
-    img = tf.image.resize(img, [64, 193])
-
-    # Return the processed image and its corresponding one-hot encoded label.
-    return img, label
-
-def spec_augment_tf(spec, time_mask_param=20, freq_mask_param=10,
-                    num_time_masks=2, num_freq_masks=2):
+def spec_augment_tf(spec, time_mask_param=20, freq_mask_param=10, num_time_masks=2, num_freq_masks=2):
 
     H = tf.shape(spec)[0]
     W = tf.shape(spec)[1]
@@ -151,29 +128,11 @@ def get_class_weights_from_paths(dir_dataset):
     
     return dict(enumerate(class_weights)), np.array(class_weights)
 
-CHANNEL = 0  # 0=Mel, 1=MFCC, 2=Delta, 3=Delta-Delta
-
-# def load_npy(path):
-#     path = path.numpy().decode("utf-8")
-#     spec = np.load(path)
-
-#     target_width = 501
-#     current_width = spec.shape[1]
-
-#     if current_width > target_width:
-#         start = (current_width - target_width) // 2
-#         spec = spec[:, start:start + target_width, :]
-#     elif current_width < target_width:
-#         pad = target_width - current_width
-#         spec = np.pad(spec, ((0,0), (0,pad), (0,0)), mode='constant')
-
-#     return spec[:, :, CHANNEL:CHANNEL+1].astype(np.float32)
-
 def load_npy(path):
     path = path.numpy().decode("utf-8")
     spec = np.load(path)
     assert spec.shape[1] == 129, f"Unexpected spectrogram width: {spec.shape[1]}"
-    return spec[:, :, CHANNEL:CHANNEL+1].astype(np.float32)
+    return spec.astype(np.float32)
 
 def process_npy(file_path, training=True):
     label = get_label(file_path)
@@ -213,83 +172,69 @@ def load_datasets(dir_dataset):
     # Return the prepared training and testing datasets.
     return train_dataset, test_dataset
 
-def get_class_weights(dataset):
-    """
-    Function to obtain the class weights for the 'CategoricalFocalLoss' loss function.
-    """
-    # Get labels from the dataset and concatenate them into a single array.
-    y_train = np.concatenate([y.numpy() for x, y in dataset], axis=0)
-
-    # Transform the one-hot encoded labels into integer labels by taking the argmax along the appropriate axis.
-    y_train_int = np.argmax(y_train, axis=1)
-
-    # Get the unique class labels from the integer labels to compute class weights.
-    classes = np.unique(y_train_int)
-
-    # Calculate the class weights (must return an array).
-    class_weights = compute_class_weight(class_weight="balanced", classes=classes, y=y_train_int)
-
-    # Cast to a numpy array to ensure it is in the correct format for use in the loss function.
-    class_weights_array = np.array(class_weights)
-
-    # Return the dictionary and array of class weights.
-    return dict(enumerate(class_weights)), class_weights_array
-
-def train(model, train_dataset, val_dataset, epochs=35):
-    """
-    Function to train a given model using the provided training and validation datasets.
-
-    model: the neural network model to be trained (e.g., a custom CNN, ResNet50, or VGG19).
-    train_dataset: the dataset used for training the model.
-    val_dataset: the dataset used for validating the model during training.
-    class_weights: a dictionary mapping class indices to weights, used to handle class imbalance during training (optional).
-    epochs: the number of epochs to train the model (default is 10).
-    batch_size: the number of samples per batch during training (default is 32).
-    callbacks: a list of Keras callbacks to be applied during training (optional).
-    """
-    # lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=1e-5, decay_steps=1000, decay_rate=0.95, staircase=True)
-
-    # # Early stopping callback to prevent overfitting by monitoring the validation loss and stopping training if it does not improve for a certain number of epochs.
-    # early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=7, restore_best_weights=True)
-    
-    # Custom callback to print the ICBHI Score at the end of each epoch, which is a specific metric relevant to the task at hand.
+def train(model, base_model, train_dataset, val_dataset):
+    class_weights_dict, _ = get_class_weights_from_paths('/app/data/processed')
     icbhi_callback = ICBHI_Score_PrintingCallback(val_dataset)
-    early_stopping = ICBHIEarlyStopping(patience=7)
 
-    # # Get the class weights for the training dataset to handle class imbalance.
-    # class_weights_dict, class_weights_array = get_class_weights(train_dataset)
+    # ── Fase 1: solo el clasificador ──────────────────────────────
+    early_stopping_1 = ICBHIEarlyStopping(patience=5)
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4, clipnorm=1.0),
+        loss='categorical_crossentropy'
+    )
+    print("=== FASE 1: Entrenando clasificador (base congelada) ===")
     
-    # Calculate class weights directly from the file paths of the training set, without going through the TF pipeline (without shuffle, batch, or augmentation).
-    class_weights_dict, class_weights_array = get_class_weights_from_paths('/app/data/processed')
+    model.fit(
+        train_dataset, epochs=15,
+        validation_data=val_dataset, verbose=2,
+        class_weight=class_weights_dict,
+        callbacks=[icbhi_callback, early_stopping_1]
+    )
 
-    # # Compile the model with the Adam optimizer, categorical cross-entropy loss function, and the defined metrics.
-    # model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0), loss = focal_loss(gamma=1.5, alpha=class_weights_array))
-    model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=5e-5, clipnorm=1.0), loss = focal_loss(gamma=1.5, alpha=None))
-    
-    # Train the model using the fit method.
-    # history = model.fit(train_dataset, epochs = epochs, validation_data = val_dataset, verbose = 2, callbacks=[ICBHI_Score_PrintingCallback(val_dataset), icbhi_callback, early_stopping])
-    history = model.fit(train_dataset, epochs = epochs, validation_data = val_dataset, verbose = 2, class_weight=class_weights_dict, callbacks=[icbhi_callback, early_stopping])
+    # ── Fase 2: descongelar últimas 30 capas ─────────────────────
+    base_model.trainable = True
+    for layer in base_model.layers[:-30]:
+        layer.trainable = False
 
-    # Save the model after training is complete.
-    model.save(os.path.join('models', datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.h5'))
+    early_stopping_2 = ICBHIEarlyStopping(patience=7)
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4, clipnorm=1.0),
+        loss='categorical_crossentropy'
+    )
+    print("=== FASE 2: Fine-tuning últimas 30 capas ===")
+    model.fit(
+        train_dataset, epochs=50,
+        validation_data=val_dataset, verbose=2,
+        class_weight=class_weights_dict,
+        callbacks=[icbhi_callback, early_stopping_2]
+    )
 
-    # Return the training history, which contains information about the loss and metrics for each epoch.
-    return history
+    # ── Fase 3: descongelar todo ──────────────────────────────────
+    base_model.trainable = True
+    early_stopping_3 = ICBHIEarlyStopping(patience=10)
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0),
+        loss='categorical_crossentropy'
+    )
+    print("=== FASE 3: Fine-tuning completo ===")
+    model.fit(
+        train_dataset, epochs=100,
+        validation_data=val_dataset, verbose=2,
+        class_weight=class_weights_dict,
+        callbacks=[icbhi_callback, early_stopping_3]
+    )
 
-# Set warning level to ignore to suppress TensorFlow warnings during execution.
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+    model.save(os.path.join('models', datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.keras'))
+    return model
 
 print("Loading datasets...")
 
-# Load the training and validation datasets.
 train_dataset, val_dataset = load_datasets('/app/data/processed')
 
 print("Creating model...")
 
-# Create the model using the create_custom_cnn function, which defines a custom CNN architecture.
-model = create_custom_cnn(input_shape=(128, 129, 1), num_classes=4)
+model, base_model = create_efficientnet_model(input_shape=(128, 129, 1), num_classes=4)
 
-print("Training model...")
+print("Starting training...")
 
-# Train the model using the defined train function, which includes class weights to handle class imbalance.
-history = train(model = model, train_dataset = train_dataset, val_dataset = val_dataset, epochs = 100)
+model = train(model, base_model, train_dataset, val_dataset)

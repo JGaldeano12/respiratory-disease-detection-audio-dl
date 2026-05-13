@@ -36,7 +36,7 @@ def divide_audio(duration, sample_rate, raw_audio, output_path, patient, cycles)
         segm = raw_audio[start:end]
 
         # Apply the Butterworth bandpass filter and standardize the audio segment
-        segmented_audio = butter_bandpass_filter(segm, 50, 2500, sample_rate, order=5)
+        segmented_audio = butter_bandpass_filter(segm, 50, 2000, sample_rate, order=5)
 
         # Check wether the audio segment is shorter than the target duration. If so, we will apply padding to reach the desired length.
         segmented_audio = check_length_and_padding(segmented_audio, target_length)

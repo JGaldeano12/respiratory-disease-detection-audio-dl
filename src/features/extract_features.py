@@ -22,31 +22,33 @@ def extract_features(audio, output_path, label, patient, index_cycle, type):
     type: type of augmentation (e.g., 'Original', 'Augmented').
     """
     # Generate the Mel Spectrogram for the audio segment:
-    spectrogram = librosa.feature.melspectrogram(y = audio, sr=8000, n_fft=2048, hop_length=128, n_mels=128, fmin=50, fmax=2500)
+    audio = standardize_audio(audio)
+    spectrogram = librosa.feature.melspectrogram(y = audio, sr=4096, n_fft=2048, hop_length=256, n_mels=128, fmin=50, fmax=2500)
     spectrogram = librosa.power_to_db(spectrogram, ref=np.max)
     
-    # Now, generate MGCC features for the audio segment:
-    mfcc = librosa.feature.mfcc(y=audio, sr=8000, n_mfcc=20, n_fft=2048, hop_length=128)
+    # # Now, generate MGCC features for the audio segment:
+    # mfcc = librosa.feature.mfcc(y=audio, sr=8000, n_mfcc=20, n_fft=2048, hop_length=512)
 
-    # Delta features (first derivative):
-    delta_spectrogram = librosa.feature.delta(mfcc, order=1)
+    # # Delta features (first derivative):
+    # delta_spectrogram = librosa.feature.delta(mfcc, order=1)
 
-    # Delta-delta features (second derivative):
-    delta_spectrogram_2 = librosa.feature.delta(mfcc, order=2)
+    # # Delta-delta features (second derivative):
+    # delta_spectrogram_2 = librosa.feature.delta(mfcc, order=2)
     
-    # Resize the MFCC and delta features to match the dimensions of the spectrogram
-    mfcc = cv2.resize(mfcc, (spectrogram.shape[1], spectrogram.shape[0]), interpolation=cv2.INTER_LINEAR)
-    delta_spectrogram = cv2.resize(delta_spectrogram, (spectrogram.shape[1], spectrogram.shape[0]), interpolation=cv2.INTER_LINEAR)
-    delta_spectrogram_2 = cv2.resize(delta_spectrogram_2, (spectrogram.shape[1], spectrogram.shape[0]), interpolation=cv2.INTER_LINEAR)
+    # # Resize the MFCC and delta features to match the dimensions of the spectrogram
+    # mfcc = cv2.resize(mfcc, (spectrogram.shape[1], spectrogram.shape[0]), interpolation=cv2.INTER_LINEAR)
+    # delta_spectrogram = cv2.resize(delta_spectrogram, (spectrogram.shape[1], spectrogram.shape[0]), interpolation=cv2.INTER_LINEAR)
+    # delta_spectrogram_2 = cv2.resize(delta_spectrogram_2, (spectrogram.shape[1], spectrogram.shape[0]), interpolation=cv2.INTER_LINEAR)
 
-    # Standardize the spectrogram to have zero mean and unit variance
-    spectrogram = standardize_audio(spectrogram)
-    mfcc = standardize_audio(mfcc)
-    delta_spectrogram = standardize_audio(delta_spectrogram)
-    delta_spectrogram_2 = standardize_audio(delta_spectrogram_2)
+    # # Standardize the spectrogram to have zero mean and unit variance
+    # spectrogram = standardize_audio(spectrogram)
+    # mfcc = standardize_audio(mfcc)
+    # delta_spectrogram = standardize_audio(delta_spectrogram)
+    # delta_spectrogram_2 = standardize_audio(delta_spectrogram_2)
 
-    # Concatenate the spectrogram, MFCC, and delta features along the channel dimension
-    combined_features = np.stack([spectrogram, mfcc, delta_spectrogram, delta_spectrogram_2], axis=-1)
+    # # Concatenate the spectrogram, MFCC, and delta features along the channel dimension
+    # combined_features = np.stack([spectrogram, mfcc, delta_spectrogram, delta_spectrogram_2], axis=-1)
+    combined_features = np.expand_dims(spectrogram, axis=-1)
 
     # # Save the features for the original audio segment
     # save_features(spectrogram, index_cycle, output_path, label, patient, type)

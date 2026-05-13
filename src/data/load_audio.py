@@ -20,7 +20,7 @@ def process_file(file, input_path, output_path, length, cycles):
         id_patient = info_elements[0] + "_" + info_elements[1] + "_" + info_elements[2] + "_" + info_elements[3] + "_" + info_elements[4]
 
         # Load the audio file using librosa
-        raw_audio, sample_rate = librosa.load(os.path.join(input_path, file), sr=8000)
+        raw_audio, sample_rate = librosa.load(os.path.join(input_path, file), sr=4096)
 
         # Proceed to audio segmentation
         divide_audio(duration = length, sample_rate = sample_rate, raw_audio = raw_audio, output_path = output_path, patient = id_patient, cycles = cycles)

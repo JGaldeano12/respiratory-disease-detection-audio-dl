@@ -74,6 +74,8 @@ def move_spectrograms_by_train_test(input_path, cycles_train, cycles_test):
     # Create a list with every spectrogrma.
     full_data = [crackle_data, wheeze_data, crackles_and_wheeze_data, healthy_data]
 
+    print("Starting to move spectrograms into Train and Test directories based on patient IDs...")
+
     # Iterate through the list of spectrogram images for each pathology, and move each image to the corresponding training or testing directory 
     # based on the patient ID extracted from the filename and its presence in the random_train or random_test lists.
     for data in full_data:
@@ -96,7 +98,9 @@ def move_spectrograms_by_train_test(input_path, cycles_train, cycles_test):
             # Consulto a qué conjunto pertenece...
             if id_patient in cycles_train:
                 shutil.copy(spectrogram, os.path.join(input_path, 'Train', label))
+                print(f"Moved spectrogram {spectrogram} to Train/{label}")
             elif id_patient in cycles_test:
                 shutil.copy(spectrogram, os.path.join(input_path, 'Test', label))
+                print(f"Moved spectrogram {spectrogram} to Test/{label}")
             else:
                 print(f"Patient ID {id_patient} not found in either training or testing sets.")

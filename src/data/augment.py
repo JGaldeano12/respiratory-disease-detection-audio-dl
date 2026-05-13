@@ -275,7 +275,7 @@ def CBA(category, duration, input_path, output_path, seed = 20260131, train_test
     # Read the audio files and add them to the list.
     for cycle in regs:
         # Load the audio file corresponding to the current respiratory cycle using librosa, specifying the sampling rate (sr) for consistent processing.
-        audio, sr = librosa.load(os.path.join(input_path, cycle[1]) + ".wav", sr = 8000)
+        audio, sr = librosa.load(os.path.join(input_path, cycle[1]) + ".wav", sr = 4096)
         
         # Define start and end of the cycle.
         start = int(float(cycle[2]) * sr)
@@ -285,7 +285,7 @@ def CBA(category, duration, input_path, output_path, seed = 20260131, train_test
         segment = audio[start:end]
 
         # Apply a Butterworth bandpass filter to the segmented audio.
-        audio_segment = butter_bandpass_filter(segment, 50, 2500, 8000, order=5)
+        audio_segment = butter_bandpass_filter(segment, 50, 2500, 4096, order=5)
 
         # Add the processed audio segment to the list of audios for augmentation.
         audios.append(audio_segment)
@@ -299,14 +299,15 @@ def CBA(category, duration, input_path, output_path, seed = 20260131, train_test
     # Defino la duración objetivo
     target_length = int(duration * sr)
 
-    # Check wether the audio segment is shorter than the target duration. If so, we will apply padding to reach the desired length.
-    # Why do we use 0 as the start sample? Mainly, because we want to keep the entire augmented audio segment.
-    concat_audio_padded = check_length_and_padding(concat_audio, start_sample = 0, target_length = target_length)
+    # # Check wether the audio segment is shorter than the target duration. If so, we will apply padding to reach the desired length.
+    # # Why do we use 0 as the start sample? Mainly, because we want to keep the entire augmented audio segment.
+    # concat_audio_padded = check_length_and_padding(concat_audio, start_sample = 0, target_length = target_length)
+    concat_audio_padded = check_length_and_padding(concat_audio, target_length)
 
     # Generate the Mel Spectrogram for the audio segment:
     extract_features(concat_audio_padded, output_path, label = category, patient = index_generated, index_cycle = index_generated, type = "CBA")
 
-def apply_CBA_by_category(raw_audio_path = '/app/data/raw', output_path = '/app/data/processed/Train', duration = 6, number = 1, category = 'Default', seed = 20260131, train_test_split = 80, control_file_path = '/app/src/data/ciclos_respiratorios.npy'):
+def apply_CBA_by_category(raw_audio_path = '/app/data/raw', output_path = '/app/data/processed/Train', duration = 8, number = 1, category = 'Default', seed = 20260131, train_test_split = 80, control_file_path = '/app/src/data/ciclos_respiratorios.npy'):
     """
     Function to apply Class-Based Augmentation (CBA) for a specified class by calling the CBA function a certain number of times 
     to generate augmented spectrograms for the selected class.
@@ -319,7 +320,7 @@ def apply_CBA_by_category(raw_audio_path = '/app/data/raw', output_path = '/app/
 
     return f"CBA applied for {category} class. Augmented spectrograms generated and saved to the specified output path."
 
-def apply_CBA(raw_audio_path = '/app/data/raw', output_path = '/app/data/processed/Train', duration = 6, seed = 20260131, train_test_split = 80, control_file_path = '/app/src/data/ciclos_respiratorios.npy'):
+def apply_CBA(raw_audio_path = '/app/data/raw', output_path = '/app/data/processed/Train', duration = 8, seed = 20260131, train_test_split = 80, control_file_path = '/app/src/data/ciclos_respiratorios.npy'):
     """
     Function to apply Class-Based Augmentation (CBA) for all classes by calling the apply_CBA_by_category function for each class with the corresponding parameters.
     """
@@ -399,7 +400,7 @@ def apply_traditional_augmentation_process_file(cycle, input_path, output_path, 
         base_filename = cycle[1]
 
         # Load the audio file using librosa
-        raw_audio, sr = librosa.load(os.path.join(input_path, base_filename + ".wav"), sr = 8000)
+        raw_audio, sr = librosa.load(os.path.join(input_path, base_filename + ".wav"), sr = 4096)
 
         # Proceed to audio segmentation
         apply_traditional_augmentation(raw_audio = raw_audio, cycle = cycle, length = length, sample_rate = sr, output_path = output_path)
@@ -420,7 +421,7 @@ def apply_traditional_augmentation_lectura_datos_parallel(input_path, output_pat
 
     return "Processing completed for all files."
 
-def apply_traditional_augmentation(raw_audio, sample_rate = 8000, length = 8, cycle = None, output_path = '/app/data/processed/Train'):
+def apply_traditional_augmentation(raw_audio, sample_rate = 4096, length = 8, cycle = None, output_path = '/app/data/processed/Train'):
     """
     Function to apply traditional audio augmentation techniques to the input audio segment.
     It will only apply to the patients used for training.
@@ -458,7 +459,7 @@ def apply_traditional_augmentation(raw_audio, sample_rate = 8000, length = 8, cy
             augmentation_type = "UnknownAug"
 
         # Apply the Butterworth bandpass filter and standardize the audio segment
-        segmented_audio = butter_bandpass_filter(augmented_audio, 50, 2500, sample_rate, order=5)
+        segmented_audio = butter_bandpass_filter(augmented_audio, 50, 2000, sample_rate, order=5)
 
         # Check wether the audio segment is shorter than the target duration. If so, we will apply padding to reach the desired length.
         segmented_audio = check_length_and_padding(segmented_audio, target_length)
@@ -482,7 +483,7 @@ def apply_traditional_augmentation(raw_audio, sample_rate = 8000, length = 8, cy
 # print(f"Number of spectrograms to be augmented for each class: Healthy: {num_healthy}, Crackle: {num_crackle}, Wheeze: {num_wheeze}, Wheeze & Crackle: {num_both}")
 
 # # Finally, apply Class-Based Augmentation (CBA) for all classes and generate augmented spectrograms.
-# apply_CBA(raw_audio_path = '/app/data/raw', output_path = '/app/data/processed/Train', duration = 6, seed = 20260131, train_test_split = 80, control_file_path = '/app/src/data/ciclos_respiratorios.npy')
+# apply_CBA(raw_audio_path = '/app/data/raw', output_path = '/app/data/processed/Train', duration = 7, seed = 20260131, train_test_split = 80, control_file_path = '/app/src/data/ciclos_respiratorios.npy')
 
 # After that, we apply traditional augmentation techniques to augment the training set. 
 # We start by selecting the respiratory cycles to be augmented, which will be the same number for each class to keep the dataset balanced.
