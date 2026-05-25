@@ -5,8 +5,6 @@
 echo "Generating dataset..."
 
 # Run the Python script to generate the dataset
-python src/data/generate_dataset.py \
-    --output_dir data/dataset \
-    --config configs/dataset_config.yaml
+python -m src.data.generate_dataset --seed 20260119
 
 echo "Dataset generation complete!"

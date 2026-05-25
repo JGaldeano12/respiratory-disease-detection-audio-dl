@@ -1,5 +1,4 @@
-import tensorflow as tf, numpy as np, os, random
-import glob
+import tensorflow as tf, numpy as np, os, random, glob, argparse
 
 from datetime import datetime
 from sklearn.utils.class_weight import compute_class_weight
@@ -142,8 +141,8 @@ def process_npy(file_path, training=True):
 
     if training:
         spec = tf.cond(
-            tf.random.uniform([]) < 0.6,
-            lambda: spec_augment_tf(spec, time_mask_param=12, freq_mask_param=6, num_time_masks=1, num_freq_masks=1),
+            tf.random.uniform([]) < 0.8,
+            lambda: spec_augment_tf(spec, time_mask_param=20, freq_mask_param=15, num_time_masks=2, num_freq_masks=2),
             lambda: spec
         )
 
@@ -173,67 +172,44 @@ def load_datasets(dir_dataset):
     return train_dataset, test_dataset
 
 def train(model, base_model, train_dataset, val_dataset):
-    class_weights_dict, _ = get_class_weights_from_paths('/app/data/processed')
+    # class_weights_dict, _ = get_class_weights_from_paths('/app/data/processed')
     icbhi_callback = ICBHI_Score_PrintingCallback(val_dataset)
-
-    # ── Fase 1: solo el clasificador ──────────────────────────────
-    early_stopping_1 = ICBHIEarlyStopping(patience=5)
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4, clipnorm=1.0),
-        loss='categorical_crossentropy'
-    )
-    print("=== FASE 1: Entrenando clasificador (base congelada) ===")
     
-    model.fit(
-        train_dataset, epochs=15,
-        validation_data=val_dataset, verbose=2,
-        class_weight=class_weights_dict,
-        callbacks=[icbhi_callback, early_stopping_1]
-    )
+    print("PHASE 1: INITIAL TRAINING (lr=1e-3)")
+    early_stopping_1 = ICBHIEarlyStopping(patience=7)
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3, clipnorm=1.0), loss=focal_loss(gamma=1.5))
+    model.fit(train_dataset, epochs=15, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_1])
 
-    # ── Fase 2: descongelar últimas 30 capas ─────────────────────
+    print("PHASE 2: REFINE TRAINING (lr=1e-4)")
     base_model.trainable = True
     for layer in base_model.layers[:-30]:
         layer.trainable = False
 
-    early_stopping_2 = ICBHIEarlyStopping(patience=7)
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4, clipnorm=1.0),
-        loss='categorical_crossentropy'
-    )
-    print("=== FASE 2: Fine-tuning últimas 30 capas ===")
-    model.fit(
-        train_dataset, epochs=50,
-        validation_data=val_dataset, verbose=2,
-        class_weight=class_weights_dict,
-        callbacks=[icbhi_callback, early_stopping_2]
-    )
+    early_stopping_2 = ICBHIEarlyStopping(patience=10)
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4, clipnorm=1.0), loss=focal_loss(gamma=1.5))
+    model.fit(train_dataset, epochs=50, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_2])
 
-    # ── Fase 3: descongelar todo ──────────────────────────────────
+    print("PHASE 3: FINE-TUNING (lr=1e-5)")
     base_model.trainable = True
-    early_stopping_3 = ICBHIEarlyStopping(patience=10)
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0),
-        loss='categorical_crossentropy'
-    )
-    print("=== FASE 3: Fine-tuning completo ===")
-    model.fit(
-        train_dataset, epochs=100,
-        validation_data=val_dataset, verbose=2,
-        class_weight=class_weights_dict,
-        callbacks=[icbhi_callback, early_stopping_3]
-    )
-
+    early_stopping_3 = ICBHIEarlyStopping(patience=15)
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0), loss=focal_loss(gamma=1.5))
+    model.fit(train_dataset, epochs=100, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_3])
+    
+    # Finalmente, guarda el modelo con el mejor ICBHI Score obtenido durante el entrenamiento, usando un timestamp para evitar sobreescrituras.
     model.save(os.path.join('models', datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.keras'))
     return model
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--random_seed', type=int, default=12345)
+args = parser.parse_args()
 
 print("Loading datasets...")
 
 train_dataset, val_dataset = load_datasets('/app/data/processed')
-
+ 
 print("Creating model...")
 
-model, base_model = create_efficientnet_model(input_shape=(128, 129, 1), num_classes=4)
+model, base_model = create_efficientnet_model(input_shape=(128, 129, 1), num_classes=4, seed=args.random_seed)
 
 print("Starting training...")
 
