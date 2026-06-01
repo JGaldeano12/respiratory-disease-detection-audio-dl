@@ -1,0 +1,201 @@
+2026-05-26 18:12:52.399471: I tensorflow/core/platform/cpu_feature_guard.cc:211] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-05-26 18:12:56.108187: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-05-26 18:12:56.630915: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-05-26 18:12:56.630999: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-05-26 18:12:56.635878: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-05-26 18:12:56.635956: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-05-26 18:12:56.635988: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-05-26 18:12:57.052131: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-05-26 18:12:57.052223: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-05-26 18:12:57.052236: I tensorflow/core/common_runtime/gpu/gpu_device.cc:2019] Could not identify NUMA node of platform GPU id 0, defaulting to 0.  Your kernel may not have been built with NUMA support.
+2026-05-26 18:12:57.052332: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-05-26 18:12:57.052422: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1928] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 9445 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3060, pci bus id: 0000:07:00.0, compute capability: 8.6
+Loading datasets...
+Creating model...
+Starting training...
+PHASE 1: INITIAL TRAINING (lr=1e-3)
+Epoch 1/15
+2026-05-26 18:13:35.869052: I external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:465] Loaded cuDNN version 90300
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1779819218.420179   31185 service.cc:145] XLA service 0x70ca8eb96980 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+I0000 00:00:1779819218.420374   31185 service.cc:153]   StreamExecutor device (0): NVIDIA GeForce RTX 3060, Compute Capability 8.6
+2026-05-26 18:13:38.433196: I tensorflow/compiler/mlir/tensorflow/utils/dump_mlir_util.cc:268] disabling MLIR crash reproducer, set env var `MLIR_CRASH_REPRODUCER_DIRECTORY` to enable.
+I0000 00:00:1779819218.532322   31185 device_compiler.h:188] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.
+2026-05-26 18:15:23.904111: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class:  [0.9924, 0.0027, 0.0, 0.0]
+
+Specificity per class: [0.0049, 0.9991, 0.995, 0.9993]
+
+ICBHI Score: 0.49918 - Sensitivity: 0.24877 - Specificity: 0.74959
+
+Confusion Matrix:
+[[919   1   6   0]
+ [375   1   1   0]
+ [140   0   0   1]
+ [ 92   0   0   0]]
+
+Best ICBHI Score found: 0.49918
+
+
+----------------------------------------------------------------------------
+
+105/105 - 137s - loss: 1.3340 - val_loss: 0.8786 - icbhi_score: 0.4992 - 137s/epoch - 1s/step
+Epoch 2/15
+2026-05-26 18:17:05.646134: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class:  [0.2689, 0.8143, 0.2624, 0.0]
+
+Specificity per class: [0.8672, 0.4443, 0.8437, 1.0]
+
+ICBHI Score: 0.56262 - Sensitivity: 0.33641 - Specificity: 0.78882
+
+Confusion Matrix:
+[[249 505 172   0]
+ [ 52 307  18   0]
+ [ 20  84  37   0]
+ [  9  55  28   0]]
+
+Best ICBHI Score found: 0.56262
+
+
+----------------------------------------------------------------------------
+
+105/105 - 102s - loss: 1.0625 - val_loss: 0.8833 - icbhi_score: 0.5626 - 102s/epoch - 967ms/step
+Epoch 3/15
+2026-05-26 18:18:44.612898: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class:  [0.9924, 0.0, 0.0, 0.0]
+
+Specificity per class: [0.0016, 1.0, 0.9943, 1.0]
+
+ICBHI Score: 0.49854 - Sensitivity: 0.24811 - Specificity: 0.74898
+
+Confusion Matrix:
+[[919   0   7   0]
+ [376   0   1   0]
+ [141   0   0   0]
+ [ 92   0   0   0]]
+
+Best ICBHI Score found: 0.56262
+
+
+----------------------------------------------------------------------------
+
+105/105 - 98s - loss: 0.9772 - val_loss: 0.6900 - icbhi_score: 0.4985 - 98s/epoch - 934ms/step
+Epoch 4/15
+2026-05-26 18:20:22.294767: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class:  [0.8672, 0.0, 0.1702, 0.0]
+
+Specificity per class: [0.0918, 1.0, 0.8889, 1.0]
+
+ICBHI Score: 0.50226 - Sensitivity: 0.25935 - Specificity: 0.74517
+
+Confusion Matrix:
+[[803   0 123   0]
+ [364   0  13   0]
+ [117   0  24   0]
+ [ 73   0  19   0]]
+
+Best ICBHI Score found: 0.56262
+
+
+----------------------------------------------------------------------------
+
+105/105 - 98s - loss: 0.9250 - val_loss: 0.7791 - icbhi_score: 0.5023 - 98s/epoch - 930ms/step
+Epoch 5/15
+2026-05-26 18:22:00.112196: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class:  [0.0162, 0.0, 1.0, 0.0]
+
+Specificity per class: [0.9984, 1.0, 0.0115, 1.0]
+
+ICBHI Score: 0.50325 - Sensitivity: 0.25405 - Specificity: 0.75246
+
+Confusion Matrix:
+[[ 15   0 911   0]
+ [  1   0 376   0]
+ [  0   0 141   0]
+ [  0   0  92   0]]
+
+Best ICBHI Score found: 0.56262
+
+
+----------------------------------------------------------------------------
+
+105/105 - 98s - loss: 0.9017 - val_loss: 1.1787 - icbhi_score: 0.5033 - 98s/epoch - 931ms/step
+Epoch 6/15
+2026-05-26 18:23:38.077923: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class:  [0.9082, 0.0027, 0.1277, 0.087]
+
+Specificity per class: [0.0689, 1.0, 0.9297, 0.9986]
+
+ICBHI Score: 0.51534 - Sensitivity: 0.28137 - Specificity: 0.7493
+
+Confusion Matrix:
+[[841   0  85   0]
+ [370   1   6   0]
+ [121   0  18   2]
+ [ 77   0   7   8]]
+
+Best ICBHI Score found: 0.56262
+
+
+----------------------------------------------------------------------------
+
+105/105 - 98s - loss: 0.8764 - val_loss: 0.7624 - icbhi_score: 0.5153 - 98s/epoch - 932ms/step
+Epoch 7/15
+2026-05-26 18:25:16.322673: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class:  [0.6987, 0.0106, 0.5461, 0.0]
+
+Specificity per class: [0.3033, 0.9871, 0.7362, 1.0]
+
+ICBHI Score: 0.53524 - Sensitivity: 0.31385 - Specificity: 0.75663
+
+Confusion Matrix:
+[[647  11 268   0]
+ [330   4  43   0]
+ [ 60   4  77   0]
+ [ 35   0  57   0]]
+
+Best ICBHI Score found: 0.56262
+
+
+----------------------------------------------------------------------------
+
+105/105 - 98s - loss: 0.8722 - val_loss: 0.8335 - icbhi_score: 0.5352 - 98s/epoch - 935ms/step
+Epoch 8/15
+2026-05-26 18:26:50.748004: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class:  [0.0346, 0.0, 0.0, 0.9891]
+
+Specificity per class: [1.0, 1.0, 0.9928, 0.0284]
+
+ICBHI Score: 0.50561 - Sensitivity: 0.25592 - Specificity: 0.75531
+
+Confusion Matrix:
+[[ 32   0   7 887]
+ [  0   0   2 375]
+ [  0   0   0 141]
+ [  0   0   1  91]]
+
+Best ICBHI Score found: 0.56262
+
+
+----------------------------------------------------------------------------
+
+105/105 - 94s - loss: 0.8663 - val_loss: 1.3012 - icbhi_score: 0.5056 - 94s/epoch - 899ms/step
+Epoch 9/15
