@@ -309,7 +309,7 @@ def train(model, base_model, train_dataset, val_dataset):
     # Unfreeze the EfficientNet backbone.
     base_model.trainable = True
 
-    for layer in base_model.layers[:-30]:
+    for layer in base_model.layers[:-20]:
         layer.trainable = False
 
     # for layer in base_model.layers:

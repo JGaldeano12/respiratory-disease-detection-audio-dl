@@ -23,7 +23,7 @@ def extract_features(audio, output_path, label, patient, index_cycle, type):
     """
     # Generate the Mel Spectrogram for the audio segment:
     audio = standardize_audio(audio)
-    spectrogram = librosa.feature.melspectrogram(y = audio, sr=4096, n_fft=2048, hop_length=256, n_mels=128, fmin=50, fmax=2500)
+    spectrogram = librosa.feature.melspectrogram(y = audio, sr=8000, n_fft=2048, hop_length=256, n_mels=128, fmin=50, fmax=2500)
     spectrogram = librosa.power_to_db(spectrogram, ref=np.max)
     
     # # Now, generate MGCC features for the audio segment:

@@ -14,8 +14,8 @@ def create_efficientnet_model(input_shape=(128, 129, 1), num_classes=4, seed=123
     # Since EfficientNetB0 expects 3-channel input, we repeat the single channel 3 times to create a 3-channel input.
     x = layers.Lambda(lambda t: tf.repeat(t, 3, axis=-1))(inputs)
 
-    # Load the EfficientNetB0 model pre-trained on ImageNet, excluding the top classification layers, and set it to non-trainable for transfer learning.
-    base_model = tf.keras.applications.EfficientNetB0(weights='imagenet', include_top=False, input_shape=input_shape[:-1] + (3,))
+    # Load the EfficientNetB2 model pre-trained on ImageNet, excluding the top classification layers, and set it to non-trainable for transfer learning.
+    base_model = tf.keras.applications.EfficientNetB2(weights='imagenet', include_top=False, input_shape=input_shape[:-1] + (3,))
 
     # Freeze the base model to prevent its weights from being updated during the initial training phase.
     base_model.trainable = False
@@ -29,7 +29,7 @@ def create_efficientnet_model(input_shape=(128, 129, 1), num_classes=4, seed=123
     x = layers.GlobalAveragePooling2D()(x)
 
     # Add a fully connected layer with 128 units, ReLU activation, GlorotUniform initialization, and L2 regularization to help prevent overfitting.
-    x = layers.Dense(128, activation='relu', kernel_initializer=initializer, kernel_regularizer=regularizers.l2(1e-3))(x)
+    x = layers.Dense(512, activation='relu', kernel_initializer=initializer, kernel_regularizer=regularizers.l2(1e-3))(x)
 
     # Add batch normalization to stabilize and accelerate training.
     x = layers.BatchNormalization()(x)

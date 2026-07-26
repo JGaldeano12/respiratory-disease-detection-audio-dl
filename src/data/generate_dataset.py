@@ -10,14 +10,14 @@ import os, gc, multiprocessing, librosa, numpy as np, cv2
 
 # Parsear el argumento de la semilla
 parser = argparse.ArgumentParser(description='Generate dataset with a given random seed.')
-parser.add_argument('--seed', type=int, default=20260119, help='Random seed for train-test split')
+parser.add_argument('--seed', type=int, default=202506, help='Random seed for train-test split')
 args = parser.parse_args()
 
-# # First, create the necessary directories for the processed data
-# create_directories(input_path='/app/data/processed')
+# First, create the necessary directories for the processed data
+create_directories(input_path='/app/data/processed')
 
-# # Then, process the raw audio files and create spectrograms
-# lectura_datos_parallel(input_path='/app/data/raw', output_path='/app/data/processed', length=8, cycles='/app/src/data/ciclos_respiratorios.npy')
+# Then, process the raw audio files and create spectrograms
+lectura_datos_parallel(input_path='/app/data/raw', output_path='/app/data/processed', length=6, cycles='/app/src/data/ciclos_respiratorios.npy')
 
 # Afterwards, create the Train-Test directories and split the spectrograms accordingly
 cycles_train, cycles_test = split_patients_by_train_test(aux_file='/app/src/data/ciclos_respiratorios.npy', seed=args.seed, train_test_split=80)

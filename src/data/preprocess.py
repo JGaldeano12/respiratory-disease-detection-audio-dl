@@ -87,7 +87,7 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
 
 #     return audio
 
-def check_length_and_padding(audio, target_length, sample_rate=8000):
+def check_length_and_padding(audio, target_length, sample_rate=4096):
     """
     Ensure audio has EXACT target_length using Wrap Padding.
 

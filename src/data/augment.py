@@ -192,7 +192,7 @@ def select_random_respiratory_cycles(category, rng, seed, train_test_split, cont
     # Return the indices and records of the selected respiratory cycles.
     return indices, regs
 
-def CBA(category, duration, input_path, output_path, rng, seed=20260131, train_test_split=80, control_file_path='/app/src/data/ciclos_respiratorios.npy'):
+def CBA(category, duration, input_path, output_path, rng, seed=202506, train_test_split=80, control_file_path='/app/src/data/ciclos_respiratorios.npy'):
     """
     Performs Class-Based Augmentation (CBA) for a specified class by selecting two random respiratory 
     cycles, concatenating them, and generating an augmented spectrogram.
@@ -204,7 +204,7 @@ def CBA(category, duration, input_path, output_path, rng, seed=20260131, train_t
     audios = []
     for cycle in regs:
         # Load the audio file at the specified sampling rate.
-        audio, sr = librosa.load(os.path.join(input_path, cycle[1]) + ".wav", sr=4096)
+        audio, sr = librosa.load(os.path.join(input_path, cycle[1]) + ".wav", sr=8000)
 
         # Extract the respiratory cycle segment based on its start and end timestamps.
         start = int(float(cycle[2]) * sr)
@@ -212,7 +212,7 @@ def CBA(category, duration, input_path, output_path, rng, seed=20260131, train_t
         segment = audio[start:end]
 
         # Apply a Butterworth bandpass filter to remove out-of-band noise.
-        audio_segment = butter_bandpass_filter(segment, 50, 2000, 4096, order=5)
+        audio_segment = butter_bandpass_filter(segment, 50, 2000, 8000, order=5)
         audios.append(audio_segment)
 
     # Build a unique identifier from the indices of the two selected cycles.
@@ -226,14 +226,14 @@ def CBA(category, duration, input_path, output_path, rng, seed=20260131, train_t
     # Extract and save the Mel Spectrogram for the concatenated audio segment.
     extract_features(concat_audio_padded, output_path, label=category, patient=index_generated, index_cycle=index_generated, type="CBA")
 
-def apply_CBA_by_category(rng, category, number, raw_audio_path='/app/data/raw', output_path='/app/data/processed/Train', duration=8, seed=20260131, train_test_split=80, control_file_path='/app/src/data/ciclos_respiratorios.npy'):
+def apply_CBA_by_category(rng, category, number, raw_audio_path='/app/data/raw', output_path='/app/data/processed/Train', duration=6, seed=202506, train_test_split=80, control_file_path='/app/src/data/ciclos_respiratorios.npy'):
     """
     Applies Class-Based Augmentation (CBA) for a specified class a given number of times.
     """
     for _ in range(number):
         CBA(category, duration, raw_audio_path, output_path, rng=rng, seed=seed, train_test_split=train_test_split, control_file_path=control_file_path)
 
-def apply_CBA(rng, raw_audio_path='/app/data/raw', output_path='/app/data/processed/Train', duration=8, seed=20260131, train_test_split=80, control_file_path='/app/src/data/ciclos_respiratorios.npy'):
+def apply_CBA(rng, raw_audio_path='/app/data/raw', output_path='/app/data/processed/Train', duration=6, seed=202506, train_test_split=80, control_file_path='/app/src/data/ciclos_respiratorios.npy'):
     """
     Applies Class-Based Augmentation (CBA) for all classes, generating the number of spectrograms
     needed to balance the dataset.
@@ -251,7 +251,7 @@ def apply_CBA(rng, raw_audio_path='/app/data/raw', output_path='/app/data/proces
 ##########################################################################################
 # The following functions are used to apply traditional audio augmentation techniques.
 ##########################################################################################
-def select_balanced_and_random_respiratory_cycles(rng, control_file_path='/app/src/data/ciclos_respiratorios.npy', seed=20260131, train_test_split=80):
+def select_balanced_and_random_respiratory_cycles(rng, control_file_path='/app/src/data/ciclos_respiratorios.npy', seed=202506, train_test_split=80):
     """
     Selects a balanced random subset of respiratory cycles for traditional augmentation,
     sampling the same number of cycles from each class.
@@ -298,7 +298,7 @@ def apply_traditional_augmentation_lectura_datos_parallel(input_path, output_pat
     with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
         pool.starmap(apply_traditional_augmentation_process_file, argumentos)
 
-def apply_traditional_augmentation(raw_audio, rng, seed, sample_rate=4096, length=8, cycle=None, output_path='/app/data/processed/Train'):
+def apply_traditional_augmentation(raw_audio, rng, seed, sample_rate=4096, length=6, cycle=None, output_path='/app/data/processed/Train'):
     """
     Applies all traditional augmentation techniques to a single respiratory cycle and saves the resulting spectrograms.
     """
@@ -337,17 +337,17 @@ def apply_traditional_augmentation(raw_audio, rng, seed, sample_rate=4096, lengt
 # cycles is selected for traditional augmentation, which is applied in parallel to speed up the process.
 ##########################################################################################
 parser = argparse.ArgumentParser(description='Augment dataset with a given random seed.')
-parser.add_argument('--seed', type=int, default=20260119, help='Random seed for reproducibility.')
+parser.add_argument('--seed', type=int, default=202506, help='Random seed for reproducibility.')
 args = parser.parse_args()
 
 # Create a single rng from the provided seed, shared across all augmentation steps.
 rng = np.random.default_rng(args.seed)
 
-# Apply Class-Based Augmentation (CBA) for all classes.
-apply_CBA(rng=rng, raw_audio_path='/app/data/raw', output_path='/app/data/processed/Train', duration=8, seed=args.seed, train_test_split=80, control_file_path='/app/src/data/ciclos_respiratorios.npy')
+# # Apply Class-Based Augmentation (CBA) for all classes.
+# apply_CBA(rng=rng, raw_audio_path='/app/data/raw', output_path='/app/data/processed/Train', duration=7, seed=args.seed, train_test_split=80, control_file_path='/app/src/data/ciclos_respiratorios.npy')
 
 # Select a balanced set of respiratory cycles for traditional augmentation.
 cycles_selected = select_balanced_and_random_respiratory_cycles(rng=rng, control_file_path='/app/src/data/ciclos_respiratorios.npy', seed=args.seed, train_test_split=80)
 
 # Apply traditional augmentation techniques to the selected cycles in parallel.
-apply_traditional_augmentation_lectura_datos_parallel(input_path='/app/data/raw', output_path='/app/data/processed/Train', length=8, cycles=cycles_selected, rng=rng, seed=args.seed)
+apply_traditional_augmentation_lectura_datos_parallel(input_path='/app/data/raw', output_path='/app/data/processed/Train', length=6, cycles=cycles_selected, rng=rng, seed=args.seed)

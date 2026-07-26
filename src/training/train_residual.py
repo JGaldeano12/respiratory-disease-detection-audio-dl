@@ -2,8 +2,8 @@ import tensorflow as tf, numpy as np, os, random, glob, argparse
 
 from datetime import datetime
 from sklearn.utils.class_weight import compute_class_weight
-from src.models.efficientnet import create_efficientnet_model
 from src.training.custom_callback import ICBHI_Score_PrintingCallback
+from src.models.custom_cnn_residual import create_custom_cnn
 
 class ICBHIEarlyStopping(tf.keras.callbacks.Callback):
     def __init__(self, patience=10, min_delta=1e-6):
@@ -187,14 +187,14 @@ def get_class_weights_from_paths(dir_dataset):
 def load_npy(path):
     path = path.numpy().decode("utf-8")
     spec = np.load(path)
-    assert spec.shape[1] == 129, f"Unexpected spectrogram width: {spec.shape[1]}"
+    assert spec.shape[1] == 97, f"Unexpected spectrogram width: {spec.shape[1]}"
     return spec.astype(np.float32)
 
 def process_npy(file_path, training=True):
     label = get_label(file_path)
     label = tf.one_hot(label, depth=4)
     spec = tf.py_function(load_npy, [file_path], tf.float32)
-    spec.set_shape([128, 129, 1])
+    spec.set_shape([128, 97, 1])
 
     if training:
         spec = tf.cond(
@@ -256,7 +256,7 @@ def load_datasets(dir_dataset, seed=12345):
     test_dataset = test_dataset.map(lambda x: process_npy(x, training=False), num_parallel_calls=1)
 
     # Create test batches.
-    test_dataset = test_dataset.batch(128, drop_remainder=False)
+    test_dataset = test_dataset.batch(128, drop_remainder=True)
 
     # Deterministic prefetching.
     test_dataset = test_dataset.prefetch(1)
@@ -264,11 +264,11 @@ def load_datasets(dir_dataset, seed=12345):
     # Return prepared datasets.
     return train_dataset, test_dataset
 
-def train(model, base_model, train_dataset, val_dataset):
+def train(model, train_dataset, val_dataset):
     """
     Train the model in three stages:
-    1. Initial training with frozen EfficientNet backbone.
-    2. Partial fine-tuning of deeper EfficientNet layers.
+    1. Initial training with frozen Custom CNN backbone.
+    2. Partial fine-tuning of deeper Custom CNN layers.
     3. Full fine-tuning of the entire backbone.
 
     IMPORTANT:
@@ -292,13 +292,13 @@ def train(model, base_model, train_dataset, val_dataset):
     print("PHASE 1: INITIAL TRAINING (lr=1e-3)")
 
     # Early stopping based on validation ICBHI score.
-    early_stopping_1 = ICBHIEarlyStopping(patience=15)
+    early_stopping_1 = ICBHIEarlyStopping(patience=5)
 
     # Compile model using Adam optimizer and focal loss.
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3, clipnorm=1.0), loss=focal_loss(gamma=1.5))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3, clipnorm=1.0), loss=focal_loss(gamma=1.0))
 
     # Train only the classification head while the backbone remains frozen.
-    model.fit(train_dataset, epochs=1, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_1])
+    model.fit(train_dataset, epochs=15, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_1])
 
     # ============================================================
     # PHASE 2 — PARTIAL FINE-TUNING
@@ -306,21 +306,11 @@ def train(model, base_model, train_dataset, val_dataset):
 
     print("PHASE 2: REFINE TRAINING (lr=1e-4)")
 
-    # Unfreeze the EfficientNet backbone.
-    base_model.trainable = True
-
-    for layer in base_model.layers[:-30]:
-        layer.trainable = False
-
-    # for layer in base_model.layers:
-    #     if isinstance(layer, tf.keras.layers.BatchNormalization):
-    #         layer.trainable = False
-
     # Early stopping for refinement phase.
-    early_stopping_2 = ICBHIEarlyStopping(patience=50)
+    early_stopping_2 = ICBHIEarlyStopping(patience=15)
 
     # Recompile model after changing trainable layers.
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4, clipnorm=1.0), loss=focal_loss(gamma=1.5))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4, clipnorm=1.0), loss=focal_loss(gamma=1.0))
 
     # Fine-tune deeper layers of the backbone.
     model.fit(train_dataset, epochs=50, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_2])
@@ -331,19 +321,11 @@ def train(model, base_model, train_dataset, val_dataset):
 
     print("PHASE 3: FINE-TUNING (lr=1e-5)")
 
-    # Unfreeze the complete backbone for final fine-tuning.
-    base_model.trainable = True
-
-    # # Freeze all BatchNormalization layers to maintain their learned statistics during fine-tuning.
-    # for layer in base_model.layers:
-    #     if isinstance(layer, tf.keras.layers.BatchNormalization):
-    #         layer.trainable = False
-
     # Early stopping for final training stage.
-    early_stopping_3 = ICBHIEarlyStopping(patience=100)
+    early_stopping_3 = ICBHIEarlyStopping(patience=20)
 
     # Recompile model with lower learning rate.
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0), loss=focal_loss(gamma=1.5))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0))
     
     # Perform full fine-tuning.
     model.fit(train_dataset, epochs=100, validation_data=val_dataset, verbose=2,callbacks=[icbhi_callback, early_stopping_3])
@@ -390,10 +372,10 @@ train_dataset, val_dataset = load_datasets('/app/data/processed', seed=SEED)
 
 print("Creating model...")
 
-# Create EfficientNet-based model with deterministic initialization.
-model, base_model = create_efficientnet_model(input_shape=(128, 129, 1), num_classes=4, seed=SEED)
+# Create Custom CNN-based model with deterministic initialization.
+model = create_custom_cnn(input_shape=(128, 97, 1), num_classes=4, seed=SEED)
 
 print("Starting training...")
 
 # Train model using deterministic pipeline configuration.
-model = train(model, base_model, train_dataset, val_dataset)
+model = train(model, train_dataset, val_dataset)

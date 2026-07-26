@@ -199,7 +199,7 @@ def process_npy(file_path, training=True):
     if training:
         spec = tf.cond(
             tf.random.uniform([]) < 0.8,
-            lambda: spec_augment_tf(spec, time_mask_param=20, freq_mask_param=15, num_time_masks=2, num_freq_masks=2),
+            lambda: spec_augment_tf(spec, time_mask_param=10, freq_mask_param=8, num_time_masks=2, num_freq_masks=2),
             lambda: spec
         )
 

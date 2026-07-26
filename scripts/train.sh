@@ -4,24 +4,15 @@ export PYTHONPATH=/app
 
 LOG_DIR="src/testing"
 
-# This script trains the model using the generated dataset.
-echo "Starting model training..."
+echo "Generating dataset with seed 202506..."
+python src/data/generate_dataset.py --seed 202506
 
-# # Run the Python script to train the model
-# echo "Training the EfficientNet model with seed 12345..."
-# python src/training/train_efficient.py --random_seed 12345 2>&1 | tee "$LOG_DIR/seed12345_efficientnet_8s_focal_loss_train_replicability_v1.txt"
+echo "Augmenting dataset with seed 202506..."
+python src/data/augment.py --seed 202506
 
-# # Run the Python script to train the model
-# echo "Training the EfficientNet model with seed 12345..."
-# python src/training/train_efficient.py --random_seed 12345 2>&1 | tee "$LOG_DIR/seed12345_efficientnet_8s_focal_loss_train_replicability_v2.txt"
+echo "========== SEED 1234 =========="
+echo "Training the Custom CNN model with changing seed..."
+python src/training/train_residual.py --random_seed 1234 2>&1 | tee "$LOG_DIR/custom_cnn_residual_duration_9_1234.txt"
 
-# Now, do a loop to change the random seed and train the model multiple times, incrementing 
-# one number each time, such as 123, 1234, 12345, etc. Starting from 123456 and increment 10 times.
-for i in {1..15}
-do
-    SEED=$((123 * 10**i))
-    echo "Training the EfficientNet model with seed $SEED..."
-    python src/training/train_efficient.py --random_seed $SEED 2>&1 | tee "$LOG_DIR/seed${SEED}_efficientnet_8s_focal_loss_train_replicability.txt"
-done
-
+echo "Training complete for seed 1234! Check the results to find the best performance."
 echo "Model training complete!"

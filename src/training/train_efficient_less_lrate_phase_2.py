@@ -304,7 +304,7 @@ def train(model, base_model, train_dataset, val_dataset):
     # PHASE 2 — PARTIAL FINE-TUNING
     # ============================================================
 
-    print("PHASE 2: REFINE TRAINING (lr=1e-4)")
+    print("PHASE 2: REFINE TRAINING (lr=5e-5)")
 
     # Unfreeze the EfficientNet backbone.
     base_model.trainable = True
@@ -320,7 +320,7 @@ def train(model, base_model, train_dataset, val_dataset):
     early_stopping_2 = ICBHIEarlyStopping(patience=50)
 
     # Recompile model after changing trainable layers.
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4, clipnorm=1.0), loss=focal_loss(gamma=1.5))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-5, clipnorm=1.0), loss=focal_loss(gamma=1.5))
 
     # Fine-tune deeper layers of the backbone.
     model.fit(train_dataset, epochs=50, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_2])
