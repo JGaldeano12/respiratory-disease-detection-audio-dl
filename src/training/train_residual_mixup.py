@@ -39,6 +39,7 @@ class MixupModel(tf.keras.Model):
         self.compiled_metrics.update_state(y, y_pred)
         return {m.name: m.result() for m in self.metrics}
 
+
 class ICBHIEarlyStopping(tf.keras.callbacks.Callback):
     def __init__(self, patience=10, min_delta=1e-6):
         super().__init__()
@@ -65,29 +66,37 @@ class ICBHIEarlyStopping(tf.keras.callbacks.Callback):
                 self.model.stop_training = True
                 print(f"\nEarly stopping: best ICBHI Score = {self.best_score:.5f}")
 
-def focal_loss(gamma=2.0, alpha=None):
-    def loss(y_true, y_pred):
-        y_pred = tf.clip_by_value(y_pred, 1e-7, 1.0 - 1e-7)
-        ce = -y_true * tf.math.log(y_pred)
-        pt = tf.reduce_sum(y_true * y_pred, axis=-1, keepdims=True)
-        focal_weight = tf.pow(1.0 - pt, gamma)
-        if alpha is not None:
-            alpha_t = tf.reduce_sum(
-                y_true * tf.constant(alpha, dtype=tf.float32),
-                axis=-1, keepdims=True
-            )
-            focal_weight = alpha_t * focal_weight
-        return tf.reduce_sum(focal_weight * ce, axis=-1)
-    return loss
 
 def get_label(file_path):
+    """
+    Devuelve etiqueta multietiqueta [crackle, wheeze] a partir del nombre de carpeta.
+
+    Healthy          → [0, 0]
+    Crackle          → [1, 0]
+    Wheeze           → [0, 1]
+    Wheeze & Crackle → [1, 1]
+    """
     elements = tf.strings.split(file_path, os.path.sep)
     label_str = elements[5]
-    keys = tf.constant(['Healthy', 'Crackle', 'Wheeze', 'Wheeze & Crackle'])
-    values = tf.constant([0, 1, 2, 3], dtype=tf.int32)
-    table = tf.lookup.StaticHashTable(tf.lookup.KeyValueTensorInitializer(keys, values), default_value=4)
-    label = table.lookup(label_str)
-    return label
+
+    # Etiqueta Crackle
+    is_crackle = tf.cast(
+        tf.logical_or(
+            tf.equal(label_str, 'Crackle'),
+            tf.equal(label_str, 'Wheeze & Crackle')
+        ), tf.float32
+    )
+
+    # Etiqueta Wheeze
+    is_wheeze = tf.cast(
+        tf.logical_or(
+            tf.equal(label_str, 'Wheeze'),
+            tf.equal(label_str, 'Wheeze & Crackle')
+        ), tf.float32
+    )
+
+    return tf.stack([is_crackle, is_wheeze])
+
 
 def spec_augment_tf(spec, time_mask_param=20, freq_mask_param=10, num_time_masks=2, num_freq_masks=2):
     H = tf.shape(spec)[0]
@@ -116,17 +125,30 @@ def spec_augment_tf(spec, time_mask_param=20, freq_mask_param=10, num_time_masks
 
     return spec
 
+
 def get_class_weights_from_paths(dir_dataset):
+    """
+    Calcula pesos por etiqueta (crackle, wheeze) de forma independiente.
+    Devuelve un array [w_crackle, w_wheeze] con pesos balanceados.
+    """
     train_paths = sorted(glob.glob(os.path.join(dir_dataset, 'Train/*/*')))
-    label_map = {'Healthy': 0, 'Crackle': 1, 'Wheeze': 2, 'Wheeze & Crackle': 3}
-    labels = []
+
+    crackle_labels = []
+    wheeze_labels = []
+
     for path in train_paths:
         folder = path.split(os.path.sep)[-2]
-        labels.append(label_map[folder])
-    labels = np.array(labels)
-    classes = np.unique(labels)
-    class_weights = compute_class_weight(class_weight="balanced", classes=classes, y=labels)
-    return dict(enumerate(class_weights)), np.array(class_weights)
+        crackle_labels.append(1 if folder in ('Crackle', 'Wheeze & Crackle') else 0)
+        wheeze_labels.append(1 if folder in ('Wheeze', 'Wheeze & Crackle') else 0)
+
+    crackle_labels = np.array(crackle_labels)
+    wheeze_labels  = np.array(wheeze_labels)
+
+    w_crackle = compute_class_weight('balanced', classes=np.array([0, 1]), y=crackle_labels)
+    w_wheeze  = compute_class_weight('balanced', classes=np.array([0, 1]), y=wheeze_labels)
+
+    return np.array([w_crackle[1], w_wheeze[1]])  # peso de la clase positiva
+
 
 def load_npy(path):
     path = path.numpy().decode("utf-8")
@@ -134,9 +156,12 @@ def load_npy(path):
     assert spec.shape[1] == 113, f"Unexpected spectrogram width: {spec.shape[1]}"
     return spec.astype(np.float32)
 
+
 def process_npy(file_path, training=True):
+    # Etiqueta multietiqueta [crackle, wheeze]
     label = get_label(file_path)
-    label = tf.one_hot(label, depth=4)
+    label = tf.ensure_shape(label, [2])
+
     spec = tf.py_function(load_npy, [file_path], tf.float32)
     spec.set_shape([128, 113, 1])
 
@@ -149,17 +174,18 @@ def process_npy(file_path, training=True):
 
     return spec, label
 
+
 def load_datasets(dir_dataset, seed=12345):
     train_dataset = tf.data.Dataset.list_files(os.path.join(dir_dataset, 'Train/*/*'), shuffle=False)
-    test_dataset = tf.data.Dataset.list_files(os.path.join(dir_dataset, 'Test/*/*'), shuffle=False)
+    test_dataset  = tf.data.Dataset.list_files(os.path.join(dir_dataset, 'Test/*/*'),  shuffle=False)
 
     options = tf.data.Options()
     options.experimental_deterministic = True
     train_dataset = train_dataset.with_options(options)
-    test_dataset = test_dataset.with_options(options)
+    test_dataset  = test_dataset.with_options(options)
 
     train_dataset = train_dataset.shuffle(buffer_size=len(train_dataset), seed=seed, reshuffle_each_iteration=True)
-    train_dataset = train_dataset.map(lambda x: process_npy(x, training=True), num_parallel_calls=1)
+    train_dataset = train_dataset.map(lambda x: process_npy(x, training=True),  num_parallel_calls=1)
     train_dataset = train_dataset.batch(128, drop_remainder=True)
     train_dataset = train_dataset.prefetch(1)
 
@@ -169,6 +195,7 @@ def load_datasets(dir_dataset, seed=12345):
 
     return train_dataset, test_dataset
 
+
 def train(model, train_dataset, val_dataset):
     icbhi_callback = ICBHI_Score_PrintingCallback(val_dataset)
 
@@ -177,27 +204,36 @@ def train(model, train_dataset, val_dataset):
     # ============================================================
     print("PHASE 1: INITIAL TRAINING (lr=1e-3)")
     early_stopping_1 = ICBHIEarlyStopping(patience=5)
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3, clipnorm=1.0),
-              loss=tf.keras.losses.CategoricalCrossentropy())
-    model.fit(train_dataset, epochs=15, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_1])
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3, clipnorm=1.0),
+        loss=tf.keras.losses.BinaryCrossentropy()
+    )
+    model.fit(train_dataset, epochs=15, validation_data=val_dataset, verbose=2,
+              callbacks=[icbhi_callback, early_stopping_1])
 
     # ============================================================
     # PHASE 2 — PARTIAL FINE-TUNING
     # ============================================================
     print("PHASE 2: REFINE TRAINING (lr=1e-4)")
     early_stopping_2 = ICBHIEarlyStopping(patience=15)
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4, clipnorm=1.0),
-              loss=tf.keras.losses.CategoricalCrossentropy())
-    model.fit(train_dataset, epochs=50, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_2])
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4, clipnorm=1.0),
+        loss=tf.keras.losses.BinaryCrossentropy()
+    )
+    model.fit(train_dataset, epochs=50, validation_data=val_dataset, verbose=2,
+              callbacks=[icbhi_callback, early_stopping_2])
 
     # ============================================================
     # PHASE 3 — FULL FINE-TUNING
     # ============================================================
     print("PHASE 3: FINE-TUNING (lr=1e-5)")
     early_stopping_3 = ICBHIEarlyStopping(patience=20)
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0),
-              loss=tf.keras.losses.CategoricalCrossentropy())
-    model.fit(train_dataset, epochs=100, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_3])
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0),
+        loss=tf.keras.losses.BinaryCrossentropy()
+    )
+    model.fit(train_dataset, epochs=100, validation_data=val_dataset, verbose=2,
+              callbacks=[icbhi_callback, early_stopping_3])
 
     # ============================================================
     # SAVE FINAL MODEL
@@ -205,6 +241,7 @@ def train(model, train_dataset, val_dataset):
     model.save(os.path.join('models', datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.keras'))
 
     return model
+
 
 # ============================================================
 # ENTRY POINT
@@ -227,9 +264,10 @@ print("Loading datasets...")
 train_dataset, val_dataset = load_datasets('/app/data/processed', seed=SEED)
 
 print("Creating model...")
-base_model = create_custom_cnn(input_shape=(128, 113, 1), num_classes=4, seed=SEED)
+# num_classes=2: salida [crackle, wheeze] con sigmoid
+base_model = create_custom_cnn(input_shape=(128, 113, 1), num_classes=2, seed=SEED)
 
-# Wrap with MixupModel to override train_step        ← CAMBIO
+# Wrap with MixupModel to override train_step
 model = MixupModel(inputs=base_model.input, outputs=base_model.output, mixup_alpha=0.3)
 
 print("Starting training...")

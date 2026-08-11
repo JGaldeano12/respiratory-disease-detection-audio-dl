@@ -71,9 +71,10 @@ def residual_block(
 
     return x
 
+
 def create_custom_cnn(
     input_shape=(128, 97, 1),
-    num_classes=4,
+    num_classes=2,
     seed=12345
 ):
 
@@ -156,9 +157,10 @@ def create_custom_cnn(
         seed=seed
     )(x)
 
+    # sigmoid: cada neurona es independiente (multietiqueta)
     outputs = layers.Dense(
         num_classes,
-        activation="softmax",
+        activation="sigmoid",
         kernel_initializer=initializer
     )(x)
 
