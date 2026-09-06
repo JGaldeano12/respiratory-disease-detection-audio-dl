@@ -298,7 +298,7 @@ def apply_traditional_augmentation_lectura_datos_parallel(input_path, output_pat
     with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
         pool.starmap(apply_traditional_augmentation_process_file, argumentos)
 
-def apply_traditional_augmentation(raw_audio, rng, seed, sample_rate=4096, length=7, cycle=None, output_path='/app/data/processed/Train'):
+def apply_traditional_augmentation(raw_audio, rng, seed, sample_rate=4096, length=8, cycle=None, output_path='/app/data/processed/Train'):
     """
     Applies all traditional augmentation techniques to a single respiratory cycle and saves the resulting spectrograms.
     """
@@ -344,10 +344,10 @@ args = parser.parse_args()
 rng = np.random.default_rng(args.seed)
 
 # # Apply Class-Based Augmentation (CBA) for all classes.
-# apply_CBA(rng=rng, raw_audio_path='/app/data/raw', output_path='/app/data/processed/Train', duration=7, seed=args.seed, train_test_split=80, control_file_path='/app/src/data/ciclos_respiratorios.npy')
+# apply_CBA(rng=rng, raw_audio_path='/app/data/raw', output_path='/app/data/processed/Train', duration=8, seed=args.seed, train_test_split=80, control_file_path='/app/src/data/ciclos_respiratorios.npy')
 
 # Select a balanced set of respiratory cycles for traditional augmentation.
 cycles_selected = select_balanced_and_random_respiratory_cycles(rng=rng, control_file_path='/app/src/data/ciclos_respiratorios.npy', seed=args.seed, train_test_split=80)
 
 # Apply traditional augmentation techniques to the selected cycles in parallel.
-apply_traditional_augmentation_lectura_datos_parallel(input_path='/app/data/raw', output_path='/app/data/processed/Train', length=7, cycles=cycles_selected, rng=rng, seed=args.seed)
+apply_traditional_augmentation_lectura_datos_parallel(input_path='/app/data/raw', output_path='/app/data/processed/Train', length=8, cycles=cycles_selected, rng=rng, seed=args.seed)
