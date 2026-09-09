@@ -1,8 +1,5 @@
-# Import funcionts from file extract_features.py and preprocess.py
 from src.features.extract_features import extract_features, save_features
 from src.data.preprocess import butter_bandpass_filter, check_length_and_padding
-
-# Import other necessary libraries
 import os, gc, multiprocessing, librosa, numpy as np, cv2
 
 def divide_audio(duration, sample_rate, raw_audio, output_path, patient, cycles):

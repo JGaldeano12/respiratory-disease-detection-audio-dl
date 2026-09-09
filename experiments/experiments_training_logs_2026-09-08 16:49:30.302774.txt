@@ -1,0 +1,538 @@
+Model: "model"
+__________________________________________________________________________________________________
+ Layer (type)                Output Shape                 Param #   Connected to                  
+==================================================================================================
+ input_1 (InputLayer)        [(None, 128, 129, 1)]        0         []                            
+                                                                                                  
+ conv2d (Conv2D)             (None, 128, 129, 32)         320       ['input_1[0][0]']             
+                                                                                                  
+ batch_normalization (Batch  (None, 128, 129, 32)         128       ['conv2d[0][0]']              
+ Normalization)                                                                                   
+                                                                                                  
+ activation (Activation)     (None, 128, 129, 32)         0         ['batch_normalization[0][0]'] 
+                                                                                                  
+ conv2d_1 (Conv2D)           (None, 128, 129, 32)         9248      ['activation[0][0]']          
+                                                                                                  
+ conv2d_2 (Conv2D)           (None, 128, 129, 32)         64        ['input_1[0][0]']             
+                                                                                                  
+ batch_normalization_1 (Bat  (None, 128, 129, 32)         128       ['conv2d_1[0][0]']            
+ chNormalization)                                                                                 
+                                                                                                  
+ batch_normalization_2 (Bat  (None, 128, 129, 32)         128       ['conv2d_2[0][0]']            
+ chNormalization)                                                                                 
+                                                                                                  
+ add (Add)                   (None, 128, 129, 32)         0         ['batch_normalization_1[0][0]'
+                                                                    , 'batch_normalization_2[0][0]
+                                                                    ']                            
+                                                                                                  
+ activation_1 (Activation)   (None, 128, 129, 32)         0         ['add[0][0]']                 
+                                                                                                  
+ max_pooling2d (MaxPooling2  (None, 64, 64, 32)           0         ['activation_1[0][0]']        
+ D)                                                                                               
+                                                                                                  
+ conv2d_3 (Conv2D)           (None, 64, 64, 64)           18496     ['max_pooling2d[0][0]']       
+                                                                                                  
+ batch_normalization_3 (Bat  (None, 64, 64, 64)           256       ['conv2d_3[0][0]']            
+ chNormalization)                                                                                 
+                                                                                                  
+ activation_2 (Activation)   (None, 64, 64, 64)           0         ['batch_normalization_3[0][0]'
+                                                                    ]                             
+                                                                                                  
+ conv2d_4 (Conv2D)           (None, 64, 64, 64)           36928     ['activation_2[0][0]']        
+                                                                                                  
+ conv2d_5 (Conv2D)           (None, 64, 64, 64)           2112      ['max_pooling2d[0][0]']       
+                                                                                                  
+ batch_normalization_4 (Bat  (None, 64, 64, 64)           256       ['conv2d_4[0][0]']            
+ chNormalization)                                                                                 
+                                                                                                  
+ batch_normalization_5 (Bat  (None, 64, 64, 64)           256       ['conv2d_5[0][0]']            
+ chNormalization)                                                                                 
+                                                                                                  
+ add_1 (Add)                 (None, 64, 64, 64)           0         ['batch_normalization_4[0][0]'
+                                                                    , 'batch_normalization_5[0][0]
+                                                                    ']                            
+                                                                                                  
+ activation_3 (Activation)   (None, 64, 64, 64)           0         ['add_1[0][0]']               
+                                                                                                  
+ max_pooling2d_1 (MaxPoolin  (None, 32, 32, 64)           0         ['activation_3[0][0]']        
+ g2D)                                                                                             
+                                                                                                  
+ conv2d_6 (Conv2D)           (None, 32, 32, 128)          73856     ['max_pooling2d_1[0][0]']     
+                                                                                                  
+ batch_normalization_6 (Bat  (None, 32, 32, 128)          512       ['conv2d_6[0][0]']            
+ chNormalization)                                                                                 
+                                                                                                  
+ activation_4 (Activation)   (None, 32, 32, 128)          0         ['batch_normalization_6[0][0]'
+                                                                    ]                             
+                                                                                                  
+ conv2d_7 (Conv2D)           (None, 32, 32, 128)          147584    ['activation_4[0][0]']        
+                                                                                                  
+ conv2d_8 (Conv2D)           (None, 32, 32, 128)          8320      ['max_pooling2d_1[0][0]']     
+                                                                                                  
+ batch_normalization_7 (Bat  (None, 32, 32, 128)          512       ['conv2d_7[0][0]']            
+ chNormalization)                                                                                 
+                                                                                                  
+ batch_normalization_8 (Bat  (None, 32, 32, 128)          512       ['conv2d_8[0][0]']            
+ chNormalization)                                                                                 
+                                                                                                  
+ add_2 (Add)                 (None, 32, 32, 128)          0         ['batch_normalization_7[0][0]'
+                                                                    , 'batch_normalization_8[0][0]
+                                                                    ']                            
+                                                                                                  
+ activation_5 (Activation)   (None, 32, 32, 128)          0         ['add_2[0][0]']               
+                                                                                                  
+ max_pooling2d_2 (MaxPoolin  (None, 16, 16, 128)          0         ['activation_5[0][0]']        
+ g2D)                                                                                             
+                                                                                                  
+ conv2d_9 (Conv2D)           (None, 16, 16, 256)          295168    ['max_pooling2d_2[0][0]']     
+                                                                                                  
+ batch_normalization_9 (Bat  (None, 16, 16, 256)          1024      ['conv2d_9[0][0]']            
+ chNormalization)                                                                                 
+                                                                                                  
+ activation_6 (Activation)   (None, 16, 16, 256)          0         ['batch_normalization_9[0][0]'
+                                                                    ]                             
+                                                                                                  
+ conv2d_10 (Conv2D)          (None, 16, 16, 256)          590080    ['activation_6[0][0]']        
+                                                                                                  
+ conv2d_11 (Conv2D)          (None, 16, 16, 256)          33024     ['max_pooling2d_2[0][0]']     
+                                                                                                  
+ batch_normalization_10 (Ba  (None, 16, 16, 256)          1024      ['conv2d_10[0][0]']           
+ tchNormalization)                                                                                
+                                                                                                  
+ batch_normalization_11 (Ba  (None, 16, 16, 256)          1024      ['conv2d_11[0][0]']           
+ tchNormalization)                                                                                
+                                                                                                  
+ add_3 (Add)                 (None, 16, 16, 256)          0         ['batch_normalization_10[0][0]
+                                                                    ',                            
+                                                                     'batch_normalization_11[0][0]
+                                                                    ']                            
+                                                                                                  
+ activation_7 (Activation)   (None, 16, 16, 256)          0         ['add_3[0][0]']               
+                                                                                                  
+ conv2d_12 (Conv2D)          (None, 16, 16, 256)          590080    ['activation_7[0][0]']        
+                                                                                                  
+ batch_normalization_12 (Ba  (None, 16, 16, 256)          1024      ['conv2d_12[0][0]']           
+ tchNormalization)                                                                                
+                                                                                                  
+ activation_8 (Activation)   (None, 16, 16, 256)          0         ['batch_normalization_12[0][0]
+                                                                    ']                            
+                                                                                                  
+ conv2d_13 (Conv2D)          (None, 16, 16, 256)          590080    ['activation_8[0][0]']        
+                                                                                                  
+ batch_normalization_13 (Ba  (None, 16, 16, 256)          1024      ['conv2d_13[0][0]']           
+ tchNormalization)                                                                                
+                                                                                                  
+ add_4 (Add)                 (None, 16, 16, 256)          0         ['batch_normalization_13[0][0]
+                                                                    ',                            
+                                                                     'activation_7[0][0]']        
+                                                                                                  
+ activation_9 (Activation)   (None, 16, 16, 256)          0         ['add_4[0][0]']               
+                                                                                                  
+ global_average_pooling2d (  (None, 256)                  0         ['activation_9[0][0]']        
+ GlobalAveragePooling2D)                                                                          
+                                                                                                  
+ dense (Dense)               (None, 256)                  65792     ['global_average_pooling2d[0][
+                                                                    0]']                          
+                                                                                                  
+ batch_normalization_14 (Ba  (None, 256)                  1024      ['dense[0][0]']               
+ tchNormalization)                                                                                
+                                                                                                  
+ dropout (Dropout)           (None, 256)                  0         ['batch_normalization_14[0][0]
+                                                                    ']                            
+                                                                                                  
+ dense_1 (Dense)             (None, 4)                    1028      ['dropout[0][0]']             
+                                                                                                  
+==================================================================================================
+Total params: 2471012 (9.43 MB)
+Trainable params: 2466596 (9.41 MB)
+Non-trainable params: 4416 (17.25 KB)
+__________________________________________________________________________________________________Epoch 0
+Recall per class: [0. 0. 1. 0.]
+Specificity per class: [1.0, 1.0, 0.0, 1.0]
+ICBHI Score: 0.5
+Sensitivity: 0.25
+Specificity: 0.75
+Best Score: 0.5
+[[   0    0 1043    0]
+ [   0    0  289    0]
+ [   0    0  262    0]
+ [   0    0   70    0]]
+--------------------------------------
+Epoch 1
+Recall per class: [0.5177373  0.         0.40839695 0.        ]
+Specificity per class: [0.5169082125603864, 0.9970909090909091, 0.4914407988587732, 1.0]
+ICBHI Score: 0.49145
+Sensitivity: 0.23153
+Specificity: 0.75136
+Best Score: 0.5
+[[540   4 499   0]
+ [124   0 165   0]
+ [155   0 107   0]
+ [ 21   0  49   0]]
+--------------------------------------
+Epoch 2
+Recall per class: [0.13998082 0.89965398 0.08015267 0.02857143]
+Specificity per class: [0.8969404186795491, 0.26690909090909093, 0.978601997146933, 0.9165621079046424]
+ICBHI Score: 0.52592
+Sensitivity: 0.28709
+Specificity: 0.76475
+Best Score: 0.52592
+[[146 775  27  95]
+ [ 16 260   1  12]
+ [ 47 168  21  26]
+ [  1  65   2   2]]
+--------------------------------------
+Epoch 3
+Recall per class: [0.83988495 0.17647059 0.01908397 0.        ]
+Specificity per class: [0.1111111111111111, 0.8792727272727273, 0.9921540656205421, 0.9981179422835633]
+ICBHI Score: 0.50201
+Sensitivity: 0.25886
+Specificity: 0.74516
+Best Score: 0.52592
+[[876 155  11   1]
+ [238  51   0   0]
+ [250   5   5   2]
+ [ 64   6   0   0]]
+--------------------------------------
+Epoch 4
+Recall per class: [0.70853308 0.4083045  0.09923664 0.        ]
+Specificity per class: [0.4605475040257649, 0.6916363636363636, 0.985734664764622, 0.998745294855709]
+ICBHI Score: 0.54409
+Sensitivity: 0.30402
+Specificity: 0.78417
+Best Score: 0.54409
+[[739 287  15   2]
+ [171 118   0   0]
+ [141  95  26   0]
+ [ 23  42   5   0]]
+--------------------------------------
+Epoch 5
+Recall per class: [0.9894535  0.03806228 0.14885496 0.        ]
+Specificity per class: [0.10144927536231885, 0.9941818181818182, 0.9885877318116976, 1.0]
+ICBHI Score: 0.53257
+Sensitivity: 0.29409
+Specificity: 0.77105
+Best Score: 0.54409
+[[1032    8    3    0]
+ [ 277   11    1    0]
+ [ 223    0   39    0]
+ [  58    0   12    0]]
+--------------------------------------
+Epoch 6
+Recall per class: [0.17545542 0.74740484 0.14503817 0.8       ]
+Specificity per class: [0.92914653784219, 0.536, 0.9614835948644793, 0.7271016311166876]
+ICBHI Score: 0.6277
+Sensitivity: 0.46697
+Specificity: 0.78843
+Best Score: 0.6277
+[[183 616  37 207]
+ [ 28 216  11  34]
+ [ 16  14  38 194]
+ [  0   8   6  56]]
+--------------------------------------
+Epoch 7
+Recall per class: [0.58485139 0.40138408 0.39312977 0.48571429]
+Specificity per class: [0.6634460547504025, 0.792, 0.9194008559201141, 0.8789209535759097]
+ICBHI Score: 0.63986
+Sensitivity: 0.46627
+Specificity: 0.81344
+Best Score: 0.63986
+[[610 276  81  76]
+ [138 116   8  27]
+ [ 65   4 103  90]
+ [  6   6  24  34]]
+--------------------------------------
+Epoch 8
+Recall per class: [0.24065197 0.8650519  0.00763359 0.28571429]
+Specificity per class: [0.8373590982286635, 0.3389090909090909, 0.9978601997146933, 0.9196988707653702]
+ICBHI Score: 0.56161
+Sensitivity: 0.34976
+Specificity: 0.77346
+Best Score: 0.63986
+[[251 755   2  35]
+ [ 39 250   0   0]
+ [ 62 105   2  93]
+ [  0  49   1  20]]
+--------------------------------------
+Epoch 9
+Recall per class: [0.37967402 0.75086505 0.10687023 0.14285714]
+Specificity per class: [0.7536231884057971, 0.44363636363636366, 0.9835948644793152, 0.9548306148055207]
+ICBHI Score: 0.56449
+Sensitivity: 0.34507
+Specificity: 0.78392
+Best Score: 0.63986
+[[396 612  13  22]
+ [ 72 217   0   0]
+ [ 75 109  28  50]
+ [  6  44  10  10]]
+--------------------------------------
+Epoch 10
+Recall per class: [0.32694151 0.81314879 0.26335878 0.22857143]
+Specificity per class: [0.7568438003220612, 0.4596363636363636, 0.9600570613409415, 0.966750313676286]
+ICBHI Score: 0.59691
+Sensitivity: 0.40801
+Specificity: 0.78582
+Best Score: 0.63986
+[[341 661  27  14]
+ [ 40 235   9   5]
+ [ 98  61  69  34]
+ [ 13  21  20  16]]
+--------------------------------------
+Epoch 11
+Recall per class: [0.60115053 0.         0.88167939 0.        ]
+Specificity per class: [0.6264090177133655, 0.9890909090909091, 0.6055634807417974, 0.9962358845671268]
+ICBHI Score: 0.58752
+Sensitivity: 0.37071
+Specificity: 0.80432
+Best Score: 0.63986
+[[627  15 397   4]
+ [197   0  92   0]
+ [ 29   0 231   2]
+ [  6   0  64   0]]
+--------------------------------------
+Epoch 12
+Recall per class: [0.80824545 0.24567474 0.44274809 0.01428571]
+Specificity per class: [0.41223832528180354, 0.8901818181818182, 0.9258202567760342, 0.9918444165621079]
+ICBHI Score: 0.59138
+Sensitivity: 0.37774
+Specificity: 0.80502
+Best Score: 0.63986
+[[843 143  49   8]
+ [205  71  12   1]
+ [137   5 116   4]
+ [ 23   3  43   1]]
+--------------------------------------
+
+Best ICBHI Score during training: 0.63986
+Model: "model"
+__________________________________________________________________________________________________
+ Layer (type)                Output Shape                 Param #   Connected to                  
+==================================================================================================
+ input_1 (InputLayer)        [(None, 128, 129, 1)]        0         []                            
+                                                                                                  
+ conv2d (Conv2D)             (None, 128, 129, 32)         320       ['input_1[0][0]']             
+                                                                                                  
+ batch_normalization (Batch  (None, 128, 129, 32)         128       ['conv2d[0][0]']              
+ Normalization)                                                                                   
+                                                                                                  
+ activation (Activation)     (None, 128, 129, 32)         0         ['batch_normalization[0][0]'] 
+                                                                                                  
+ conv2d_1 (Conv2D)           (None, 128, 129, 32)         9248      ['activation[0][0]']          
+                                                                                                  
+ conv2d_2 (Conv2D)           (None, 128, 129, 32)         64        ['input_1[0][0]']             
+                                                                                                  
+ batch_normalization_1 (Bat  (None, 128, 129, 32)         128       ['conv2d_1[0][0]']            
+ chNormalization)                                                                                 
+                                                                                                  
+ batch_normalization_2 (Bat  (None, 128, 129, 32)         128       ['conv2d_2[0][0]']            
+ chNormalization)                                                                                 
+                                                                                                  
+ add (Add)                   (None, 128, 129, 32)         0         ['batch_normalization_1[0][0]'
+                                                                    , 'batch_normalization_2[0][0]
+                                                                    ']                            
+                                                                                                  
+ activation_1 (Activation)   (None, 128, 129, 32)         0         ['add[0][0]']                 
+                                                                                                  
+ max_pooling2d (MaxPooling2  (None, 64, 64, 32)           0         ['activation_1[0][0]']        
+ D)                                                                                               
+                                                                                                  
+ conv2d_3 (Conv2D)           (None, 64, 64, 64)           18496     ['max_pooling2d[0][0]']       
+                                                                                                  
+ batch_normalization_3 (Bat  (None, 64, 64, 64)           256       ['conv2d_3[0][0]']            
+ chNormalization)                                                                                 
+                                                                                                  
+ activation_2 (Activation)   (None, 64, 64, 64)           0         ['batch_normalization_3[0][0]'
+                                                                    ]                             
+                                                                                                  
+ conv2d_4 (Conv2D)           (None, 64, 64, 64)           36928     ['activation_2[0][0]']        
+                                                                                                  
+ conv2d_5 (Conv2D)           (None, 64, 64, 64)           2112      ['max_pooling2d[0][0]']       
+                                                                                                  
+ batch_normalization_4 (Bat  (None, 64, 64, 64)           256       ['conv2d_4[0][0]']            
+ chNormalization)                                                                                 
+                                                                                                  
+ batch_normalization_5 (Bat  (None, 64, 64, 64)           256       ['conv2d_5[0][0]']            
+ chNormalization)                                                                                 
+                                                                                                  
+ add_1 (Add)                 (None, 64, 64, 64)           0         ['batch_normalization_4[0][0]'
+                                                                    , 'batch_normalization_5[0][0]
+                                                                    ']                            
+                                                                                                  
+ activation_3 (Activation)   (None, 64, 64, 64)           0         ['add_1[0][0]']               
+                                                                                                  
+ max_pooling2d_1 (MaxPoolin  (None, 32, 32, 64)           0         ['activation_3[0][0]']        
+ g2D)                                                                                             
+                                                                                                  
+ conv2d_6 (Conv2D)           (None, 32, 32, 128)          73856     ['max_pooling2d_1[0][0]']     
+                                                                                                  
+ batch_normalization_6 (Bat  (None, 32, 32, 128)          512       ['conv2d_6[0][0]']            
+ chNormalization)                                                                                 
+                                                                                                  
+ activation_4 (Activation)   (None, 32, 32, 128)          0         ['batch_normalization_6[0][0]'
+                                                                    ]                             
+                                                                                                  
+ conv2d_7 (Conv2D)           (None, 32, 32, 128)          147584    ['activation_4[0][0]']        
+                                                                                                  
+ conv2d_8 (Conv2D)           (None, 32, 32, 128)          8320      ['max_pooling2d_1[0][0]']     
+                                                                                                  
+ batch_normalization_7 (Bat  (None, 32, 32, 128)          512       ['conv2d_7[0][0]']            
+ chNormalization)                                                                                 
+                                                                                                  
+ batch_normalization_8 (Bat  (None, 32, 32, 128)          512       ['conv2d_8[0][0]']            
+ chNormalization)                                                                                 
+                                                                                                  
+ add_2 (Add)                 (None, 32, 32, 128)          0         ['batch_normalization_7[0][0]'
+                                                                    , 'batch_normalization_8[0][0]
+                                                                    ']                            
+                                                                                                  
+ activation_5 (Activation)   (None, 32, 32, 128)          0         ['add_2[0][0]']               
+                                                                                                  
+ max_pooling2d_2 (MaxPoolin  (None, 16, 16, 128)          0         ['activation_5[0][0]']        
+ g2D)                                                                                             
+                                                                                                  
+ conv2d_9 (Conv2D)           (None, 16, 16, 256)          295168    ['max_pooling2d_2[0][0]']     
+                                                                                                  
+ batch_normalization_9 (Bat  (None, 16, 16, 256)          1024      ['conv2d_9[0][0]']            
+ chNormalization)                                                                                 
+                                                                                                  
+ activation_6 (Activation)   (None, 16, 16, 256)          0         ['batch_normalization_9[0][0]'
+                                                                    ]                             
+                                                                                                  
+ conv2d_10 (Conv2D)          (None, 16, 16, 256)          590080    ['activation_6[0][0]']        
+                                                                                                  
+ conv2d_11 (Conv2D)          (None, 16, 16, 256)          33024     ['max_pooling2d_2[0][0]']     
+                                                                                                  
+ batch_normalization_10 (Ba  (None, 16, 16, 256)          1024      ['conv2d_10[0][0]']           
+ tchNormalization)                                                                                
+                                                                                                  
+ batch_normalization_11 (Ba  (None, 16, 16, 256)          1024      ['conv2d_11[0][0]']           
+ tchNormalization)                                                                                
+                                                                                                  
+ add_3 (Add)                 (None, 16, 16, 256)          0         ['batch_normalization_10[0][0]
+                                                                    ',                            
+                                                                     'batch_normalization_11[0][0]
+                                                                    ']                            
+                                                                                                  
+ activation_7 (Activation)   (None, 16, 16, 256)          0         ['add_3[0][0]']               
+                                                                                                  
+ conv2d_12 (Conv2D)          (None, 16, 16, 256)          590080    ['activation_7[0][0]']        
+                                                                                                  
+ batch_normalization_12 (Ba  (None, 16, 16, 256)          1024      ['conv2d_12[0][0]']           
+ tchNormalization)                                                                                
+                                                                                                  
+ activation_8 (Activation)   (None, 16, 16, 256)          0         ['batch_normalization_12[0][0]
+                                                                    ']                            
+                                                                                                  
+ conv2d_13 (Conv2D)          (None, 16, 16, 256)          590080    ['activation_8[0][0]']        
+                                                                                                  
+ batch_normalization_13 (Ba  (None, 16, 16, 256)          1024      ['conv2d_13[0][0]']           
+ tchNormalization)                                                                                
+                                                                                                  
+ add_4 (Add)                 (None, 16, 16, 256)          0         ['batch_normalization_13[0][0]
+                                                                    ',                            
+                                                                     'activation_7[0][0]']        
+                                                                                                  
+ activation_9 (Activation)   (None, 16, 16, 256)          0         ['add_4[0][0]']               
+                                                                                                  
+ global_average_pooling2d (  (None, 256)                  0         ['activation_9[0][0]']        
+ GlobalAveragePooling2D)                                                                          
+                                                                                                  
+ dense (Dense)               (None, 256)                  65792     ['global_average_pooling2d[0][
+                                                                    0]']                          
+                                                                                                  
+ batch_normalization_14 (Ba  (None, 256)                  1024      ['dense[0][0]']               
+ tchNormalization)                                                                                
+                                                                                                  
+ dropout (Dropout)           (None, 256)                  0         ['batch_normalization_14[0][0]
+                                                                    ']                            
+                                                                                                  
+ dense_1 (Dense)             (None, 4)                    1028      ['dropout[0][0]']             
+                                                                                                  
+==================================================================================================
+Total params: 2471012 (9.43 MB)
+Trainable params: 2466596 (9.41 MB)
+Non-trainable params: 4416 (17.25 KB)
+__________________________________________________________________________________________________Epoch 0
+Recall per class: [0.64717162 0.41176471 0.29007634 0.28571429]
+Specificity per class: [0.5700483091787439, 0.744, 0.9529243937232525, 0.9441656210790464]
+ICBHI Score: 0.60573
+Sensitivity: 0.40868
+Specificity: 0.80278
+Best Score: 0.63986
+[[675 304  47  17]
+ [160 119   4   6]
+ [ 92  28  76  66]
+ [ 15  20  15  20]]
+--------------------------------------
+Epoch 1
+Recall per class: [0.82550336 0.23875433 0.35496183 0.1       ]
+Specificity per class: [0.3896940418679549, 0.8763636363636363, 0.949358059914408, 0.9912170639899623]
+ICBHI Score: 0.59073
+Sensitivity: 0.3798
+Specificity: 0.80166
+Best Score: 0.63986
+[[861 141  40   1]
+ [213  69   7   0]
+ [138  18  93  13]
+ [ 28  11  24   7]]
+--------------------------------------
+Epoch 2
+Recall per class: [0.45349952 0.58477509 0.39312977 0.34285714]
+Specificity per class: [0.7198067632850241, 0.637090909090909, 0.9265335235378032, 0.9253450439146801]
+ICBHI Score: 0.62288
+Sensitivity: 0.44357
+Specificity: 0.80219
+Best Score: 0.63986
+[[473 458  72  40]
+ [ 99 169  12   9]
+ [ 61  28 103  70]
+ [ 14  13  19  24]]
+--------------------------------------
+Epoch 3
+Recall per class: [0.61169703 0.33910035 0.46183206 0.3       ]
+Specificity per class: [0.6006441223832528, 0.776, 0.9022824536376605, 0.9416562107904642]
+ICBHI Score: 0.61665
+Sensitivity: 0.42816
+Specificity: 0.80515
+Best Score: 0.63986
+[[638 279  94  32]
+ [165  98  18   8]
+ [ 70  18 121  53]
+ [ 13  11  25  21]]
+--------------------------------------
+Epoch 4
+Recall per class: [0.32214765 0.68512111 0.27480916 0.44285714]
+Specificity per class: [0.7761674718196457, 0.5265454545454545, 0.956490727532097, 0.8895859473023839]
+ICBHI Score: 0.60922
+Sensitivity: 0.43123
+Specificity: 0.7872
+Best Score: 0.63986
+[[336 593  40  74]
+ [ 68 198   9  14]
+ [ 63  39  72  88]
+ [  8  19  12  31]]
+--------------------------------------
+Epoch 5
+Recall per class: [0.54745925 0.43252595 0.4351145  0.31428571]
+Specificity per class: [0.6521739130434783, 0.7258181818181818, 0.8987161198288159, 0.939146800501882]
+ICBHI Score: 0.61816
+Sensitivity: 0.43235
+Specificity: 0.80396
+Best Score: 0.63986
+[[571 337 100  35]
+ [136 125  21   7]
+ [ 66  27 114  55]
+ [ 14  13  21  22]]
+--------------------------------------
+Epoch 6
+Recall per class: [0.6021093  0.11418685 0.67938931 0.1       ]
+Specificity per class: [0.5877616747181964, 0.9258181818181819, 0.7104136947218259, 0.9661229611041405]
+ICBHI Score: 0.58573
+Sensitivity: 0.37392
+Specificity: 0.79753
+Best Score: 0.63986
+[[628  95 295  25]
+ [188  33  60   8]
+ [ 61   2 178  21]
+ [  7   5  51   7]]
+--------------------------------------

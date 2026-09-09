@@ -6,9 +6,6 @@ data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 
-# Logs from experiments
-experiments/*
-
 # Exclude the trained models
 models/custom_cnn/*
 models/pretrained/*

@@ -3,7 +3,27 @@ from tensorflow.keras import layers, models, regularizers
 
 def create_efficientnet_model(input_shape=(128, 129, 1), num_classes=4, seed=12345):
     """
-    Function to create an EfficientNet-based model for respiratory cycle classification.
+    Create an EfficientNetB2-based model for multi-class image classification.
+
+    The model uses EfficientNetB2 pre-trained on ImageNet as a frozen feature
+    extractor. Since the input data contains a single channel, the channel is
+    replicated three times to match the three-channel input expected by the
+    pre-trained network. The extracted features are then processed by global
+    average pooling, a dense classification block, and a softmax output layer.
+
+    The base model is returned separately to allow its layers to be unfrozen
+    later for fine-tuning.
+
+    Args:
+        input_shape (tuple[int, int, int], optional): Shape of a single input
+            sample, excluding the batch dimension. Defaults to (128, 129, 1).
+        num_classes (int, optional): Number of output classes. Defaults to 4.
+        seed (int, optional): Random seed used for weight initialization and
+            dropout. Defaults to 12345.
+
+    Returns:
+        tuple[tf.keras.Model, tf.keras.Model]: The complete classification
+        model and the pre-trained EfficientNetB2 base model, respectively.
     """
     # Use GlorotUniform initializer with the specified seed for reproducibility.
     initializer = tf.keras.initializers.GlorotUniform(seed=seed)

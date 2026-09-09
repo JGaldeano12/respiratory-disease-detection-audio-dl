@@ -1,9 +1,18 @@
-import librosa, numpy as np, os, gc, multiprocessing, cv2
+import librosa, numpy as np, os, gc
 
 def standardize_audio(audio):
     """
-    Function to standardize the audio signal by removing the mean and scaling to unit variance.
-    This helps in normalizing the audio data and can improve the performance of machine learning models.
+    Standardize an audio signal to have approximately zero mean and unit variance.
+
+    The mean of the input signal is subtracted and the result is divided by its
+    standard deviation. A small constant is added to the standard deviation to
+    prevent division by zero.
+
+    Args:
+        audio (np.ndarray): Input audio signal to standardize.
+
+    Returns:
+        np.ndarray: Standardized audio signal.
     """
     mean = np.mean(audio)
     std = np.std(audio) + 1e-6  # Add a small value to avoid division by zero
@@ -12,51 +21,55 @@ def standardize_audio(audio):
 
 def extract_features(audio, output_path, label, patient, index_cycle, type):
     """
-    Function to extract features (spectrograms) from the audio segments and save them as .png images in the specified directory.
+    Extract a Mel spectrogram from an audio segment and save it as a NumPy array.
 
-    audio: the audio data.
-    output_path: destination path for the features.
-    label: label of the audio segment (e.g., 'Healthy', 'Unhealthy').
-    patient: patient ID.
-    index_cycle: index of the respiratory cycle.
-    type: type of augmentation (e.g., 'Original', 'Augmented').
+    The input audio is first standardized. A Mel spectrogram is then computed
+    and converted from power values to the decibel scale. The resulting
+    spectrogram is expanded with a channel dimension and saved as a `.npy`
+    file using the provided metadata.
+
+    Args:
+        audio (np.ndarray): Audio segment from which the features are extracted.
+        output_path (str): Base directory where the extracted features are saved.
+        label (str): Class label associated with the audio segment.
+        patient (str): Identifier of the patient associated with the recording.
+        index_cycle (str): Identifier of the respiratory cycle.
+        type (str): Type of audio sample or augmentation applied.
+
+    Returns:
+        None
     """
     # Generate the Mel Spectrogram for the audio segment:
     audio = standardize_audio(audio)
     spectrogram = librosa.feature.melspectrogram(y = audio, sr=8000, n_fft=2048, hop_length=256, n_mels=128, fmin=50, fmax=2500)
+    # spectrogram = librosa.feature.melspectrogram(y=audio, sr=4096, n_fft=2048, hop_length=256, n_mels=128, fmin=50, fmax=2500)
     spectrogram = librosa.power_to_db(spectrogram, ref=np.max)
-    
-    # # Now, generate MGCC features for the audio segment:
-    # mfcc = librosa.feature.mfcc(y=audio, sr=8000, n_mfcc=20, n_fft=2048, hop_length=512)
 
-    # # Delta features (first derivative):
-    # delta_spectrogram = librosa.feature.delta(mfcc, order=1)
-
-    # # Delta-delta features (second derivative):
-    # delta_spectrogram_2 = librosa.feature.delta(mfcc, order=2)
-    
-    # # Resize the MFCC and delta features to match the dimensions of the spectrogram
-    # mfcc = cv2.resize(mfcc, (spectrogram.shape[1], spectrogram.shape[0]), interpolation=cv2.INTER_LINEAR)
-    # delta_spectrogram = cv2.resize(delta_spectrogram, (spectrogram.shape[1], spectrogram.shape[0]), interpolation=cv2.INTER_LINEAR)
-    # delta_spectrogram_2 = cv2.resize(delta_spectrogram_2, (spectrogram.shape[1], spectrogram.shape[0]), interpolation=cv2.INTER_LINEAR)
-
-    # # Standardize the spectrogram to have zero mean and unit variance
-    # spectrogram = standardize_audio(spectrogram)
-    # mfcc = standardize_audio(mfcc)
-    # delta_spectrogram = standardize_audio(delta_spectrogram)
-    # delta_spectrogram_2 = standardize_audio(delta_spectrogram_2)
-
-    # # Concatenate the spectrogram, MFCC, and delta features along the channel dimension
-    # combined_features = np.stack([spectrogram, mfcc, delta_spectrogram, delta_spectrogram_2], axis=-1)
+    # Concatenate the spectrogram, MFCC, and delta features along the channel dimension
     combined_features = np.expand_dims(spectrogram, axis=-1)
 
-    # # Save the features for the original audio segment
-    # save_features(spectrogram, index_cycle, output_path, label, patient, type)
+    # Save the features for the original audio segment
     save_features(combined_features, index_cycle, output_path, label, patient, type)
 
 def save_features(data, index_cycle, output_path, label, patient, type):
     """
-    Function to generate and save the features (spectrograms) for each audio segment. The features are saved as .npy arrays in the specified directory.
+    Save extracted features as a NumPy array using a metadata-based filename.
+
+    The input feature array is converted to `float32` before being saved as a
+    `.npy` file. The output filename is constructed from the class label,
+    patient identifier, respiratory cycle identifier, and sample or
+    augmentation type.
+
+    Args:
+        data (np.ndarray): Feature array to save.
+        index_cycle (str): Identifier of the respiratory cycle.
+        output_path (str): Base directory where the feature file is saved.
+        label (str): Class label used to determine the output subdirectory.
+        patient (str): Identifier of the patient associated with the sample.
+        type (str): Type of audio sample or augmentation used in the filename.
+
+    Returns:
+        None
     """
     # Create the spectrogram filename based on the patient ID, index, and augmentation type
     path = f"{label}/{patient}_{index_cycle}_{type}.npy"

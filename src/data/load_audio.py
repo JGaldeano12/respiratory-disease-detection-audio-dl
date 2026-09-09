@@ -1,15 +1,24 @@
-# # Import funcionts from file extract_features.py and preprocess.py
-# from src.features.extract_features import generar_guardar_features
-# from src.data.preprocess import butter_bandpass_filter, check_length_and_padding 
-# from src.data.augment import gen_augmented
 from src.data.segment import divide_audio
-
-# Import other necessary libraries
 import os, gc, multiprocessing, librosa, numpy as np, cv2
 
 def process_file(file, input_path, output_path, length, cycles):
     """
-    Function to process a single audio file. Includes: loading, segmenting, generating spectrograms and saving the results.
+    Load and process a single audio file.
+
+    The function extracts the patient identifier from the filename, loads the
+    audio at a sampling rate of 8000 Hz, and delegates its segmentation to
+    `divide_audio`.
+
+    Args:
+        file (str): Path or filename of the audio file to process.
+        input_path (str): Directory containing the input audio files.
+        output_path (str): Directory where the processed segments are saved.
+        length (float): Duration of each generated audio segment.
+        cycles (np.ndarray): Respiratory cycle information used during audio
+            segmentation.
+
+    Returns:
+        None
     """
     try:
         # Get unique record ID from the filename
@@ -20,7 +29,7 @@ def process_file(file, input_path, output_path, length, cycles):
         id_patient = info_elements[0] + "_" + info_elements[1] + "_" + info_elements[2] + "_" + info_elements[3] + "_" + info_elements[4]
 
         # Load the audio file using librosa
-        raw_audio, sample_rate = librosa.load(os.path.join(input_path, file), sr=4096)
+        raw_audio, sample_rate = librosa.load(os.path.join(input_path, file), sr=8000)
 
         # Proceed to audio segmentation
         divide_audio(duration = length, sample_rate = sample_rate, raw_audio = raw_audio, output_path = output_path, patient = id_patient, cycles = cycles)
@@ -30,8 +39,23 @@ def process_file(file, input_path, output_path, length, cycles):
 
 def lectura_datos_parallel(input_path, output_path, length, cycles):
     """
-    Function to read the data and process .wav files in parallel.
-    """  
+    Process all WAV files in a directory in parallel.
+
+    The function identifies all `.wav` files in `input_path`, loads the
+    respiratory cycle information from the specified NumPy file, and processes
+    each audio file using a separate task in a multiprocessing pool.
+
+    Args:
+        input_path (str): Directory containing the input `.wav` files.
+        output_path (str): Directory where the processed audio segments are
+            saved.
+        length (float): Duration of each generated audio segment.
+        cycles (str): Path to the NumPy file containing the respiratory cycle
+            information.
+
+    Returns:
+        str: Confirmation message after all audio files have been processed.
+    """
     # List of .wav files in the directory
     archivos_wav = [os.path.join(input_path, f) for f in os.listdir(input_path) if f.endswith(".wav")]
 

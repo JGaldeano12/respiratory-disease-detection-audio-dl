@@ -1,115 +1,69 @@
 from scipy.signal import butter, lfilter
-
 import librosa, numpy as np, os, gc, multiprocessing, cv2, math
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
     """
-    Function to design a Butterworth bandpass filter.
-    """
-    # Design the Butterworth bandpass filter coefficients based on the specified lowcut, highcut frequencies, sampling rate (fs), and filter order.
-    nyq = 0.5 * fs
+    Design a Butterworth bandpass filter.
 
-    # Normalize the lowcut and highcut frequencies by the Nyquist frequency and compute the filter coefficients using the Butterworth filter design.
+    Args:
+        lowcut (float): Lower cutoff frequency in Hz.
+        highcut (float): Upper cutoff frequency in Hz.
+        fs (float): Sampling frequency of the signal in Hz.
+        order (int, optional): Order of the Butterworth filter. Defaults to 5.
+
+    Returns:
+        tuple[np.ndarray, np.ndarray]: Numerator (`b`) and denominator (`a`)
+        coefficients of the IIR filter.
+    """
+    nyq = 0.5 * fs
     low = lowcut / nyq
     high = highcut / nyq
 
-    # Compute the Butterworth bandpass filter coefficients using the butter function from the scipy.signal library.
-    b, a = butter(order, [low, high], btype='band')
+    b, a = butter(order, [low, high], btype="band")
 
-    # Return the filter coefficients (b, a) for the designed Butterworth bandpass filter.
     return b, a
- 
+
 def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
     """
-    Function to apply a Butterworth bandpass filter to the input data.
+    Apply a Butterworth bandpass filter to a signal.
+
+    Args:
+        data (np.ndarray): Input signal to filter.
+        lowcut (float): Lower cutoff frequency in Hz.
+        highcut (float): Upper cutoff frequency in Hz.
+        fs (float): Sampling frequency of the signal in Hz.
+        order (int, optional): Order of the Butterworth filter. Defaults to 5.
+
+    Returns:
+        np.ndarray: Filtered signal.
     """
-    # Apply the Butterworth bandpass filter to the input data
     b, a = butter_bandpass(lowcut, highcut, fs, order=order)
-    y = lfilter(b, a, data)
-
-    # Return the filtered audio data
-    return y
-
-# def check_length_and_padding(audio, target_length, sample_rate=8000, crossfade_ms=10):
-#     """
-#     Ensure audio has EXACT target_length using Repeat/Tile Padding.
-
-#     Repeats the audio cyclically until reaching target_length, applying
-#     a short crossfade at each repetition boundary to avoid discontinuities.
-
-#     Args:
-#         audio        : np.ndarray — input audio signal
-#         target_length: int        — desired number of samples
-#         sample_rate  : int        — used to compute crossfade length in samples
-#         crossfade_ms : int        — crossfade duration in milliseconds (default: 10ms)
-#     """
-#     current_length = len(audio)
-
-#     # TRUNCATE
-#     if current_length > target_length:
-#         audio = audio[:target_length]
-
-#     # REPEAT/TILE PADDING
-#     elif current_length < target_length:
-#         crossfade_samples = int(sample_rate * crossfade_ms / 1000)
-#         crossfade_samples = min(crossfade_samples, current_length // 2)
-
-#         # Número de repeticiones necesarias
-#         repeats = math.ceil(target_length / current_length)
-#         tiled = np.tile(audio, repeats)
-
-#         # Aplicar crossfade en cada punto de costura
-#         for i in range(1, repeats):
-#             join = i * current_length  # índice del punto de unión
-
-#             if join >= len(tiled):
-#                 break
-
-#             # Ventanas de fade-out y fade-in
-#             fade_out = np.linspace(1.0, 0.0, crossfade_samples)
-#             fade_in  = np.linspace(0.0, 1.0, crossfade_samples)
-
-#             # Zona antes de la costura (final del bloque anterior)
-#             start_out = join - crossfade_samples
-#             end_out   = join
-
-#             # Zona después de la costura (inicio del bloque siguiente)
-#             start_in  = join
-#             end_in    = join + crossfade_samples
-
-#             if end_in <= len(tiled):
-#                 tiled[start_out:end_out] *= fade_out
-#                 tiled[start_in:end_in]   *= fade_in
-#                 # Mezcla: suma ambas zonas solapadas
-#                 tiled[start_out:end_out] += tiled[start_in:end_in] * fade_out[::-1]
-
-#         audio = tiled[:target_length]
-
-#     return audio
+    return lfilter(b, a, data)
 
 def check_length_and_padding(audio, target_length, sample_rate=4096):
     """
-    Ensure audio has EXACT target_length using Wrap Padding.
+    Adjust an audio signal to an exact target length.
 
-    Treats the audio as a circular buffer, filling the missing samples
-    by cycling back to the beginning of the signal. This avoids artificial
-    silence (zero padding) and phase inversion (reflect padding), while
-    being simpler and more efficient than manual tiling.
+    Signals longer than `target_length` are truncated. Shorter signals are
+    extended using wrap padding, repeating samples from the beginning of the
+    signal until the target length is reached.
 
     Args:
-        audio         : np.ndarray — input audio signal
-        target_length : int        — desired number of samples
-        sample_rate   : int        — retained for API consistency
+        audio (np.ndarray): Input audio signal.
+        target_length (int): Desired number of samples.
+        sample_rate (int, optional): Sampling rate retained for API
+            compatibility. It is not used by the current implementation.
+            Defaults to 4096.
+
+    Returns:
+        np.ndarray: Audio signal with exactly `target_length` samples.
     """
     current_length = len(audio)
 
-    # TRUNCATE
     if current_length > target_length:
         audio = audio[:target_length]
-
-    # WRAP PADDING
     elif current_length < target_length:
         padding = target_length - current_length
-        audio = np.pad(audio, (0, padding), mode='wrap')
+        audio = np.pad(audio, (0, padding), mode="wrap")
 
     return audio

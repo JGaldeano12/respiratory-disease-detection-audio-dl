@@ -2,9 +2,20 @@ import shutil, os, numpy as np
 
 def create_directories(input_path):
     """
-    Function to check if the necessary directories for training and testing sets exist, and create them if they do not exist. 
-    This includes directories for each class (Crackle, Wheeze, Wheeze & Crackle, Healthy) within both the Train and Test directories.
+    Create the class directories required to store spectrogram data.
+
+    The function ensures that directories for the Crackle, Wheeze,
+    Wheeze & Crackle, and Healthy classes exist inside the specified
+    input path. Existing directories are preserved.
+
+    Args:
+        input_path (str): Base directory where the class directories
+            will be created.
+
+    Returns:
+        None
     """
+    # Create directories for each class if they do not already exist
     for dir_path in [os.path.join(input_path, "Crackle"),
                      os.path.join(input_path, "Wheeze"), 
                      os.path.join(input_path, "Wheeze & Crackle"), 
@@ -15,9 +26,20 @@ def create_directories(input_path):
 
 def check_and_create_directories(input_path):
     """
-    Function to check if the necessary directories for training and testing sets exist, and create them if they do not exist. 
-    This includes directories for each class (Crackle, Wheeze, Wheeze & Crackle, Healthy) within both the Train and Test directories.
+    Create the directory structure required for the training and testing sets.
+
+    The function ensures that the Train and Test directories exist, together
+    with a subdirectory for each respiratory sound class: Crackle, Wheeze,
+    Wheeze & Crackle, and Healthy. Existing directories are preserved.
+
+    Args:
+        input_path (str): Base directory where the training and testing
+            directory structure will be created.
+
+    Returns:
+        None
     """
+    # Create directories for Train and Test sets, along with subdirectories for each class
     for dir_path in [os.path.join(input_path, "Train"), 
                      os.path.join(input_path, "Test"), 
                      os.path.join(input_path, "Train/Crackle"),
@@ -34,7 +56,25 @@ def check_and_create_directories(input_path):
 
 def split_patients_by_train_test(aux_file, seed, train_test_split):
     """
-    Function to split patients into training and testing sets based on the provided respiratory cycles and random training patient IDs.
+    Split patients and their respiratory cycles into training and testing sets.
+
+    The respiratory cycle data is loaded from the provided NumPy file, and
+    unique patient identifiers are randomly shuffled using the specified seed.
+    The first portion of patients, determined by `train_test_split`, is
+    assigned to the training set, while the remaining patients are assigned
+    to the testing set. The corresponding respiratory cycles are then returned
+    for each set.
+
+    Args:
+        aux_file (str): Path to the NumPy file containing labeled respiratory
+            cycle data, with patient identifiers stored in the first column.
+        seed (int): Random seed used to reproducibly shuffle patient IDs.
+        train_test_split (float): Percentage of the 112 patients assigned to
+            the training set.
+
+    Returns:
+        tuple[np.ndarray, np.ndarray]: Respiratory cycle data corresponding to
+        the training patients and testing patients, respectively.
     """
     # First, load file with the labeled respiratory cycles
     aux_file = np.load(aux_file)
@@ -60,7 +100,24 @@ def split_patients_by_train_test(aux_file, seed, train_test_split):
 
 def move_spectrograms_by_train_test(input_path, cycles_train, cycles_test):
     """
-    Function to move the spectrogram images into the corresponding training and testing directories based on the assigned patient IDs for each set.
+    Copy spectrogram images into their corresponding training or testing sets.
+
+    The function retrieves spectrogram files from each respiratory sound class
+    directory, determines the patient identifier associated with each file, and
+    copies the spectrogram to the corresponding Train or Test directory
+    according to whether the patient belongs to `cycles_train` or
+    `cycles_test`.
+
+    Args:
+        input_path (str): Base directory containing the class-specific
+            spectrogram directories.
+        cycles_train (np.ndarray): Training respiratory cycle data used to
+            identify patients assigned to the training set.
+        cycles_test (np.ndarray): Testing respiratory cycle data used to
+            identify patients assigned to the testing set.
+
+    Returns:
+        None
     """
     # List every spectrogram image in the directory and its subdirectories, and categorize them based on their corresponding patient IDs
     crackle_data = [os.path.join(os.path.join(input_path, "Crackle"), f) for f in os.listdir(os.path.join(input_path, "Crackle"))]

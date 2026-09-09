@@ -1,9 +1,8 @@
 import nlpaug.augmenter.audio as naa
-import cv2, cmapy, os, gc, numpy as np, librosa, multiprocessing, argparse
+import os, gc, numpy as np, librosa, multiprocessing, argparse
 
-from scipy.signal import butter, lfilter
 from src.data.preprocess import butter_bandpass_filter, check_length_and_padding
-from src.features.extract_features import extract_features, save_features
+from src.features.extract_features import extract_features
 from src.data.divide import split_patients_by_train_test
 
 import warnings
@@ -11,7 +10,24 @@ warnings.filterwarnings("ignore")
 
 def gen_augmented(original, sample_rate, rng, seed):
     """
-    Generates augmented versions of the original audio segment. Includes one sample per technique + one combined sample.
+    Generate multiple augmented versions of an audio segment.
+
+    The function creates one augmented sample for each supported technique:
+    time shifting, time stretching, vocal tract length perturbation (VTLP),
+    and additive Gaussian noise. It also generates an additional sample by
+    randomly combining these techniques. All generated samples are adjusted
+    to match the length of the original audio segment.
+
+    Args:
+        original (np.ndarray): Original audio segment to augment.
+        sample_rate (int): Sampling rate of the audio signal in Hz.
+        rng (np.random.Generator): Random number generator used to sample
+            augmentation parameters and probabilities.
+        seed (int): Random seed used when applying VTLP augmentation.
+
+    Returns:
+        list[np.ndarray]: List containing the four individually augmented
+        audio segments and one combined augmented segment.
     """
     # Define the list of augmentation techniques to be applied.
     augment_types = ["time_shift", "time_stretch", "vtlp", "noise"]
@@ -93,7 +109,21 @@ def gen_augmented(original, sample_rate, rng, seed):
 
 def check_balanced_dataset(data_path):
     """
-    Calculates the number of augmented spectrograms needed per class to balance the dataset.
+    Calculate the number of additional samples required to balance each class.
+
+    The function counts the files contained in the Healthy, Crackle, Wheeze,
+    and Wheeze & Crackle directories and uses the largest class size as the
+    target size. For each class, it returns the difference between the target
+    size and the current number of samples.
+
+    Args:
+        data_path (str): Path containing the directories for all dataset
+            classes.
+
+    Returns:
+        tuple[int, int, int, int]: Number of additional samples required for
+        the Healthy, Crackle, Wheeze, and Wheeze & Crackle classes,
+        respectively.
     """
     # Define the classes used in the dataset.
     classes = ['Healthy', 'Crackle', 'Wheeze', 'Wheeze & Crackle']
@@ -108,153 +138,33 @@ def check_balanced_dataset(data_path):
     # calculated as the difference between the maximum number of samples and the current count for each class.
     return tuple(num_max - counts[c] for c in classes)
 
-##########################################################################################
-# The following functions are used to apply Class-Based Augmentation (CBA).
-##########################################################################################
+# Define all functions needed to apply traditional augmentation techniques to the dataset, 
+# including selecting a balanced random subset of respiratory cycles, processing individual audio
+# files, and applying augmentation techniques in parallel across multiple files.
 
-def select_random_respiratory_cycles(category, rng, seed, train_test_split, control_file_path='/app/src/data/ciclos_respiratorios.npy'):
+def select_balanced_and_random_respiratory_cycles(rng, control_file_path='/app/src/resources/aux_respiratory_cycles.npy', seed=202506, train_test_split=80):
     """
-    Function to select two random respiratory cycles for augmentation based on the specified category.
-    """
-    # Filter the respiratory cycles used for training based on the seed and train-test split.
-    train_cycles, _ = split_patients_by_train_test(control_file_path, seed, train_test_split)
+    Select an equal number of respiratory cycles from each class for augmentation.
 
-    # Precompute the duration mask once and reuse it for all class filters (threshold: 4.5 seconds).
-    mask = train_cycles[:, 11].astype(float) < 4.5
+    The function first obtains the respiratory cycles assigned to the training
+    set. It then determines the size of the smallest class and randomly selects
+    that same number of cycles from each of the four classes, producing a
+    balanced set of respiratory cycles.
 
-    # Filter cycles by class and duration threshold, storing them in a dictionary for easy access.
-    cycles = {
-        'Healthy':          train_cycles[(train_cycles[:, 6] == 'Healthy')          & mask],
-        'Crackle':          train_cycles[(train_cycles[:, 6] == 'Crackle')          & mask],
-        'Wheeze':           train_cycles[(train_cycles[:, 6] == 'Wheeze')           & mask],
-        'Wheeze & Crackle': train_cycles[(train_cycles[:, 6] == 'Wheeze & Crackle') & mask],
-    }
+    Args:
+        rng (np.random.Generator): Random number generator used to select the
+            cycles from each class.
+        control_file_path (str, optional): Path to the NumPy file containing
+            the respiratory cycle annotations. Defaults to
+            '/app/src/resources/aux_respiratory_cycles.npy'.
+        seed (int, optional): Random seed used for the patient-level
+            train/test split. Defaults to 202506.
+        train_test_split (float, optional): Percentage of patients assigned to
+            the training set. Defaults to 80.
 
-    if category == 'Healthy':
-        # For the Healthy class, select two random cycles exclusively from the healthy pool.
-        indices = rng.choice(len(cycles['Healthy']), size=2, replace=False)
-        regs = cycles['Healthy'][indices]
-
-    elif category in ('Crackle', 'Wheeze'):
-        main = cycles[category]
-
-        # With 50% probability, mix one cycle from the target class with one healthy cycle.
-        # Otherwise, select two cycles from the target class only.
-        if rng.random() < 0.5:
-            id_main    = rng.choice(len(main))
-            id_healthy = rng.choice(len(cycles['Healthy']))
-            indices = [id_main, id_healthy]
-            regs    = [main[id_main], cycles['Healthy'][id_healthy]]
-        else:
-            indices = rng.choice(len(main), size=2, replace=False)
-            regs    = main[indices]
-
-    elif category == 'Wheeze & Crackle':
-        both = cycles['Wheeze & Crackle']
-
-        # Ensure there are enough cycles available for augmentation.
-        if len(both) == 0:
-            raise ValueError("Not enough cycles available for 'Wheeze & Crackle' augmentation")
-
-        # Build the list of valid combination options based on the availability of cycles in each class.
-        opciones = [k for k, v in {
-            'wheeze_crackle + crackle':        len(cycles['Crackle']) > 0,
-            'wheeze_crackle + wheeze':         len(cycles['Wheeze']) > 0,
-            'wheeze_crackle + healthy':        len(cycles['Healthy']) > 0,
-            'wheeze_crackle + wheeze_crackle': len(both) > 1,
-        }.items() if v]
-
-        # Randomly select one of the valid combinations.
-        opcion = rng.choice(opciones)
-
-        if opcion == 'wheeze_crackle + wheeze_crackle':
-            # Select two cycles from the Wheeze & Crackle pool.
-            indices = rng.choice(len(both), size=2, replace=False)
-            regs    = both[indices]
-        else:
-            # Map the selected combination to its corresponding secondary class pool.
-            label_map = {
-                'wheeze_crackle + crackle': 'Crackle',
-                'wheeze_crackle + wheeze':  'Wheeze',
-                'wheeze_crackle + healthy': 'Healthy',
-            }
-            secondary = cycles[label_map[opcion]]
-
-            # Select one cycle from the Wheeze & Crackle pool and one from the secondary class pool.
-            id_both      = rng.choice(len(both))
-            id_secondary = rng.choice(len(secondary))
-            indices = [id_both, id_secondary]
-            regs    = [both[id_both], secondary[id_secondary]]
-
-    else:
-        raise ValueError(f"Invalid category '{category}'. Choose from: 'Healthy', 'Crackle', 'Wheeze', 'Wheeze & Crackle'.")
-
-    # Return the indices and records of the selected respiratory cycles.
-    return indices, regs
-
-def CBA(category, duration, input_path, output_path, rng, seed=202506, train_test_split=80, control_file_path='/app/src/data/ciclos_respiratorios.npy'):
-    """
-    Performs Class-Based Augmentation (CBA) for a specified class by selecting two random respiratory 
-    cycles, concatenating them, and generating an augmented spectrogram.
-    """
-    # Select two random respiratory cycles from the training set for the specified category.
-    indices, regs = select_random_respiratory_cycles(category, rng=rng, seed=seed, train_test_split=train_test_split, control_file_path=control_file_path)
-
-    # Load, segment, and filter each selected respiratory cycle.
-    audios = []
-    for cycle in regs:
-        # Load the audio file at the specified sampling rate.
-        audio, sr = librosa.load(os.path.join(input_path, cycle[1]) + ".wav", sr=8000)
-
-        # Extract the respiratory cycle segment based on its start and end timestamps.
-        start = int(float(cycle[2]) * sr)
-        end   = int(float(cycle[3]) * sr)
-        segment = audio[start:end]
-
-        # Apply a Butterworth bandpass filter to remove out-of-band noise.
-        audio_segment = butter_bandpass_filter(segment, 50, 2000, 8000, order=5)
-        audios.append(audio_segment)
-
-    # Build a unique identifier from the indices of the two selected cycles.
-    index_generated = f"{indices[0]}_{indices[1]}"
-
-    # Concatenate the two audio segments and adjust to the target duration.
-    concat_audio = np.concatenate((audios[0], audios[1]))
-    target_length = int(duration * sr)
-    concat_audio_padded = check_length_and_padding(concat_audio, target_length)
-
-    # Extract and save the Mel Spectrogram for the concatenated audio segment.
-    extract_features(concat_audio_padded, output_path, label=category, patient=index_generated, index_cycle=index_generated, type="CBA")
-
-def apply_CBA_by_category(rng, category, number, raw_audio_path='/app/data/raw', output_path='/app/data/processed/Train', duration=6, seed=202506, train_test_split=80, control_file_path='/app/src/data/ciclos_respiratorios.npy'):
-    """
-    Applies Class-Based Augmentation (CBA) for a specified class a given number of times.
-    """
-    for _ in range(number):
-        CBA(category, duration, raw_audio_path, output_path, rng=rng, seed=seed, train_test_split=train_test_split, control_file_path=control_file_path)
-
-def apply_CBA(rng, raw_audio_path='/app/data/raw', output_path='/app/data/processed/Train', duration=6, seed=202506, train_test_split=80, control_file_path='/app/src/data/ciclos_respiratorios.npy'):
-    """
-    Applies Class-Based Augmentation (CBA) for all classes, generating the number of spectrograms
-    needed to balance the dataset.
-    """
-    # Calculate the number of augmented spectrograms needed per class to balance the dataset.
-    num_healthy, num_crackle, num_wheeze, num_both = check_balanced_dataset(output_path)
-
-    # Apply CBA for each class with the corresponding number of augmentations needed.
-    for category, number in zip(
-        ['Healthy', 'Crackle', 'Wheeze', 'Wheeze & Crackle'],
-        [num_healthy, num_crackle, num_wheeze, num_both]
-    ):
-        apply_CBA_by_category(rng, category, number, raw_audio_path, output_path, duration, seed, train_test_split, control_file_path)
-
-##########################################################################################
-# The following functions are used to apply traditional audio augmentation techniques.
-##########################################################################################
-def select_balanced_and_random_respiratory_cycles(rng, control_file_path='/app/src/data/ciclos_respiratorios.npy', seed=202506, train_test_split=80):
-    """
-    Selects a balanced random subset of respiratory cycles for traditional augmentation,
-    sampling the same number of cycles from each class.
+    Returns:
+        np.ndarray: Concatenated array containing a balanced random selection
+        of respiratory cycles from all classes.
     """
     # Filter the respiratory cycles used for training.
     cycles_train, _ = split_patients_by_train_test(aux_file=control_file_path, seed=seed, train_test_split=train_test_split)
@@ -274,12 +184,30 @@ def select_balanced_and_random_respiratory_cycles(rng, control_file_path='/app/s
 
 def apply_traditional_augmentation_process_file(cycle, input_path, output_path, length, rng, seed):
     """
-    Processes a single .WAV file by loading, segmenting, and applying traditional augmentation techniques.
-    Input must be a single row from the cycles array.
+    Load an audio file and apply traditional augmentation to one respiratory cycle.
+
+    The function receives a single respiratory cycle annotation, loads the
+    corresponding WAV recording at 8000 Hz, and applies the traditional
+    augmentation pipeline to the audio segment defined by that cycle.
+
+    Args:
+        cycle (np.ndarray): Single row containing the respiratory cycle
+            annotation and associated metadata.
+        input_path (str): Directory containing the original WAV recordings.
+        output_path (str): Directory where the augmented features are saved.
+        length (float): Target duration of the processed audio segments in
+            seconds.
+        rng (np.random.Generator): Random number generator used during
+            augmentation.
+        seed (int): Random seed used by augmentation operations that require
+            deterministic behaviour.
+
+    Returns:
+        None
     """
     try:
         # Load the audio file at the specified sampling rate.
-        raw_audio, sr = librosa.load(os.path.join(input_path, cycle[1] + ".wav"), sr=4096)
+        raw_audio, sr = librosa.load(os.path.join(input_path, cycle[1] + ".wav"), sr=8000)
 
         # Apply traditional augmentation to the loaded audio segment.
         apply_traditional_augmentation(raw_audio=raw_audio, cycle=cycle, length=length, sample_rate=sr, output_path=output_path, rng=rng, seed=seed)
@@ -289,7 +217,25 @@ def apply_traditional_augmentation_process_file(cycle, input_path, output_path, 
 
 def apply_traditional_augmentation_lectura_datos_parallel(input_path, output_path, length, cycles, rng, seed):
     """
-    Processes all selected .WAV files in parallel, applying traditional augmentation techniques to each.
+    Apply traditional augmentation to multiple respiratory cycles in parallel.
+
+    A multiprocessing pool is created using all available CPU cores. Each
+    respiratory cycle is processed independently by loading its corresponding
+    audio file and executing the traditional augmentation pipeline.
+
+    Args:
+        input_path (str): Directory containing the original WAV recordings.
+        output_path (str): Directory where the augmented features are saved.
+        length (float): Target duration of the processed audio segments in
+            seconds.
+        cycles (np.ndarray): Array containing the respiratory cycles to
+            process.
+        rng (np.random.Generator): Random number generator passed to each
+            processing task.
+        seed (int): Random seed used during augmentation.
+
+    Returns:
+        None
     """
     # Build the argument tuples, passing the shared seed to each worker.
     argumentos = [(cycle, input_path, output_path, length, rng, seed) for cycle in cycles]
@@ -298,9 +244,36 @@ def apply_traditional_augmentation_lectura_datos_parallel(input_path, output_pat
     with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
         pool.starmap(apply_traditional_augmentation_process_file, argumentos)
 
-def apply_traditional_augmentation(raw_audio, rng, seed, sample_rate=4096, length=8, cycle=None, output_path='/app/data/processed/Train'):
+def apply_traditional_augmentation(raw_audio, rng, seed, sample_rate=8000, length=8, cycle=None, output_path='/app/data/processed/Train'):
     """
-    Applies all traditional augmentation techniques to a single respiratory cycle and saves the resulting spectrograms.
+    Generate and process augmented versions of a single respiratory cycle.
+
+    The respiratory cycle is extracted from the input recording according to
+    its start and end timestamps. Five augmented versions are generated,
+    consisting of four individual augmentation techniques and one combined
+    augmentation. Each version is filtered, adjusted to the target length,
+    converted into features, and saved with the corresponding augmentation
+    type.
+
+    Args:
+        raw_audio (np.ndarray): Original audio recording containing the
+            respiratory cycle.
+        rng (np.random.Generator): Random number generator used to sample
+            augmentation parameters.
+        seed (int): Random seed used by augmentation operations that require
+            deterministic behaviour.
+        sample_rate (int, optional): Sampling rate of the audio signal in Hz.
+            Defaults to 4096.
+        length (float, optional): Target duration of the processed audio
+            segments in seconds. Defaults to 8.
+        cycle (np.ndarray, optional): Respiratory cycle annotation containing
+            the start and end times, patient identifier, and class label.
+            Defaults to None.
+        output_path (str, optional): Directory where the extracted features
+            are saved. Defaults to '/app/data/processed/Train'.
+
+    Returns:
+        None
     """
     # Define the target length and the augmentation type labels in order.
     target_length = int(length * sample_rate)
@@ -332,10 +305,7 @@ def apply_traditional_augmentation(raw_audio, rng, seed, sample_rate=4096, lengt
     # Free memory after processing the audio file.
     gc.collect()
 
-##########################################################################################
-# CBA is first applied to balance the dataset. Then, a balanced random subset of respiratory 
-# cycles is selected for traditional augmentation, which is applied in parallel to speed up the process.
-##########################################################################################
+# Parse command-line arguments.
 parser = argparse.ArgumentParser(description='Augment dataset with a given random seed.')
 parser.add_argument('--seed', type=int, default=202506, help='Random seed for reproducibility.')
 args = parser.parse_args()
@@ -343,11 +313,16 @@ args = parser.parse_args()
 # Create a single rng from the provided seed, shared across all augmentation steps.
 rng = np.random.default_rng(args.seed)
 
-# # Apply Class-Based Augmentation (CBA) for all classes.
-# apply_CBA(rng=rng, raw_audio_path='/app/data/raw', output_path='/app/data/processed/Train', duration=8, seed=args.seed, train_test_split=80, control_file_path='/app/src/data/ciclos_respiratorios.npy')
-
 # Select a balanced set of respiratory cycles for traditional augmentation.
-cycles_selected = select_balanced_and_random_respiratory_cycles(rng=rng, control_file_path='/app/src/data/ciclos_respiratorios.npy', seed=args.seed, train_test_split=80)
+cycles_selected = select_balanced_and_random_respiratory_cycles(rng=rng, 
+                                                                control_file_path='/app/src/resources/aux_respiratory_cycles.npy', 
+                                                                seed=args.seed, 
+                                                                train_test_split=80)
 
 # Apply traditional augmentation techniques to the selected cycles in parallel.
-apply_traditional_augmentation_lectura_datos_parallel(input_path='/app/data/raw', output_path='/app/data/processed/Train', length=8, cycles=cycles_selected, rng=rng, seed=args.seed)
+apply_traditional_augmentation_lectura_datos_parallel(input_path='/app/data/raw', 
+                                                      output_path='/app/data/processed/Train', 
+                                                      length=8, 
+                                                      cycles=cycles_selected, 
+                                                      rng=rng, 
+                                                      seed=args.seed)

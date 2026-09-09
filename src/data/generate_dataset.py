@@ -17,8 +17,8 @@ args = parser.parse_args()
 create_directories(input_path='/app/data/processed')
 
 # Then, process the raw audio files and create spectrograms
-lectura_datos_parallel(input_path='/app/data/raw', output_path='/app/data/processed', length=8, cycles='/app/src/data/ciclos_respiratorios.npy')
+lectura_datos_parallel(input_path='/app/data/raw', output_path='/app/data/processed', length=8, cycles='/app/src/resources/aux_respiratory_cycles.npy')
 
 # Afterwards, create the Train-Test directories and split the spectrograms accordingly
-cycles_train, cycles_test = split_patients_by_train_test(aux_file='/app/src/data/ciclos_respiratorios.npy', seed=args.seed, train_test_split=80)
+cycles_train, cycles_test = split_patients_by_train_test(aux_file='/app/src/resources/aux_respiratory_cycles.npy', seed=args.seed, train_test_split=80)
 move_spectrograms_by_train_test(input_path='/app/data/processed', cycles_train=cycles_train, cycles_test=cycles_test)

@@ -97,14 +97,14 @@ def get_class_weights_from_paths(dir_dataset):
 def load_npy(path):
     path = path.numpy().decode("utf-8")
     spec = np.load(path)
-    assert spec.shape[1] == 129, f"Unexpected spectrogram width: {spec.shape[1]}"
+    assert spec.shape[1] == 251, f"Unexpected spectrogram width: {spec.shape[1]}"
     return spec.astype(np.float32)
 
 def process_npy(file_path, training=True):
     label = get_label(file_path)
     label = tf.one_hot(label, depth=4)
     spec = tf.py_function(load_npy, [file_path], tf.float32)
-    spec.set_shape([128, 129, 1])
+    spec.set_shape([128, 251, 1])
 
     if training:
         spec = tf.cond(
@@ -143,7 +143,7 @@ def train(model, train_dataset, val_dataset):
     # ============================================================
     print("PHASE 1: INITIAL TRAINING (lr=1e-3)")
     early_stopping_1 = ICBHIEarlyStopping(patience=5)
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3, clipnorm=1.0), loss=focal_loss(gamma=1.0))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-4, clipnorm=1.0), loss=focal_loss(gamma=1.0))
     model.fit(train_dataset, epochs=15, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_1])
 
     # ============================================================
@@ -151,7 +151,7 @@ def train(model, train_dataset, val_dataset):
     # ============================================================
     print("PHASE 2: REFINE TRAINING (lr=1e-4)")
     early_stopping_2 = ICBHIEarlyStopping(patience=15)
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4, clipnorm=1.0), loss=focal_loss(gamma=1.0))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0))
     model.fit(train_dataset, epochs=50, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_2])
 
     # ============================================================
@@ -159,7 +159,7 @@ def train(model, train_dataset, val_dataset):
     # ============================================================
     print("PHASE 3: FINE-TUNING (lr=1e-5)")
     early_stopping_3 = ICBHIEarlyStopping(patience=20)
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0))
     model.fit(train_dataset, epochs=100, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_3])
 
     # ============================================================
@@ -190,7 +190,7 @@ print("Loading datasets...")
 train_dataset, val_dataset = load_datasets('/app/data/processed', seed=SEED)
 
 print("Creating model...")
-model = create_custom_cnn(input_shape=(128, 129, 1), num_classes=4, seed=SEED)
+model = create_custom_cnn(input_shape=(128, 251, 1), num_classes=4, seed=SEED)
 
 print("Starting training...")
 model = train(model, train_dataset, val_dataset)

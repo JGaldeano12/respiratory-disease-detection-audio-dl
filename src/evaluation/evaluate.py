@@ -1,90 +1,256 @@
-import seaborn as sns, numpy as np, matplotlib.pyplot as plt, datetime, os
+import seaborn as sns
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+import tensorflow as tf
+from datetime import datetime
 
 from tensorflow.keras.models import load_model
 from sklearn.metrics import confusion_matrix, recall_score
 
-def evaluate_model(model_path, test_dataset):
+def get_label(file_path):
     """
-    Function to evaluate a trained model on a test dataset and compute the confusion matrix and recall score.
+    Extract the class label from the file path.
+
+    The function maps the class name contained in the file path to its
+    corresponding integer label.
+
+    Args:
+        file_path (tf.Tensor): Path to the NumPy spectrogram file.
+
+    Returns:
+        tf.Tensor: Integer-encoded class label.
     """
-    # Load the trained model from the specified file path.
-    model = load_model(model_path)
+    elements = tf.strings.split(file_path, os.path.sep)
+    label_str = elements[5]
 
-    # Initialize lists to store the true labels and predicted labels for the test dataset.
-    predictions = []
-    labels = []
+    keys = tf.constant(['Healthy', 'Crackle', 'Wheeze', 'Wheeze & Crackle'])
+    values = tf.constant([0, 1, 2, 3], dtype=tf.int32)
 
-    # Iterate through the test dataset and make predictions using the loaded model.
-    for img, label in test_dataset:
-        # Predict and obtain the predicted class by taking the argmax of the model's output.
-        pred = model.predict(img, verbose = 0)
-        pred = np.argmax(pred, axis = 1)
-        label = np.argmax(label, axis = 1)
+    table = tf.lookup.StaticHashTable(
+        tf.lookup.KeyValueTensorInitializer(keys, values),
+        default_value=4
+    )
 
-        # Append the predicted and true labels to their respective lists.
-        predictions.append(pred)
-        labels.append(label)
+    label = table.lookup(label_str)
+    return label
+
+def load_npy(path):
+    """
+    Load a NumPy spectrogram from a file.
+
+    The function loads the spectrogram, verifies its expected width,
+    and converts it to float32 format.
+
+    Args:
+        path (tf.Tensor): Path to the NumPy spectrogram file.
+
+    Returns:
+        np.ndarray: Loaded spectrogram with float32 data type.
+    """
+    path = path.numpy().decode("utf-8")
+    spec = np.load(path)
+    assert spec.shape[1] == 251, (f"Unexpected spectrogram width: {spec.shape[1]}")
+
+    return spec.astype(np.float32)
+
+def process_npy(file_path):
+    """
+    Load and preprocess a NumPy spectrogram for model evaluation.
+
+    The function extracts the class label from the file path, converts it
+    to one-hot encoding, loads the corresponding spectrogram, and sets
+    its expected shape.
+
+    Args:
+        file_path (tf.Tensor): Path to the NumPy spectrogram file.
+
+    Returns:
+        tuple:
+            tf.Tensor: Preprocessed spectrogram.
+            tf.Tensor: One-hot encoded class label.
+    """
+    label = get_label(file_path)
+    label = tf.one_hot(label, depth=4)
+
+    spec = tf.py_function(load_npy, [file_path], tf.float32)
+    spec.set_shape([128, 251, 1])
+
+    return spec, label
+
+def load_test_dataset(dir_dataset):
+    """
+    Load and preprocess the test dataset.
+
+    The function retrieves all NumPy spectrogram files from the test
+    directory, applies the preprocessing pipeline, batches the samples,
+    and enables prefetching for efficient evaluation.
+
+    Args:
+        dir_dataset (str): Root directory containing the test dataset.
+
+    Returns:
+        tf.data.Dataset: Preprocessed and batched test dataset.
+    """
+    test_dataset = tf.data.Dataset.list_files(os.path.join(dir_dataset, 'Test/*/*'), shuffle=False)
+
+    # Ensure deterministic processing and evaluation order.
+    options = tf.data.Options()
+    options.experimental_deterministic = True
+
+    test_dataset = test_dataset.with_options(options)
+
+    # Load and preprocess the spectrograms.
+    test_dataset = test_dataset.map(process_npy, num_parallel_calls=1)
+
+    # Group samples into batches for model inference.
+    test_dataset = test_dataset.batch(1, drop_remainder=True)
+
+    # Prefetch batches to improve evaluation efficiency.
+    test_dataset = test_dataset.prefetch(1)
+
+    return test_dataset
 
 def create_confusion_matrix(labels, predictions):
     """
-    Function to create and save a confusion matrix based on the true labels and predicted labels.
-    """
-    # Obtain the confusion matrix by comparing the true labels and predicted labels.
-    cm = confusion_matrix(np.concatenate(labels), np.concatenate(predictions))
+    Create and save a confusion matrix based on the true and predicted labels.
 
-    # Create and save a heatmap of the confusion matrix using seaborn for better visualization.
-    plt.figure(figsize=(3, 3))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
+    Args:
+        labels (np.ndarray): True class labels.
+        predictions (np.ndarray): Predicted class labels.
+
+    Returns:
+        str: Confirmation message after the confusion matrix is saved.
+    """
+    # Compute the confusion matrix.
+    cm = confusion_matrix(labels, predictions)
+
+    # Define the class names corresponding to the labels in get_label().
+    class_names = ['Healthy', 'Crackle', 'Wheeze', 'Wheeze & Crackle']
+
+    # Create and save a heatmap of the confusion matrix.
+    plt.figure(figsize=(5, 4))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, xticklabels=class_names, yticklabels=class_names)
     plt.xlabel('Predicted')
     plt.ylabel('True')
+    plt.xticks(rotation=45, ha='right')
     plt.title('Confusion Matrix')
-    plt.savefig('confusion_matrix.png')
+    plt.tight_layout()
+    plt.savefig(f'/app/src/testing/confusion_matrix_' f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.png')
     plt.close()
 
-    # Return a log message indicating that the confusion matrix has been saved.
     return "Confusion matrix saved!"
 
 def calculate_specificity_per_class(labels, predictions):
     """
-    Function to calculate the specificity for each class based on the true labels and predicted labels.
-    """
-    # Concatenate the true labels and predicted labels into single arrays for metric computation.
-    predictions = np.concatenate(predictions)
-    labels = np.concatenate(labels)
+    Calculate the specificity for each class.
 
-    # Determine the number of classes based on the maximum label value in the true labels, and initialize a list to store the specificity for each class.
+    Specificity is calculated as the proportion of true negative samples
+    among all samples that do not belong to the corresponding class.
+
+    Args:
+        labels (np.ndarray): True class labels.
+        predictions (np.ndarray): Predicted class labels.
+
+    Returns:
+        list: Specificity value for each class.
+    """
+    # Determine the number of classes from the true labels.
     num_classes = np.max(labels) + 1
     specificities = []
-    
-    # Iterate through each class and calculate the true negatives and false positives to compute the specificity for that class.
+
+    # Calculate specificity independently for each class.
     for i in range(num_classes):
-        # Calculate true negatives and false positives for the current class by comparing the true labels and predicted labels.
         true_negatives = np.sum((labels != i) & (predictions != i))
         false_positives = np.sum((labels != i) & (predictions == i))
-        
-        # Calculate specificity for the current class, with a small epsilon added to the denominator to prevent division by zero.
-        specificity = true_negatives / (true_negatives + false_positives + np.finfo(float).eps)
+        specificity = (true_negatives / (true_negatives + false_positives + np.finfo(float).eps))
         specificities.append(specificity)
-    
-    # Return the list of specificities for each class.
+
     return specificities
 
 def compute_recall_specificity_score(labels, predictions):
     """
-    Function to compute recall, specificity, and the ICBHI score based on the true labels and predicted labels.
+    Compute recall, specificity, and the ICBHI score.
+
+    The ICBHI score is calculated as the average of the mean recall and
+    mean specificity across all classes.
+
+    Args:
+        labels (np.ndarray): True class labels.
+        predictions (np.ndarray): Predicted class labels.
+
+    Returns:
+        tuple:
+            float: Mean recall across all classes.
+            float: Mean specificity across all classes.
+            float: ICBHI score.
     """
-    # Concatenate the true labels and predicted labels into single arrays for metric computation.
+    # Compute recall independently for each class.
+    recall_per_class = recall_score(labels, predictions, average=None)
+
+    # Compute specificity independently for each class.
+    specificity_per_class = calculate_specificity_per_class(labels, predictions)
+
+    # Compute the mean recall and specificity.
+    mean_recall = np.mean(recall_per_class)
+    mean_specificity = np.mean(specificity_per_class)
+
+    # Compute the ICBHI score.
+    icbhi_score = (mean_recall + mean_specificity) / 2
+
+    return mean_recall, mean_specificity, icbhi_score
+
+def evaluate_model(model_path, dir_test_dataset):
+    """
+    Evaluate a trained model on the test dataset.
+
+    The function loads the trained model, processes the test dataset,
+    generates predictions, and computes the confusion matrix, recall,
+    specificity, and ICBHI score.
+
+    Args:
+        model_path (str): Path to the trained Keras model.
+        dir_test_dataset (str): Root directory containing the test dataset.
+
+    Returns:
+        str: Confirmation message after the evaluation is completed.
+    """
+    # Load the trained model without restoring its compilation configuration.
+    model = load_model(model_path, compile=False)
+
+    # Load and preprocess the test dataset.
+    test_dataset = load_test_dataset(dir_test_dataset)
+
+    # Initialize lists to store the true and predicted labels.
+    predictions = []
+    labels = []
+
+    # Generate predictions for each batch in the test dataset.
+    for images, batch_labels in test_dataset:
+        batch_predictions = model.predict(images, verbose=0)
+
+        # Convert model outputs and one-hot encoded labels to class indices.
+        batch_predictions = np.argmax(batch_predictions, axis=1)
+        batch_labels = np.argmax(batch_labels, axis=1)
+
+        predictions.append(batch_predictions)
+        labels.append(batch_labels)
+
+    # Concatenate all batches into single arrays.
     predictions = np.concatenate(predictions)
     labels = np.concatenate(labels)
 
-    # Compute recall per class:
-    recall_per_class = recall_score(labels, predictions, average=None)
+    # Create and save the confusion matrix.
+    create_confusion_matrix(labels, predictions)
 
-    # Compute specificity per class using the previously defined function.
-    specificity_per_class = calculate_specificity_per_class(labels, predictions)
+    # Compute recall, specificity, and the ICBHI score.
+    recall, specificity, icbhi_score = (compute_recall_specificity_score(labels, predictions))
 
-    # Compute the ICBHI score as the average of recall and specificity across all classes.
-    icbhi_score = ( np.mean(recall_per_class) + np.mean(specificity_per_class) ) / 2
+    # Display the evaluation metrics.
+    print(f"Recall: {recall:.4f}")
+    print(f"Specificity: {specificity:.4f}")
+    print(f"ICBHI Score: {icbhi_score:.4f}")
 
-    # Return the computed recall, specificity, and ICBHI score as a log.
-    return f"Recall: {np.mean(recall_per_class):.4f}, Specificity: {np.mean(specificity_per_class):.4f}, ICBHI Score: {icbhi_score:.4f}"
+    return "Evaluation complete!"
+
+evaluate_model('/app/models/custom_cnn/best_model_epoch.keras', '/app/data/processed')
