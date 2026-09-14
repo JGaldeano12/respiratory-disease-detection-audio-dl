@@ -1,5 +1,5 @@
 from scipy.signal import butter, lfilter
-import librosa, numpy as np, os, gc, multiprocessing, cv2, math
+import numpy as np
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
     """
@@ -40,7 +40,7 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
     b, a = butter_bandpass(lowcut, highcut, fs, order=order)
     return lfilter(b, a, data)
 
-def check_length_and_padding(audio, target_length, sample_rate=4096):
+def check_length_and_padding(audio, target_length):
     """
     Adjust an audio signal to an exact target length.
 
@@ -51,9 +51,6 @@ def check_length_and_padding(audio, target_length, sample_rate=4096):
     Args:
         audio (np.ndarray): Input audio signal.
         target_length (int): Desired number of samples.
-        sample_rate (int, optional): Sampling rate retained for API
-            compatibility. It is not used by the current implementation.
-            Defaults to 4096.
 
     Returns:
         np.ndarray: Audio signal with exactly `target_length` samples.

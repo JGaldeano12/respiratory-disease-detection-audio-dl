@@ -5,7 +5,7 @@ from sklearn.utils.class_weight import compute_class_weight
 from src.training.custom_callback import ICBHI_Score_PrintingCallback, ICBHIEarlyStopping
 from src.training.losses import focal_loss
 from src.data.utils import load_datasets
-from src.models.efficientnet import create_efficientnet_model
+from src.models.resnet_50 import create_resnet50_model
 
 def train(model, base_model, train_dataset, val_dataset):
     """
@@ -39,10 +39,10 @@ def train(model, base_model, train_dataset, val_dataset):
     # Second phase of training with a reduced learning rate and early stopping.
     print("PHASE 2: REFINE TRAINING (lr=1e-4)")
 
-    # Unfreeze the EfficientNet backbone.
+    # Unfreeze the ResNet-50 backbone.
     base_model.trainable = True
 
-    # Freeze the first 30 layers of the EfficientNet backbone to retain learned features.
+    # Freeze the first 30 layers of the ResNet-50 backbone to retain learned features.
     for layer in base_model.layers[:-30]:
         layer.trainable = False
 
@@ -54,7 +54,7 @@ def train(model, base_model, train_dataset, val_dataset):
     # Third and final phase of training with an even lower learning rate and early stopping.
     print("PHASE 3: FINE-TUNING (lr=1e-5)")
 
-    # Unfreeze the EfficientNet backbone.
+    # Unfreeze the ResNet-50 backbone.
     base_model.trainable = True
 
     # Early stopping for final training stage.
@@ -88,9 +88,9 @@ tf.config.experimental.enable_op_determinism()
 print("Loading datasets...")
 train_dataset, val_dataset = load_datasets('/app/data/processed', seed=SEED)
 
-# Create EfficientNet-based model with deterministic initialization.
+# Create ResNet-50-based model with deterministic initialization.
 print("Creating model...")
-model, base_model = create_efficientnet_model(input_shape=(128, 251, 1), num_classes=4, seed=SEED)
+model, base_model = create_resnet50_model(input_shape=(128, 251, 1), num_classes=4, seed=SEED)
 
 # Start the training process for the model using the loaded datasets.
 print("Starting training...")

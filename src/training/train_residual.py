@@ -2,195 +2,82 @@ import tensorflow as tf, numpy as np, os, random, glob, argparse
 
 from datetime import datetime
 from sklearn.utils.class_weight import compute_class_weight
-from src.training.custom_callback import ICBHI_Score_PrintingCallback
+from src.training.custom_callback import ICBHI_Score_PrintingCallback, ICBHIEarlyStopping
+from src.training.losses import focal_loss
+from src.data.utils import load_datasets
 from src.models.custom_cnn_residual import create_custom_cnn
 
-class ICBHIEarlyStopping(tf.keras.callbacks.Callback):
-    def __init__(self, patience=10, min_delta=1e-6):
-        super().__init__()
-        self.patience = patience
-        self.min_delta = min_delta
-        self.best_score = -np.inf
-        self.wait = 0
-        self.best_weights = None
-
-    def on_epoch_end(self, epoch, logs=None):
-        current_score = logs.get('icbhi_score', -np.inf)
-
-        if self.best_weights is None:
-            self.best_weights = self.model.get_weights()
-
-        if current_score > self.best_score + self.min_delta:
-            self.best_score = current_score
-            self.wait = 0
-            self.best_weights = self.model.get_weights()
-        else:
-            self.wait += 1
-            if self.wait >= self.patience:
-                self.model.set_weights(self.best_weights)
-                self.model.stop_training = True
-                print(f"\nEarly stopping: best ICBHI Score = {self.best_score:.5f}")
-
-def focal_loss(gamma=2.0, alpha=None):
-    def loss(y_true, y_pred):
-        y_pred = tf.clip_by_value(y_pred, 1e-7, 1.0 - 1e-7)
-        ce = -y_true * tf.math.log(y_pred)
-        pt = tf.reduce_sum(y_true * y_pred, axis=-1, keepdims=True)
-        focal_weight = tf.pow(1.0 - pt, gamma)
-        if alpha is not None:
-            alpha_t = tf.reduce_sum(
-                y_true * tf.constant(alpha, dtype=tf.float32),
-                axis=-1, keepdims=True
-            )
-            focal_weight = alpha_t * focal_weight
-        return tf.reduce_sum(focal_weight * ce, axis=-1)
-    return loss
-
-def get_label(file_path):
-    elements = tf.strings.split(file_path, os.path.sep)
-    label_str = elements[5]
-    keys = tf.constant(['Healthy', 'Crackle', 'Wheeze', 'Wheeze & Crackle'])
-    values = tf.constant([0, 1, 2, 3], dtype=tf.int32)
-    table = tf.lookup.StaticHashTable(tf.lookup.KeyValueTensorInitializer(keys, values), default_value=4)
-    label = table.lookup(label_str)
-    return label
-
-def spec_augment_tf(spec, time_mask_param=20, freq_mask_param=10, num_time_masks=2, num_freq_masks=2):
-    H = tf.shape(spec)[0]
-    W = tf.shape(spec)[1]
-
-    for _ in range(num_freq_masks):
-        f = tf.random.uniform([], 0, freq_mask_param, dtype=tf.int32)
-        f0 = tf.random.uniform([], 0, H - f + 1, dtype=tf.int32)
-        mask = tf.ones_like(spec)
-        mask = tf.tensor_scatter_nd_update(
-            mask,
-            indices=tf.reshape(tf.range(f0, f0 + f), (-1, 1)),
-            updates=tf.zeros((f, W, tf.shape(spec)[2]))
-        )
-        spec = spec * mask
-
-    for _ in range(num_time_masks):
-        t = tf.random.uniform([], 0, time_mask_param, dtype=tf.int32)
-        t0 = tf.random.uniform([], 0, W - t + 1, dtype=tf.int32)
-        time_mask = tf.concat([
-            tf.ones((H, t0, tf.shape(spec)[2])),
-            tf.zeros((H, t, tf.shape(spec)[2])),
-            tf.ones((H, W - t0 - t, tf.shape(spec)[2]))
-        ], axis=1)
-        spec = spec * time_mask
-
-    return spec
-
-def get_class_weights_from_paths(dir_dataset):
-    train_paths = sorted(glob.glob(os.path.join(dir_dataset, 'Train/*/*')))
-    label_map = {'Healthy': 0, 'Crackle': 1, 'Wheeze': 2, 'Wheeze & Crackle': 3}
-    labels = []
-    for path in train_paths:
-        folder = path.split(os.path.sep)[-2]
-        labels.append(label_map[folder])
-    labels = np.array(labels)
-    classes = np.unique(labels)
-    class_weights = compute_class_weight(class_weight="balanced", classes=classes, y=labels)
-    return dict(enumerate(class_weights)), np.array(class_weights)
-
-def load_npy(path):
-    path = path.numpy().decode("utf-8")
-    spec = np.load(path)
-    assert spec.shape[1] == 251, f"Unexpected spectrogram width: {spec.shape[1]}"
-    return spec.astype(np.float32)
-
-def process_npy(file_path, training=True):
-    label = get_label(file_path)
-    label = tf.one_hot(label, depth=4)
-    spec = tf.py_function(load_npy, [file_path], tf.float32)
-    spec.set_shape([128, 251, 1])
-
-    if training:
-        spec = tf.cond(
-            tf.random.uniform([]) < 0.8,
-            lambda: spec_augment_tf(spec, time_mask_param=20, freq_mask_param=15, num_time_masks=2, num_freq_masks=2),
-            lambda: spec
-        )
-
-    return spec, label
-
-def load_datasets(dir_dataset, seed=12345):
-    train_dataset = tf.data.Dataset.list_files(os.path.join(dir_dataset, 'Train/*/*'), shuffle=False)
-    test_dataset = tf.data.Dataset.list_files(os.path.join(dir_dataset, 'Test/*/*'), shuffle=False)
-
-    options = tf.data.Options()
-    options.experimental_deterministic = True
-    train_dataset = train_dataset.with_options(options)
-    test_dataset = test_dataset.with_options(options)
-
-    train_dataset = train_dataset.shuffle(buffer_size=len(train_dataset), seed=seed, reshuffle_each_iteration=True)
-    train_dataset = train_dataset.map(lambda x: process_npy(x, training=True), num_parallel_calls=1)
-    train_dataset = train_dataset.batch(128, drop_remainder=True)
-    train_dataset = train_dataset.prefetch(1)
-
-    test_dataset = test_dataset.map(lambda x: process_npy(x, training=False), num_parallel_calls=1)
-    test_dataset = test_dataset.batch(128, drop_remainder=True)
-    test_dataset = test_dataset.prefetch(1)
-
-    return train_dataset, test_dataset
-
 def train(model, train_dataset, val_dataset):
+    """
+    Train the model using a three-phase training strategy.
+
+    The training process consists of three consecutive phases with
+    progressively adjusted learning rates and early stopping based on
+    the validation ICBHI score. The final trained model is saved with
+    a timestamped filename.
+
+    Args:
+        model (tf.keras.Model): Model to be trained.
+        train_dataset (tf.data.Dataset): Training dataset used to update
+            the model parameters.
+        val_dataset (tf.data.Dataset): Validation dataset used to monitor
+            the model performance during training.
+
+    Returns:
+        tf.keras.Model: Trained model after completing the three training
+            phases.
+    """
+    # Initialize the ICBHI score callback to monitor the model's performance on the validation dataset.
     icbhi_callback = ICBHI_Score_PrintingCallback(val_dataset)
 
-    # ============================================================
-    # PHASE 1 — INITIAL TRAINING
-    # ============================================================
+    # First phase of training with a higher learning rate and early stopping.
     print("PHASE 1: INITIAL TRAINING (lr=1e-3)")
     early_stopping_1 = ICBHIEarlyStopping(patience=5)
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-4, clipnorm=1.0), loss=focal_loss(gamma=1.0))
     model.fit(train_dataset, epochs=15, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_1])
 
-    # ============================================================
-    # PHASE 2 — PARTIAL FINE-TUNING
-    # ============================================================
+    # Second phase of training with a reduced learning rate and early stopping.
     print("PHASE 2: REFINE TRAINING (lr=1e-4)")
     early_stopping_2 = ICBHIEarlyStopping(patience=15)
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0))
     model.fit(train_dataset, epochs=50, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_2])
 
-    # ============================================================
-    # PHASE 3 — FULL FINE-TUNING
-    # ============================================================
+    # Third and final phase of training with an even lower learning rate and early stopping.
     print("PHASE 3: FINE-TUNING (lr=1e-5)")
     early_stopping_3 = ICBHIEarlyStopping(patience=20)
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0))
     model.fit(train_dataset, epochs=100, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_3])
 
-    # ============================================================
-    # SAVE FINAL MODEL
-    # ============================================================
+    # Save the final trained model with a timestamped filename.
     model.save(os.path.join('models', datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.keras'))
-
     return model
 
-# ============================================================
-# ENTRY POINT
-# ============================================================
+# Parse command-line arguments.
 parser = argparse.ArgumentParser()
 parser.add_argument('--random_seed', type=int, default=12345)
 args = parser.parse_args()
 
+# Set the random seed for reproducibility across various libraries and TensorFlow operations.
 SEED = args.random_seed
 
+# Set environment variables and seeds for reproducibility.
 os.environ['PYTHONHASHSEED'] = str(SEED)
 os.environ['TF_DETERMINISTIC_OPS'] = '1'
 
+# Set random seeds for Python's random module, NumPy, and TensorFlow.
 random.seed(SEED)
 np.random.seed(SEED)
 tf.random.set_seed(SEED)
 tf.config.experimental.enable_op_determinism()
 
+# Load the training and validation datasets.
 print("Loading datasets...")
 train_dataset, val_dataset = load_datasets('/app/data/processed', seed=SEED)
 
+# Create the custom CNN model with residual connections.
 print("Creating model...")
 model = create_custom_cnn(input_shape=(128, 251, 1), num_classes=4, seed=SEED)
 
+# Start the training process for the model using the loaded datasets.
 print("Starting training...")
 model = train(model, train_dataset, val_dataset)

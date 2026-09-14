@@ -165,3 +165,29 @@ class ICBHI_Score_PrintingCallback(tf.keras.callbacks.Callback):
 
         with open(self.dir_logs, 'a') as file:
             file.write(final_msg + "\n")
+
+class ICBHIEarlyStopping(tf.keras.callbacks.Callback):
+    def __init__(self, patience=10, min_delta=1e-6):
+        super().__init__()
+        self.patience = patience
+        self.min_delta = min_delta
+        self.best_score = -np.inf
+        self.wait = 0
+        self.best_weights = None
+
+    def on_epoch_end(self, epoch, logs=None):
+        current_score = logs.get('icbhi_score', -np.inf)
+
+        if self.best_weights is None:
+            self.best_weights = self.model.get_weights()
+
+        if current_score > self.best_score + self.min_delta:
+            self.best_score = current_score
+            self.wait = 0
+            self.best_weights = self.model.get_weights()
+        else:
+            self.wait += 1
+            if self.wait >= self.patience:
+                self.model.set_weights(self.best_weights)
+                self.model.stop_training = True
+                print(f"\nEarly stopping: best ICBHI Score = {self.best_score:.5f}")

@@ -1,11 +1,9 @@
-import nlpaug.augmenter.audio as naa
-import os, gc, numpy as np, librosa, multiprocessing, argparse
+import nlpaug.augmenter.audio as naa, os, gc, numpy as np, librosa, multiprocessing, argparse, warnings
 
 from src.data.preprocess import butter_bandpass_filter, check_length_and_padding
 from src.features.extract_features import extract_features
 from src.data.divide import split_patients_by_train_test
 
-import warnings
 warnings.filterwarnings("ignore")
 
 def gen_augmented(original, sample_rate, rng, seed):
@@ -182,7 +180,7 @@ def select_balanced_and_random_respiratory_cycles(rng, control_file_path='/app/s
     # Concatenate the selected cycles from all classes into a single array.
     return np.concatenate(selected, axis=0)
 
-def apply_traditional_augmentation_process_file(cycle, input_path, output_path, length, rng, seed):
+def apply_traditional_augmentation_process_file(cycle, input_path, output_path, sample_rate, length, rng, seed):
     """
     Load an audio file and apply traditional augmentation to one respiratory cycle.
 
@@ -207,7 +205,7 @@ def apply_traditional_augmentation_process_file(cycle, input_path, output_path, 
     """
     try:
         # Load the audio file at the specified sampling rate.
-        raw_audio, sr = librosa.load(os.path.join(input_path, cycle[1] + ".wav"), sr=8000)
+        raw_audio, sr = librosa.load(os.path.join(input_path, cycle[1] + ".wav"), sr=sample_rate)
 
         # Apply traditional augmentation to the loaded audio segment.
         apply_traditional_augmentation(raw_audio=raw_audio, cycle=cycle, length=length, sample_rate=sr, output_path=output_path, rng=rng, seed=seed)
@@ -215,7 +213,7 @@ def apply_traditional_augmentation_process_file(cycle, input_path, output_path, 
     except Exception as e:
         print(f"Error while processing {cycle[1]}: {e}")
 
-def apply_traditional_augmentation_lectura_datos_parallel(input_path, output_path, length, cycles, rng, seed):
+def apply_traditional_augmentation_lectura_datos_parallel(input_path, output_path, sample_rate, length, cycles, rng, seed):
     """
     Apply traditional augmentation to multiple respiratory cycles in parallel.
 
@@ -238,7 +236,7 @@ def apply_traditional_augmentation_lectura_datos_parallel(input_path, output_pat
         None
     """
     # Build the argument tuples, passing the shared seed to each worker.
-    argumentos = [(cycle, input_path, output_path, length, rng, seed) for cycle in cycles]
+    argumentos = [(cycle, input_path, output_path, sample_rate, length, rng, seed) for cycle in cycles]
 
     # Launch a pool of workers to process files in parallel.
     with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
@@ -300,14 +298,17 @@ def apply_traditional_augmentation(raw_audio, rng, seed, sample_rate=8000, lengt
         segmented_audio = check_length_and_padding(segmented_audio, target_length)
 
         # Extract and save the Mel Spectrogram for the augmented audio segment.
-        extract_features(segmented_audio, output_path=output_path, label=cycle[6], patient=cycle[1], index_cycle=index_cycle, type=augmentation_type)
+        extract_features(segmented_audio, sample_rate, output_path=output_path, label=cycle[6], patient=cycle[1], index_cycle=index_cycle, type=augmentation_type)
 
     # Free memory after processing the audio file.
     gc.collect()
 
 # Parse command-line arguments.
 parser = argparse.ArgumentParser(description='Augment dataset with a given random seed.')
-parser.add_argument('--seed', type=int, default=202506, help='Random seed for reproducibility.')
+parser.add_argument('--seed', type=int, default=202506, help='Random seed for train-test split')
+parser.add_argument('--sample_rate', type=int, default=8000, help='Sampling rate for audio processing')
+parser.add_argument('--duration', type=int, default=8, help='Duration of each audio segment')
+parser.add_argument('--test_train_split', type=int, default=80, help='Percentage of data for training')
 args = parser.parse_args()
 
 # Create a single rng from the provided seed, shared across all augmentation steps.
@@ -317,12 +318,13 @@ rng = np.random.default_rng(args.seed)
 cycles_selected = select_balanced_and_random_respiratory_cycles(rng=rng, 
                                                                 control_file_path='/app/src/resources/aux_respiratory_cycles.npy', 
                                                                 seed=args.seed, 
-                                                                train_test_split=80)
+                                                                train_test_split=args.test_train_split)
 
 # Apply traditional augmentation techniques to the selected cycles in parallel.
 apply_traditional_augmentation_lectura_datos_parallel(input_path='/app/data/raw', 
                                                       output_path='/app/data/processed/Train', 
-                                                      length=8, 
+                                                      sample_rate=args.sample_rate, 
+                                                      length=args.duration, 
                                                       cycles=cycles_selected, 
                                                       rng=rng, 
                                                       seed=args.seed)

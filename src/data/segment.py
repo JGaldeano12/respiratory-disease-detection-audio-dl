@@ -1,6 +1,6 @@
 from src.features.extract_features import extract_features, save_features
 from src.data.preprocess import butter_bandpass_filter, check_length_and_padding
-import os, gc, multiprocessing, librosa, numpy as np, cv2
+import gc, numpy as np
 
 def divide_audio(duration, sample_rate, raw_audio, output_path, patient, cycles):
     """
@@ -39,7 +39,7 @@ def divide_audio(duration, sample_rate, raw_audio, output_path, patient, cycles)
         segmented_audio = check_length_and_padding(segmented_audio, target_length)
 
         # Generate the Mel Spectrogram for the audio segment:
-        extract_features(segmented_audio, output_path, label = index_cycle[6], patient = patient, index_cycle = aux_index_cycle, type = "Original")
+        extract_features(segmented_audio, sample_rate, output_path, label = index_cycle[6], patient = patient, index_cycle = aux_index_cycle, type = "Original")
 
         # Increment the cycle index for the next iteration
         aux_index_cycle += 1

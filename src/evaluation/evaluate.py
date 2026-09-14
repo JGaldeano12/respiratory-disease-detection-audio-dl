@@ -7,76 +7,7 @@ from datetime import datetime
 
 from tensorflow.keras.models import load_model
 from sklearn.metrics import confusion_matrix, recall_score
-
-def get_label(file_path):
-    """
-    Extract the class label from the file path.
-
-    The function maps the class name contained in the file path to its
-    corresponding integer label.
-
-    Args:
-        file_path (tf.Tensor): Path to the NumPy spectrogram file.
-
-    Returns:
-        tf.Tensor: Integer-encoded class label.
-    """
-    elements = tf.strings.split(file_path, os.path.sep)
-    label_str = elements[5]
-
-    keys = tf.constant(['Healthy', 'Crackle', 'Wheeze', 'Wheeze & Crackle'])
-    values = tf.constant([0, 1, 2, 3], dtype=tf.int32)
-
-    table = tf.lookup.StaticHashTable(
-        tf.lookup.KeyValueTensorInitializer(keys, values),
-        default_value=4
-    )
-
-    label = table.lookup(label_str)
-    return label
-
-def load_npy(path):
-    """
-    Load a NumPy spectrogram from a file.
-
-    The function loads the spectrogram, verifies its expected width,
-    and converts it to float32 format.
-
-    Args:
-        path (tf.Tensor): Path to the NumPy spectrogram file.
-
-    Returns:
-        np.ndarray: Loaded spectrogram with float32 data type.
-    """
-    path = path.numpy().decode("utf-8")
-    spec = np.load(path)
-    assert spec.shape[1] == 251, (f"Unexpected spectrogram width: {spec.shape[1]}")
-
-    return spec.astype(np.float32)
-
-def process_npy(file_path):
-    """
-    Load and preprocess a NumPy spectrogram for model evaluation.
-
-    The function extracts the class label from the file path, converts it
-    to one-hot encoding, loads the corresponding spectrogram, and sets
-    its expected shape.
-
-    Args:
-        file_path (tf.Tensor): Path to the NumPy spectrogram file.
-
-    Returns:
-        tuple:
-            tf.Tensor: Preprocessed spectrogram.
-            tf.Tensor: One-hot encoded class label.
-    """
-    label = get_label(file_path)
-    label = tf.one_hot(label, depth=4)
-
-    spec = tf.py_function(load_npy, [file_path], tf.float32)
-    spec.set_shape([128, 251, 1])
-
-    return spec, label
+from src.data.utils import get_label, load_npy, process_npy
 
 def load_test_dataset(dir_dataset):
     """

@@ -19,7 +19,7 @@ def standardize_audio(audio):
     standardized_audio = (audio - mean) / std
     return standardized_audio
 
-def extract_features(audio, output_path, label, patient, index_cycle, type):
+def extract_features(audio, sample_rate, output_path, label, patient, index_cycle, type):
     """
     Extract a Mel spectrogram from an audio segment and save it as a NumPy array.
 
@@ -30,6 +30,7 @@ def extract_features(audio, output_path, label, patient, index_cycle, type):
 
     Args:
         audio (np.ndarray): Audio segment from which the features are extracted.
+        sample_rate (int): Sampling rate of the audio signal.
         output_path (str): Base directory where the extracted features are saved.
         label (str): Class label associated with the audio segment.
         patient (str): Identifier of the patient associated with the recording.
@@ -41,8 +42,7 @@ def extract_features(audio, output_path, label, patient, index_cycle, type):
     """
     # Generate the Mel Spectrogram for the audio segment:
     audio = standardize_audio(audio)
-    spectrogram = librosa.feature.melspectrogram(y = audio, sr=8000, n_fft=2048, hop_length=256, n_mels=128, fmin=50, fmax=2500)
-    # spectrogram = librosa.feature.melspectrogram(y=audio, sr=4096, n_fft=2048, hop_length=256, n_mels=128, fmin=50, fmax=2500)
+    spectrogram = librosa.feature.melspectrogram(y = audio, sr=sample_rate, n_fft=2048, hop_length=256, n_mels=128, fmin=50, fmax=2500)
     spectrogram = librosa.power_to_db(spectrogram, ref=np.max)
 
     # Concatenate the spectrogram, MFCC, and delta features along the channel dimension
