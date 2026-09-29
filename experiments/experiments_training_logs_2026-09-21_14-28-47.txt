@@ -1,0 +1,28 @@
+Model: "model"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ input_1 (InputLayer)        [(None, 128, 251, 1)]     0         
+                                                                 
+ lambda (Lambda)             (None, 128, 251, 3)       0         
+                                                                 
+ resnet50 (Functional)       (None, 4, 8, 2048)        23587712  
+                                                                 
+ flatten (Flatten)           (None, 65536)             0         
+                                                                 
+ dense (Dense)               (None, 1024)              67109888  
+                                                                 
+ dropout (Dropout)           (None, 1024)              0         
+                                                                 
+ dense_1 (Dense)             (None, 1024)              1049600   
+                                                                 
+ dropout_1 (Dropout)         (None, 1024)              0         
+                                                                 
+ dense_2 (Dense)             (None, 4)                 4100      
+                                                                 
+=================================================================
+Total params: 91751300 (350.00 MB)
+Trainable params: 68163588 (260.02 MB)
+Non-trainable params: 23587712 (89.98 MB)
+_________________________________________________________________
+

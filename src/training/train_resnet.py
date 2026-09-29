@@ -1,11 +1,10 @@
-import tensorflow as tf, numpy as np, os, random, glob, argparse
+import tensorflow as tf, numpy as np, os, random, argparse
 
 from datetime import datetime
-from sklearn.utils.class_weight import compute_class_weight
 from src.training.custom_callback import ICBHI_Score_PrintingCallback, ICBHIEarlyStopping
 from src.training.losses import focal_loss
-from src.data.utils import load_datasets
-from src.models.resnet_50 import create_resnet50_model
+from src.data.utils import load_datasets, get_class_weights_from_paths
+from src.models.resnet_50 import create_resnet_50
 
 def train(model, base_model, train_dataset, val_dataset):
     """
@@ -30,10 +29,13 @@ def train(model, base_model, train_dataset, val_dataset):
     # Initialize the ICBHI score callback to monitor the model's performance on the validation dataset.
     icbhi_callback = ICBHI_Score_PrintingCallback(val_dataset)
 
+    # Get the class weights based on the training dataset to handle class imbalance.
+    _, class_weights = get_class_weights_from_paths('/app/data/processed')
+
     # First phase of training with a higher learning rate and early stopping.
-    print("PHASE 1: INITIAL TRAINING (lr=1e-3)")
+    print("PHASE 1: INITIAL TRAINING (lr=1e-4)")
     early_stopping_1 = ICBHIEarlyStopping(patience=5)
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-4, clipnorm=1.0), loss=focal_loss(gamma=1.0))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights))
     model.fit(train_dataset, epochs=15, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_1])
 
     # Second phase of training with a reduced learning rate and early stopping.
@@ -48,7 +50,7 @@ def train(model, base_model, train_dataset, val_dataset):
 
     # Early stopping for refinement phase.
     early_stopping_2 = ICBHIEarlyStopping(patience=15)
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights))
     model.fit(train_dataset, epochs=50, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_2])
 
     # Third and final phase of training with an even lower learning rate and early stopping.
@@ -59,7 +61,7 @@ def train(model, base_model, train_dataset, val_dataset):
 
     # Early stopping for final training stage.
     early_stopping_3 = ICBHIEarlyStopping(patience=20)
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights))
     model.fit(train_dataset, epochs=100, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_3])
 
     # Save the final trained model with a timestamped filename.
@@ -90,7 +92,7 @@ train_dataset, val_dataset = load_datasets('/app/data/processed', seed=SEED)
 
 # Create ResNet-50-based model with deterministic initialization.
 print("Creating model...")
-model, base_model = create_resnet50_model(input_shape=(128, 251, 1), num_classes=4, seed=SEED)
+model, base_model = create_resnet_50(input_shape=(128, 251, 1), num_classes=4)
 
 # Start the training process for the model using the loaded datasets.
 print("Starting training...")

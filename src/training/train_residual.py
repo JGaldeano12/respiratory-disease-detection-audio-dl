@@ -30,22 +30,26 @@ def train(model, train_dataset, val_dataset):
     # Initialize the ICBHI score callback to monitor the model's performance on the validation dataset.
     icbhi_callback = ICBHI_Score_PrintingCallback(val_dataset)
 
+    # Get the class weights based on the training dataset to handle class imbalance.
+    class_weights = compute_class_weight(class_weight='balanced', classes=np.unique(np.concatenate([y for x, y in train_dataset.unbatch()])), y=np.concatenate([y for x, y in train_dataset.unbatch()]))
+    class_weights_dict = {i: weight for i, weight in enumerate(class_weights)}
+
     # First phase of training with a higher learning rate and early stopping.
     print("PHASE 1: INITIAL TRAINING (lr=1e-3)")
     early_stopping_1 = ICBHIEarlyStopping(patience=5)
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-4, clipnorm=1.0), loss=focal_loss(gamma=1.0))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-4, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights_dict))
     model.fit(train_dataset, epochs=15, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_1])
 
     # Second phase of training with a reduced learning rate and early stopping.
     print("PHASE 2: REFINE TRAINING (lr=1e-4)")
     early_stopping_2 = ICBHIEarlyStopping(patience=15)
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights_dict))
     model.fit(train_dataset, epochs=50, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_2])
 
     # Third and final phase of training with an even lower learning rate and early stopping.
     print("PHASE 3: FINE-TUNING (lr=1e-5)")
     early_stopping_3 = ICBHIEarlyStopping(patience=20)
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights_dict))
     model.fit(train_dataset, epochs=100, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_3])
 
     # Save the final trained model with a timestamped filename.

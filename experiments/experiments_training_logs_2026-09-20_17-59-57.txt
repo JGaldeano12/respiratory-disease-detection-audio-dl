@@ -1,0 +1,149 @@
+Model: "model"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ input_1 (InputLayer)        [(None, 128, 251, 1)]     0         
+                                                                 
+ lambda (Lambda)             (None, 128, 251, 3)       0         
+                                                                 
+ vgg19 (Functional)          (None, 4, 7, 512)         20024384  
+                                                                 
+ flatten (Flatten)           (None, 14336)             0         
+                                                                 
+ dense (Dense)               (None, 128)               1835136   
+                                                                 
+ dropout (Dropout)           (None, 128)               0         
+                                                                 
+ dense_1 (Dense)             (None, 128)               16512     
+                                                                 
+ dropout_1 (Dropout)         (None, 128)               0         
+                                                                 
+ dense_2 (Dense)             (None, 4)                 516       
+                                                                 
+=================================================================
+Total params: 21876548 (83.45 MB)
+Trainable params: 1852164 (7.07 MB)
+Non-trainable params: 20024384 (76.39 MB)
+_________________________________________________________________
+
+Epoch 1
+Recall per class: [0.99712368 0.01038062 0.         0.        ]
+Specificity per class: [0.00483092 0.99781818 1.         1.        ]
+ICBHI Score: 0.50127
+Sensitivity: 0.25188
+Specificity: 0.75066
+Best Score: 0.50127
+Confusion Matrix:
+[[1040    3    0    0]
+ [ 286    3    0    0]
+ [ 262    0    0    0]
+ [  70    0    0    0]]
+--------------------------------------
+Epoch 2
+Recall per class: [1. 0. 0. 0.]
+Specificity per class: [0. 1. 1. 1.]
+ICBHI Score: 0.50000
+Sensitivity: 0.25000
+Specificity: 0.75000
+Best Score: 0.50127
+Confusion Matrix:
+[[1043    0    0    0]
+ [ 289    0    0    0]
+ [ 262    0    0    0]
+ [  70    0    0    0]]
+--------------------------------------
+Epoch 3
+Recall per class: [1. 0. 0. 0.]
+Specificity per class: [0. 1. 1. 1.]
+ICBHI Score: 0.50000
+Sensitivity: 0.25000
+Specificity: 0.75000
+Best Score: 0.50127
+Confusion Matrix:
+[[1043    0    0    0]
+ [ 289    0    0    0]
+ [ 262    0    0    0]
+ [  70    0    0    0]]
+--------------------------------------
+Epoch 4
+Recall per class: [1. 0. 0. 0.]
+Specificity per class: [0. 1. 1. 1.]
+ICBHI Score: 0.50000
+Sensitivity: 0.25000
+Specificity: 0.75000
+Best Score: 0.50127
+Confusion Matrix:
+[[1043    0    0    0]
+ [ 289    0    0    0]
+ [ 262    0    0    0]
+ [  70    0    0    0]]
+--------------------------------------
+Epoch 5
+Recall per class: [1. 0. 0. 0.]
+Specificity per class: [0. 1. 1. 1.]
+ICBHI Score: 0.50000
+Sensitivity: 0.25000
+Specificity: 0.75000
+Best Score: 0.50127
+Confusion Matrix:
+[[1043    0    0    0]
+ [ 289    0    0    0]
+ [ 262    0    0    0]
+ [  70    0    0    0]]
+--------------------------------------
+Epoch 6
+Recall per class: [1. 0. 0. 0.]
+Specificity per class: [0. 1. 1. 1.]
+ICBHI Score: 0.50000
+Sensitivity: 0.25000
+Specificity: 0.75000
+Best Score: 0.50127
+Confusion Matrix:
+[[1043    0    0    0]
+ [ 289    0    0    0]
+ [ 262    0    0    0]
+ [  70    0    0    0]]
+--------------------------------------
+
+Best ICBHI Score during training: 0.50127
+Model: "model"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ input_1 (InputLayer)        [(None, 128, 251, 1)]     0         
+                                                                 
+ lambda (Lambda)             (None, 128, 251, 3)       0         
+                                                                 
+ vgg19 (Functional)          (None, 4, 7, 512)         20024384  
+                                                                 
+ flatten (Flatten)           (None, 14336)             0         
+                                                                 
+ dense (Dense)               (None, 128)               1835136   
+                                                                 
+ dropout (Dropout)           (None, 128)               0         
+                                                                 
+ dense_1 (Dense)             (None, 128)               16512     
+                                                                 
+ dropout_1 (Dropout)         (None, 128)               0         
+                                                                 
+ dense_2 (Dense)             (None, 4)                 516       
+                                                                 
+=================================================================
+Total params: 21876548 (83.45 MB)
+Trainable params: 21876548 (83.45 MB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Epoch 1
+Recall per class: [1. 0. 0. 0.]
+Specificity per class: [0. 1. 1. 1.]
+ICBHI Score: 0.50000
+Sensitivity: 0.25000
+Specificity: 0.75000
+Best Score: 0.50127
+Confusion Matrix:
+[[1043    0    0    0]
+ [ 289    0    0    0]
+ [ 262    0    0    0]
+ [  70    0    0    0]]
+--------------------------------------

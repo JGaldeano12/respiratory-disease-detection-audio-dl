@@ -1,5 +1,6 @@
 import os, random, numpy as np, tensorflow as tf, glob
 from tensorflow.keras import layers, models, regularizers
+from tensorflow.keras.applications import ResNet50
 
 def create_efficientnet_model(input_shape=(128, 129, 1), num_classes=4, seed=12345):
     """

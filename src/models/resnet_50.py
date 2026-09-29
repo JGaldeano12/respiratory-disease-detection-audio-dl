@@ -1,6 +1,6 @@
 import tensorflow as tf
-from keras import layers, models
-from keras.applications import ResNet50
+from tensorflow.keras import layers, models
+from tensorflow.keras.applications import ResNet50
 
 def create_resnet_50(input_shape=(128, 129, 1), num_classes=4):
     """
@@ -11,8 +11,9 @@ def create_resnet_50(input_shape=(128, 129, 1), num_classes=4):
     replicated three times to match the three-channel input expected by the
     pre-trained ResNet50 model.
 
-    The extracted features are flattened and processed by two fully connected
-    layers with dropout before the final softmax classification layer.
+    The extracted features are aggregated with global average pooling and
+    processed by two fully connected layers (with batch normalization and
+    dropout) before the final softmax classification layer.
 
     Args:
         input_shape (tuple[int, int, int], optional): Shape of a single input
@@ -42,16 +43,27 @@ def create_resnet_50(input_shape=(128, 129, 1), num_classes=4):
     # ResNet50 convolutional base.
     x = base_model(x)
 
-    # Convert the extracted feature maps into a one-dimensional feature vector
-    # before passing it to the fully connected classification layers.
-    x = layers.Flatten()(x)
+    # Aggregate the spatial feature maps into a single 2048-d vector per
+    # sample. GlobalAveragePooling2D is used instead of Flatten: flattening
+    # the (4, 8, 2048) feature map produces a 65,536-d vector feeding a
+    # randomly-initialized Dense(1024) layer (~67M parameters), which at the
+    # phase-1 learning rate is prone to exploding activations and permanent
+    # ReLU death (constant-output collapse). GAP avoids both the dimension
+    # blow-up and that instability.
+    x = layers.GlobalAveragePooling2D()(x)
 
     # Learn task-specific feature representations through two dense layers.
-    # Dropout is applied after each layer to reduce overfitting.
-    x = layers.Dense(1024, activation='relu')(x)
+    # BatchNormalization is applied before each activation to keep
+    # pre-activation statistics centered and prevent dying ReLUs; Dropout is
+    # applied after each block to reduce overfitting.
+    x = layers.Dense(1024, kernel_initializer='he_normal')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
     x = layers.Dropout(0.5)(x)
 
-    x = layers.Dense(1024, activation='relu')(x)
+    x = layers.Dense(1024, kernel_initializer='he_normal')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
     x = layers.Dropout(0.5)(x)
 
     # Generate a probability distribution across all target classes.
@@ -62,4 +74,4 @@ def create_resnet_50(input_shape=(128, 129, 1), num_classes=4):
     model = models.Model(inputs, outputs)
     
     # Return the complete uncompiled model.
-    return model
+    return model, base_model

@@ -31,8 +31,10 @@ def load_test_dataset(dir_dataset):
 
     test_dataset = test_dataset.with_options(options)
 
-    # Load and preprocess the spectrograms.
-    test_dataset = test_dataset.map(process_npy, num_parallel_calls=1)
+    # Load and preprocess the spectrograms. training=False is passed explicitly
+    # so that SpecAugment is not applied at evaluation time (process_npy
+    # defaults to training=True, which was silently augmenting the test data).
+    test_dataset = test_dataset.map(lambda x: process_npy(x, training=False), num_parallel_calls=1)
 
     # Group samples into batches for model inference.
     test_dataset = test_dataset.batch(1, drop_remainder=True)
@@ -171,8 +173,8 @@ def evaluate_model(model_path, dir_test_dataset):
     predictions = np.concatenate(predictions)
     labels = np.concatenate(labels)
 
-    # Create and save the confusion matrix.
-    create_confusion_matrix(labels, predictions)
+    # # Create and save the confusion matrix.
+    # create_confusion_matrix(labels, predictions)
 
     # Compute recall, specificity, and the ICBHI score.
     recall, specificity, icbhi_score = (compute_recall_specificity_score(labels, predictions))

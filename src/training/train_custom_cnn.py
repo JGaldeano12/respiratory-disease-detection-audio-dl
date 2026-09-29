@@ -5,9 +5,9 @@ from sklearn.utils.class_weight import compute_class_weight
 from src.training.custom_callback import ICBHI_Score_PrintingCallback, ICBHIEarlyStopping
 from src.training.losses import focal_loss
 from src.data.utils import load_datasets, get_class_weights_from_paths
-from src.models.vgg_19 import create_vgg_19
+from src.models.custom_cnn import create_custom_cnn
 
-def train(model, base_model, train_dataset, val_dataset):
+def train(model, train_dataset, val_dataset):
     """
     Train the model using a three-phase training strategy.
 
@@ -36,31 +36,17 @@ def train(model, base_model, train_dataset, val_dataset):
     # First phase of training with a higher learning rate and early stopping.
     print("PHASE 1: INITIAL TRAINING (lr=5e-4)")
     early_stopping_1 = ICBHIEarlyStopping(patience=5)
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-4, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=3e-4, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights))
     model.fit(train_dataset, epochs=15, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_1])
 
     # Second phase of training with a reduced learning rate and early stopping.
-    print("PHASE 2: REFINE TRAINING (lr=1e-4)")
-
-    # Unfreeze the VGG-19 backbone.
-    base_model.trainable = True
-
-    # Freeze the first 30 layers of the VGG-19 backbone to retain learned features.
-    for layer in base_model.layers[:-30]:
-        layer.trainable = False
-
-    # Early stopping for refinement phase.
+    print("PHASE 2: REFINE TRAINING (lr=1e-5)")
     early_stopping_2 = ICBHIEarlyStopping(patience=15)
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights))
     model.fit(train_dataset, epochs=50, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_2])
 
     # Third and final phase of training with an even lower learning rate and early stopping.
-    print("PHASE 3: FINE-TUNING (lr=1e-5)")
-
-    # Unfreeze the VGG-19 backbone.
-    base_model.trainable = True
-
-    # Early stopping for final training stage.
+    print("PHASE 3: FINE-TUNING (lr=5e-5)")
     early_stopping_3 = ICBHIEarlyStopping(patience=20)
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights))
     model.fit(train_dataset, epochs=100, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_3])
@@ -91,10 +77,10 @@ tf.config.experimental.enable_op_determinism()
 print("Loading datasets...")
 train_dataset, val_dataset = load_datasets('/app/data/processed', seed=SEED)
 
-# Create VGG-19-based model with deterministic initialization.
+# Create the custom plain CNN model.
 print("Creating model...")
-model, base_model = create_vgg_19(input_shape=(128, 251, 1), num_classes=4)
+model = create_custom_cnn(input_shape=(128, 251, 1), num_classes=4, seed=SEED)
 
 # Start the training process for the model using the loaded datasets.
 print("Starting training...")
-model = train(model, base_model, train_dataset, val_dataset)
+model = train(model, train_dataset, val_dataset)

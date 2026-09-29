@@ -1,0 +1,54 @@
+2026-09-14 15:30:31.704607: I tensorflow/core/platform/cpu_feature_guard.cc:211] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-09-14 15:30:34.535223: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-09-14 15:30:34.646596: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-09-14 15:30:34.646686: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-09-14 15:30:34.649825: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-09-14 15:30:34.649920: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-09-14 15:30:34.649955: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-09-14 15:30:34.873465: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-09-14 15:30:34.873578: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-09-14 15:30:34.873592: I tensorflow/core/common_runtime/gpu/gpu_device.cc:2019] Could not identify NUMA node of platform GPU id 0, defaulting to 0.  Your kernel may not have been built with NUMA support.
+2026-09-14 15:30:34.873636: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-09-14 15:30:34.873669: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1928] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 9445 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3060, pci bus id: 0000:07:00.0, compute capability: 8.6
+Loading datasets...
+Creating model...
+Starting training...
+PHASE 1: INITIAL TRAINING (lr=1e-3)
+Epoch 1/15
+2026-09-14 15:30:57.605875: I external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:465] Loaded cuDNN version 90300
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1789399859.964758   66757 service.cc:145] XLA service 0x7eb61b61d540 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+I0000 00:00:1789399859.964867   66757 service.cc:153]   StreamExecutor device (0): NVIDIA GeForce RTX 3060, Compute Capability 8.6
+2026-09-14 15:30:59.970401: I tensorflow/compiler/mlir/tensorflow/utils/dump_mlir_util.cc:268] disabling MLIR crash reproducer, set env var `MLIR_CRASH_REPRODUCER_DIRECTORY` to enable.
+I0000 00:00:1789399860.044456   66757 device_compiler.h:188] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.
+2026-09-14 15:33:47.819460: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.9971, 0.0104, 0.0, 0.0]
+
+Specificity per class: [0.0048, 0.9978, 1.0, 1.0]
+
+ICBHI Score: 0.50127 - Sensitivity: 0.25188 - Specificity: 0.75066
+
+Confusion Matrix:
+[[1040    3    0    0]
+ [ 286    3    0    0]
+ [ 262    0    0    0]
+ [  70    0    0    0]]
+
+Best ICBHI Score found: 0.50127
+
+
+----------------------------------------------------------------------------
+
+108/108 - 187s - loss: 1.1808 - val_loss: 0.8805 - icbhi_score: 0.5013 - 187s/epoch - 2s/step
+Epoch 2/15
