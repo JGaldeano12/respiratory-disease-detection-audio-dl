@@ -1,4 +1,5 @@
 import os
+import argparse
 from datetime import datetime
 
 import matplotlib.pyplot as plt
@@ -45,13 +46,14 @@ def load_test_dataset(dir_dataset):
 
     return test_dataset
 
-def create_confusion_matrix(labels, predictions):
+def create_confusion_matrix(labels, predictions, output_path):
     """
     Create and save a confusion matrix based on the true and predicted labels.
 
     Args:
         labels (np.ndarray): True class labels.
         predictions (np.ndarray): Predicted class labels.
+        output_path (str): Path of the PNG file where the figure is saved.
 
     Returns:
         str: Confirmation message after the confusion matrix is saved.
@@ -70,8 +72,10 @@ def create_confusion_matrix(labels, predictions):
     plt.xticks(rotation=45, ha='right')
     plt.title('Confusion Matrix')
     plt.tight_layout()
-    plt.savefig(f'/app/src/testing/confusion_matrix_' f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.png')
+    plt.savefig(output_path)
     plt.close()
+
+    return f"Confusion matrix saved to {output_path}"
 
     return "Confusion matrix saved!"
 
@@ -134,7 +138,7 @@ def compute_recall_specificity_score(labels, predictions):
 
     return mean_recall, mean_specificity, icbhi_score
 
-def evaluate_model(model_path, dir_test_dataset):
+def evaluate_model(model_path, dir_test_dataset, output_dir):
     """
     Evaluate a trained model on the test dataset.
 
@@ -145,6 +149,7 @@ def evaluate_model(model_path, dir_test_dataset):
     Args:
         model_path (str): Path to the trained Keras model.
         dir_test_dataset (str): Root directory containing the test dataset.
+        output_dir (str): Directory where the confusion matrix is saved.
 
     Returns:
         str: Confirmation message after the evaluation is completed.
@@ -174,8 +179,11 @@ def evaluate_model(model_path, dir_test_dataset):
     predictions = np.concatenate(predictions)
     labels = np.concatenate(labels)
 
-    # # Create and save the confusion matrix.
-    # create_confusion_matrix(labels, predictions)
+    # Create and save the confusion matrix, named after the evaluated model.
+    os.makedirs(output_dir, exist_ok=True)
+    model_name = os.path.splitext(os.path.basename(model_path))[0]
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    print(create_confusion_matrix(labels, predictions, os.path.join(output_dir, f"confusion_matrix_{model_name}_{timestamp}.png")))
 
     # Compute recall, specificity, and the ICBHI score.
     recall, specificity, icbhi_score = (compute_recall_specificity_score(labels, predictions))
@@ -187,4 +195,11 @@ def evaluate_model(model_path, dir_test_dataset):
 
     return "Evaluation complete!"
 
-evaluate_model('/app/models/CustomCNN/best_model_CustomCNN.keras', '/app/data/processed')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Evaluate a trained model on the test dataset.')
+    parser.add_argument('--model_path', type=str, default='/app/models/CustomCNN/best_model_CustomCNN.keras', help='Path to the trained Keras model')
+    parser.add_argument('--data_dir', type=str, default='/app/data/processed', help='Root directory containing the Test folder')
+    parser.add_argument('--output_dir', type=str, default='/app/experiments', help='Directory where the confusion matrix is saved')
+    args = parser.parse_args()
+
+    print(evaluate_model(args.model_path, args.data_dir, args.output_dir))

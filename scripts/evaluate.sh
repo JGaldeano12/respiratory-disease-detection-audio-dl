@@ -1,12 +1,16 @@
 #!/bin/bash
+cd /app || exit 1
+export PYTHONPATH=/app
+export TF_CPP_MIN_LOG_LEVEL=1
 
-# This script evaluates the trained model on the test dataset and generates a report.
-echo "Starting model evaluation..."
+# Path to the model to evaluate. Defaults to the best Custom CNN checkpoint.
+MODEL_PATH="${1:-models/CustomCNN/best_model_CustomCNN.keras}"
 
-# Run the Python script to evaluate the model
+echo "Starting evaluation of $MODEL_PATH..."
+
 python src/evaluation/evaluate.py \
-    --model_dir models/checkpoints \
-    --test_data_dir data/test \
+    --model_path "$MODEL_PATH" \
+    --data_dir data/processed \
     --output_dir experiments
 
 echo "Model evaluation complete!"
