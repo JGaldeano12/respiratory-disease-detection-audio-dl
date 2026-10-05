@@ -8,7 +8,7 @@ import librosa
 import nlpaug.augmenter.audio as naa
 import numpy as np
 
-from src.data.divide import split_patients_by_train_test
+from src.data.divide import split_patients_by_train_val_test
 from src.data.preprocess import butter_bandpass_filter, check_length_and_padding
 from src.features.extract_features import extract_features
 
@@ -148,12 +148,12 @@ def check_balanced_dataset(data_path):
 # including selecting a balanced random subset of respiratory cycles, processing individual audio
 # files, and applying augmentation techniques in parallel across multiple files.
 
-def select_balanced_and_random_respiratory_cycles(rng, control_file_path='/app/src/resources/aux_respiratory_cycles.npy', seed=202506, train_test_split=80):
+def select_balanced_and_random_respiratory_cycles(rng, control_file_path='/app/src/resources/aux_respiratory_cycles.npy', seed=202506, train_test_split=80, val_split=15):
     """
     Select an equal number of respiratory cycles from each class for augmentation.
 
     The function first obtains the respiratory cycles assigned to the training
-    set. It then determines the size of the smallest class and randomly selects
+    set, excluding the validation and testing patients. It then determines the size of the smallest class and randomly selects
     that same number of cycles from each of the four classes, producing a
     balanced set of respiratory cycles.
 
@@ -164,16 +164,18 @@ def select_balanced_and_random_respiratory_cycles(rng, control_file_path='/app/s
             the respiratory cycle annotations. Defaults to
             '/app/src/resources/aux_respiratory_cycles.npy'.
         seed (int, optional): Random seed used for the patient-level
-            train/test split. Defaults to 202506.
+            train/validation/test split. Defaults to 202506.
         train_test_split (float, optional): Percentage of patients assigned to
-            the training set. Defaults to 80.
+            the training + validation block. Defaults to 80.
+        val_split (float, optional): Percentage of the training + validation
+            patients assigned to the validation set. Defaults to 15.
 
     Returns:
         np.ndarray: Concatenated array containing a balanced random selection
         of respiratory cycles from all classes.
     """
-    # Filter the respiratory cycles used for training.
-    cycles_train, _ = split_patients_by_train_test(aux_file=control_file_path, seed=seed, train_test_split=train_test_split)
+    # Filter the respiratory cycles used for training (validation and testing patients are never augmented).
+    cycles_train, _, _ = split_patients_by_train_val_test(aux_file=control_file_path, seed=seed, train_test_split=train_test_split, val_split=val_split)
 
     # Calculate the minimum number of cycles across all classes to ensure a balanced selection.
     _, counts = np.unique(cycles_train[:, 6], return_counts=True)
@@ -313,10 +315,11 @@ def apply_traditional_augmentation(raw_audio, rng, seed, sample_rate=8000, lengt
 
 # Parse command-line arguments.
 parser = argparse.ArgumentParser(description='Augment dataset with a given random seed.')
-parser.add_argument('--seed', type=int, default=202506, help='Random seed for train-test split')
+parser.add_argument('--seed', type=int, default=202506, help='Random seed for the patient-wise split')
 parser.add_argument('--sample_rate', type=int, default=8000, help='Sampling rate for audio processing')
 parser.add_argument('--duration', type=int, default=8, help='Duration of each audio segment')
-parser.add_argument('--test_train_split', type=int, default=80, help='Percentage of data for training')
+parser.add_argument('--test_train_split', type=int, default=80, help='Percentage of patients used for training + validation')
+parser.add_argument('--val_split', type=int, default=15, help='Percentage of the training + validation patients used for validation')
 args = parser.parse_args()
 
 # Create a single rng from the provided seed, shared across all augmentation steps.
@@ -326,7 +329,8 @@ rng = np.random.default_rng(args.seed)
 cycles_selected = select_balanced_and_random_respiratory_cycles(rng=rng, 
                                                                 control_file_path='/app/src/resources/aux_respiratory_cycles.npy', 
                                                                 seed=args.seed, 
-                                                                train_test_split=args.test_train_split)
+                                                                train_test_split=args.test_train_split,
+                                                                val_split=args.val_split)
 
 # Apply traditional augmentation techniques to the selected cycles in parallel.
 apply_traditional_augmentation_process_files_parallel(input_path='/app/data/raw', 

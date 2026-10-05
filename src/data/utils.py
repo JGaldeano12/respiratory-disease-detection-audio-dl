@@ -18,8 +18,8 @@ def get_label(file_path):
     Returns:
         tf.Tensor: Integer-encoded class label.
     """
-    elements = tf.strings.split(file_path, os.path.sep)
-    label_str = elements[5]
+    # The class label is the name of the parent directory of the file.
+    label_str = tf.strings.split(file_path, os.path.sep)[-2]
 
     keys = tf.constant(['Healthy', 'Crackle', 'Wheeze', 'Wheeze & Crackle'])
     values = tf.constant([0, 1, 2, 3], dtype=tf.int32)
@@ -168,39 +168,43 @@ def process_npy(file_path, training=True):
 
 def load_datasets(dir_dataset, seed=12345):
     """
-    Load and prepare the training and testing datasets.
+    Load and prepare the training, validation and testing datasets.
 
-    The function creates TensorFlow data pipelines for the training and
-    testing datasets, including shuffling, preprocessing, batching, and
-    prefetching. The training dataset is shuffled using the provided seed,
-    while deterministic execution is enabled for both datasets.
+    The function creates TensorFlow data pipelines for the training,
+    validation and testing datasets, including shuffling, preprocessing,
+    batching, and prefetching. Only the training dataset is shuffled (using
+    the provided seed) and augmented with SpecAugment, while deterministic
+    execution is enabled for all datasets.
 
     Args:
         dir_dataset (str): Path to the root directory containing the
-            training and testing datasets.
+            Train, Val and Test directories.
         seed (int): Random seed used for shuffling the training dataset.
 
     Returns:
         tuple:
-            A tuple containing the prepared training and testing
-            TensorFlow datasets.
+            A tuple containing the prepared training, validation and
+            testing TensorFlow datasets.
     """
-    train_dataset = tf.data.Dataset.list_files(os.path.join(dir_dataset, 'Train/*/*'), shuffle=False)
-    test_dataset = tf.data.Dataset.list_files(os.path.join(dir_dataset, 'Test/*/*'), shuffle=False)
-
     options = tf.data.Options()
     options.experimental_deterministic = True
 
-    train_dataset = train_dataset.with_options(options)
-    test_dataset = test_dataset.with_options(options)
-
+    # Training dataset: shuffled, augmented, and batched dropping the last incomplete batch.
+    train_dataset = tf.data.Dataset.list_files(os.path.join(dir_dataset, 'Train/*/*'), shuffle=False).with_options(options)
     train_dataset = train_dataset.shuffle(buffer_size=len(train_dataset), seed=seed, reshuffle_each_iteration=True)
     train_dataset = train_dataset.map(lambda x: process_npy(x, training=True), num_parallel_calls=1)
     train_dataset = train_dataset.batch(16, drop_remainder=True)
     train_dataset = train_dataset.prefetch(1)
 
-    test_dataset = test_dataset.map(lambda x: process_npy(x, training=False), num_parallel_calls=1)
-    test_dataset = test_dataset.batch(16, drop_remainder=False)
-    test_dataset = test_dataset.prefetch(1)
+    # Validation and testing datasets: neither shuffled nor augmented, and every sample is kept.
+    eval_datasets = []
+    for split in ['Val', 'Test']:
+        dataset = tf.data.Dataset.list_files(os.path.join(dir_dataset, split, '*/*'), shuffle=False).with_options(options)
+        dataset = dataset.map(lambda x: process_npy(x, training=False), num_parallel_calls=1)
+        dataset = dataset.batch(16, drop_remainder=False)
+        dataset = dataset.prefetch(1)
+        eval_datasets.append(dataset)
 
-    return train_dataset, test_dataset
+    val_dataset, test_dataset = eval_datasets
+
+    return train_dataset, val_dataset, test_dataset

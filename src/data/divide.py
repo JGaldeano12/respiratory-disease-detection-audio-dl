@@ -3,6 +3,10 @@ import shutil
 
 import numpy as np
 
+# Class and split directory names used across the dataset.
+CLASSES = ["Crackle", "Wheeze", "Wheeze & Crackle", "Healthy"]
+SPLITS = ["Train", "Val", "Test"]
+
 def create_directories(input_path):
     """
     Create the class directories required to store spectrogram data.
@@ -18,157 +22,130 @@ def create_directories(input_path):
     Returns:
         None
     """
-    # Create directories for each class if they do not already exist
-    for dir_path in [os.path.join(input_path, "Crackle"),
-                     os.path.join(input_path, "Wheeze"), 
-                     os.path.join(input_path, "Wheeze & Crackle"), 
-                     os.path.join(input_path, "Healthy")]:
-        
-        # Create the directory if it does not exist
-        os.makedirs(dir_path, exist_ok=True)
+    # Create the directory of each class if it does not already exist.
+    for class_name in CLASSES:
+        os.makedirs(os.path.join(input_path, class_name), exist_ok=True)
 
 def check_and_create_directories(input_path):
     """
-    Create the directory structure required for the training and testing sets.
+    Create the directory structure required for the training, validation and testing sets.
 
-    The function ensures that the Train and Test directories exist, together
-    with a subdirectory for each respiratory sound class: Crackle, Wheeze,
-    Wheeze & Crackle, and Healthy. Existing directories are preserved.
+    The function ensures that the Train, Val and Test directories exist,
+    together with a subdirectory for each respiratory sound class: Crackle,
+    Wheeze, Wheeze & Crackle, and Healthy. Existing directories are preserved.
 
     Args:
-        input_path (str): Base directory where the training and testing
-            directory structure will be created.
+        input_path (str): Base directory where the directory structure
+            will be created.
 
     Returns:
         None
     """
-    # Create directories for Train and Test sets, along with subdirectories for each class
-    for dir_path in [os.path.join(input_path, "Train"), 
-                     os.path.join(input_path, "Test"), 
-                     os.path.join(input_path, "Train/Crackle"),
-                     os.path.join(input_path, "Train/Wheeze"), 
-                     os.path.join(input_path, "Train/Wheeze & Crackle"), 
-                     os.path.join(input_path, "Train/Healthy"), 
-                     os.path.join(input_path, "Test/Crackle"), 
-                     os.path.join(input_path, "Test/Wheeze"), 
-                     os.path.join(input_path, "Test/Wheeze & Crackle"),
-                     os.path.join(input_path, "Test/Healthy")]:
-        
-        # Create the directory if it does not exist
-        os.makedirs(dir_path, exist_ok=True)
+    # Create one directory per split and class if it does not already exist.
+    for split in SPLITS:
+        for class_name in CLASSES:
+            os.makedirs(os.path.join(input_path, split, class_name), exist_ok=True)
 
-def split_patients_by_train_test(aux_file, seed, train_test_split):
+def split_patients_by_train_val_test(aux_file, seed, train_test_split, val_split):
     """
-    Split patients and their respiratory cycles into training and testing sets.
+    Split patients and their respiratory cycles into training, validation and testing sets.
 
     The respiratory cycle data is loaded from the provided NumPy file, and
     unique patient identifiers are randomly shuffled using the specified seed.
-    The first portion of patients, determined by `train_test_split`, is
-    assigned to the training set, while the remaining patients are assigned
-    to the testing set. The corresponding respiratory cycles are then returned
-    for each set.
+    The first portion of patients, determined by `train_test_split`, forms the
+    development block, while the remaining patients form the testing set. A
+    fraction of the development block, determined by `val_split`, is then held
+    out as the validation set, and the rest is used for training. All sets are
+    patient-wise disjoint, and the testing set does not depend on `val_split`.
 
     Args:
         aux_file (str): Path to the NumPy file containing labeled respiratory
             cycle data, with patient identifiers stored in the first column.
         seed (int): Random seed used to reproducibly shuffle patient IDs.
-        train_test_split (float): Percentage of the 112 patients assigned to
-            the training set.
+        train_test_split (float): Percentage of patients assigned to the
+            development block (training + validation).
+        val_split (float): Percentage of the development block assigned to
+            the validation set.
 
     Returns:
-        tuple[np.ndarray, np.ndarray]: Respiratory cycle data corresponding to
-        the training patients and testing patients, respectively.
+        tuple[np.ndarray, np.ndarray, np.ndarray]: Respiratory cycle data
+        corresponding to the training, validation and testing patients,
+        respectively.
     """
-    # First, load file with the labeled respiratory cycles
+    # Load the file with the labeled respiratory cycles.
     aux_file = np.load(aux_file)
 
-    # Then, obtain the unique patient IDs from the respiratory cycles data
+    # Obtain the unique patient IDs from the respiratory cycles data.
     list_id_patients = np.unique(aux_file[:, 0])
 
-    # Use a local random generator for the train/test split so we don't reset the global NumPy RNG state.
+    # Use a local random generator so we don't reset the global NumPy RNG state.
     rng = np.random.default_rng(seed)
     rng.shuffle(list_id_patients)
 
-    # Split the patient IDs into training and testing sets based on the specified train_test_split ratio.
-    # The first portion of the shuffled patient IDs will be assigned to the training set, while the remaining portion will be assigned to the testing set.
-    random_train = list_id_patients[:int(112 * train_test_split / 100)]
-    random_test = list_id_patients[int(112 * train_test_split / 100):]
+    # The first n_dev shuffled patients form the development block and the rest the testing set.
+    n_dev = int(len(list_id_patients) * train_test_split / 100)
+    n_val = int(n_dev * val_split / 100)
 
-    # Finally, get the respiratory cycles corresponding to the training and testing patient IDs by filtering the original respiratory cycles data based on the assigned patient IDs for each set.
+    # The last n_val patients of the development block form the validation set.
+    random_train = list_id_patients[:n_dev - n_val]
+    random_val = list_id_patients[n_dev - n_val:n_dev]
+    random_test = list_id_patients[n_dev:]
+
+    # Get the respiratory cycles corresponding to the patients of each set.
     cycles_train = aux_file[np.isin(aux_file[:, 0], random_train)]
+    cycles_val = aux_file[np.isin(aux_file[:, 0], random_val)]
     cycles_test = aux_file[np.isin(aux_file[:, 0], random_test)]
 
-    # Finally, return the lists.
-    return cycles_train, cycles_test
+    return cycles_train, cycles_val, cycles_test
 
-def move_spectrograms_by_train_test(input_path, cycles_train, cycles_test):
+def move_spectrograms_by_split(input_path, cycles_train, cycles_val, cycles_test):
     """
-        Move spectrogram images into their corresponding training or testing sets.
+    Move spectrogram images into their corresponding training, validation or testing sets.
 
     The function retrieves spectrogram files from each respiratory sound class
     directory, determines the patient identifier associated with each file, and
-    copies the spectrogram to the corresponding Train or Test directory
-    according to whether the patient belongs to `cycles_train` or
-    `cycles_test`.
+    moves the spectrogram to the corresponding Train, Val or Test directory
+    according to the set the patient belongs to.
 
     Args:
         input_path (str): Base directory containing the class-specific
             spectrogram directories.
         cycles_train (np.ndarray): Training respiratory cycle data used to
             identify patients assigned to the training set.
+        cycles_val (np.ndarray): Validation respiratory cycle data used to
+            identify patients assigned to the validation set.
         cycles_test (np.ndarray): Testing respiratory cycle data used to
             identify patients assigned to the testing set.
 
     Returns:
         None
     """
-    # List every spectrogram image in the directory and its subdirectories, and categorize them based on their corresponding patient IDs
-    crackle_data = [os.path.join(os.path.join(input_path, "Crackle"), f) for f in os.listdir(os.path.join(input_path, "Crackle"))]
-    wheeze_data = [os.path.join(os.path.join(input_path, "Wheeze"), f) for f in os.listdir(os.path.join(input_path, "Wheeze"))]
-    crackles_and_wheeze_data = [os.path.join(os.path.join(input_path, "Wheeze & Crackle"), f) for f in os.listdir(os.path.join(input_path, "Wheeze & Crackle"))]
-    healthy_data = [os.path.join(os.path.join(input_path, "Healthy"), f) for f in os.listdir(os.path.join(input_path, "Healthy"))]
+    # List every spectrogram file inside the class directories.
+    full_data = [os.path.join(input_path, class_name, f) for class_name in CLASSES for f in os.listdir(os.path.join(input_path, class_name))]
 
-    # Check and create the necessary directories for training and testing sets if they do not exist
+    # Check and create the necessary directories for every split if they do not exist.
     check_and_create_directories(input_path)
 
-    # Build sets with the patient IDs (first column) of each split for exact and fast lookups.
-    train_ids = set(cycles_train[:, 0])
-    test_ids = set(cycles_test[:, 0])
-    
-    # Create a list with every spectrogram.
-    full_data = [crackle_data, wheeze_data, crackles_and_wheeze_data, healthy_data]
+    # Map each patient ID (first column) to its split for exact and fast lookups.
+    patient_split = {}
+    for split, cycles in zip(SPLITS, [cycles_train, cycles_val, cycles_test]):
+        for id_patient in np.unique(cycles[:, 0]):
+            patient_split[id_patient] = split
 
-    print("Starting to move spectrograms into Train and Test directories based on patient IDs...")
+    print("Starting to move spectrograms into Train, Val and Test directories based on patient IDs...")
 
-    # Iterate through the list of spectrogram images for each pathology, and move each image to the corresponding training or testing directory 
-    # based on the patient ID extracted from the filename and its presence in the random_train or random_test lists.
-    for data in full_data:
-        # Iterate through each spectrogram image in the current pathology's list of images.
-        for spectrogram in data:
-            # Separate the path of the spectrogram image to extract the patient ID and label information from the filename and directory structure.
-            path_elements = spectrogram.split("/")
+    for spectrogram in full_data:
+        # Get the label from the parent directory and the patient ID from the filename.
+        label = os.path.basename(os.path.dirname(spectrogram))
+        id_patient = os.path.basename(spectrogram).split("_")[0]
 
-            # Extract the patient ID and label information from the filename and directory structure to determine the appropriate destination 
-            # directory for the spectrogram image based on its corresponding patient ID and assigned training or testing set.
-            filename = path_elements[5]
+        # Check which set the patient belongs to.
+        split = patient_split.get(id_patient)
+        if split is None:
+            print(f"Patient ID {id_patient} not found in any set.")
+            continue
 
-            # Get the label from the directory structure.
-            label = path_elements[4]
-            
-            # Extract the patient ID from the filename.
-            filename_data = filename.split("_")
-            id_patient = filename_data[0]
+        # Move the spectrogram to its split. The full destination path is given so that an existing file is overwritten.
+        shutil.move(spectrogram, os.path.join(input_path, split, label, os.path.basename(spectrogram)))
 
-            # Check which set the patient belongs to.
-            if id_patient in train_ids:
-                split = 'Train'
-            elif id_patient in test_ids:
-                split = 'Test'
-            else:
-                print(f"Patient ID {id_patient} not found in either training or testing sets.")
-                continue
-
-            # Move the spectrogram to its split. The full destination path is given so that an existing file is overwritten.
-            shutil.move(spectrogram, os.path.join(input_path, split, label, os.path.basename(spectrogram)))
-
-    print("Spectrograms moved into Train and Test directories.")
+    print("Spectrograms moved into Train, Val and Test directories.")

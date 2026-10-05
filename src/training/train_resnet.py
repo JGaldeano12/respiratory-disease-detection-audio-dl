@@ -47,7 +47,7 @@ def train(model, base_model, train_dataset, val_dataset):
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights))
     model.fit(train_dataset, epochs=15, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping])
 
-    # Second phase of training with a reduced learning rate and early stopping.
+    # Second phase of training: partial fine-tuning of the backbone with early stopping.
     print("PHASE 2: REFINE TRAINING (lr=1e-4)")
 
     # Unfreeze the ResNet-50 backbone.
@@ -63,7 +63,7 @@ def train(model, base_model, train_dataset, val_dataset):
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights))
     model.fit(train_dataset, epochs=50, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping])
 
-    # Third and final phase of training with an even lower learning rate and early stopping.
+    # Third and final phase of training with a lower learning rate and early stopping.
     print("PHASE 3: FINE-TUNING (lr=1e-5)")
 
     # Unfreeze the ResNet-50 backbone.
@@ -77,7 +77,7 @@ def train(model, base_model, train_dataset, val_dataset):
 
     # Restore the best weights found across the entire training run (all three
     # phases) before saving, so the timestamped checkpoint matches the best
-    # model, i.e. the same one saved as best_model_epoch.keras by icbhi_callback.
+    # model, i.e. the same one saved as best_model_<model_name>.keras by icbhi_callback.
     if early_stopping.best_weights is not None:
         model.set_weights(early_stopping.best_weights)
 
@@ -105,7 +105,8 @@ tf.config.experimental.enable_op_determinism()
 
 # Load the training and validation datasets.
 print("Loading datasets...")
-train_dataset, val_dataset = load_datasets('/app/data/processed', seed=SEED)
+# The testing dataset is not used during training; it is evaluated afterwards with evaluate.py.
+train_dataset, val_dataset, _ = load_datasets('/app/data/processed', seed=SEED)
 
 # Create ResNet-50-based model with deterministic initialization.
 print("Creating model...")
