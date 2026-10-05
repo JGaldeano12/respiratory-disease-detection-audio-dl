@@ -149,7 +149,7 @@ def evaluate_model(model_path, dir_test_dataset):
         str: Confirmation message after the evaluation is completed.
     """
     # Load the trained model without restoring its compilation configuration.
-    model = load_model(model_path, compile=False)
+    model = load_model(model_path, compile=False, safe_mode=False)
 
     # Load and preprocess the test dataset.
     test_dataset = load_test_dataset(dir_test_dataset)
@@ -186,4 +186,4 @@ def evaluate_model(model_path, dir_test_dataset):
 
     return "Evaluation complete!"
 
-evaluate_model('/app/models/custom_cnn/best_model_epoch.keras', '/app/data/processed')
+evaluate_model('/app/models/CustomCNN/best_model_CustomCNN.keras', '/app/data/processed')

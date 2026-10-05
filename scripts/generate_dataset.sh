@@ -5,6 +5,6 @@
 echo "Generating dataset..."
 
 # Run the Python script to generate the dataset
-python -m src.data.generate_dataset --seed 20260119
+python -m src.data.generate_dataset --seed 202506
 
 echo "Dataset generation complete!"

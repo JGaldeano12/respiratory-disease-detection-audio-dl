@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import tensorflow as tf
 
@@ -11,21 +12,33 @@ class ICBHI_Score_PrintingCallback(tf.keras.callbacks.Callback):
     The callback evaluates the model on the validation dataset at the end
     of each epoch, computes recall, specificity, and the ICBHI score,
     prints the corresponding metrics, logs the results, and saves the model
-    whenever a new best ICBHI score is achieved.
+    to a model-specific path whenever a new best ICBHI score is achieved.
     """
 
-    def __init__(self, val_dataset):
+    def __init__(self, val_dataset, model_name):
         """
         Initialize the ICBHI score callback.
 
         Args:
             val_dataset (tf.data.Dataset): Dataset used to evaluate the model
                 after each training epoch.
+            model_name (str): Name of the model being trained (e.g. 'ResNet',
+                'VGG19', 'EfficientNet', 'CustomCNN'). Used to build a
+                model-specific directory and filename for the best checkpoint,
+                so that different architectures don't overwrite each other's
+                best model.
         """
         super().__init__()
 
         self.best_icbhi_score = 0.0
         self.val_dataset = val_dataset
+        self.model_name = model_name
+
+        # Build a model-specific save path, e.g. /app/models/ResNet/best_model_ResNet.keras,
+        # and make sure the target directory exists.
+        self.save_dir = os.path.join('/app/models', model_name)
+        self.save_path = os.path.join(self.save_dir, f'best_model_{model_name}.keras')
+        os.makedirs(self.save_dir, exist_ok=True)
 
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
@@ -120,7 +133,7 @@ class ICBHI_Score_PrintingCallback(tf.keras.callbacks.Callback):
         # Save the model when a new best ICBHI score is achieved.
         if icbhi_score > self.best_icbhi_score:
             self.best_icbhi_score = icbhi_score
-            self.model.save("/app/models/custom_cnn/best_model_epoch.keras")
+            self.model.save(self.save_path)
 
         # Compute and display the confusion matrix.
         cm = confusion_matrix(labels_np, predictions_np)

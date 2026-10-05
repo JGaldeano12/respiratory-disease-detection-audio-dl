@@ -27,16 +27,20 @@ def train(model, base_model, train_dataset, val_dataset):
             phases.
     """
     # Initialize the ICBHI score callback to monitor the model's performance on the validation dataset.
-    icbhi_callback = ICBHI_Score_PrintingCallback(val_dataset)
+    icbhi_callback = ICBHI_Score_PrintingCallback(val_dataset, model_name='ResNet')
 
     # Get the class weights based on the training dataset to handle class imbalance.
     _, class_weights = get_class_weights_from_paths('/app/data/processed')
 
+    # Single early stopping instance reused across all three phases, so that
+    # best_score/best_weights track the best model across the entire training
+    # run rather than resetting at the start of each phase.
+    early_stopping = ICBHIEarlyStopping(patience=5)
+
     # First phase of training with a higher learning rate and early stopping.
     print("PHASE 1: INITIAL TRAINING (lr=1e-4)")
-    early_stopping_1 = ICBHIEarlyStopping(patience=5)
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights))
-    model.fit(train_dataset, epochs=15, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_1])
+    model.fit(train_dataset, epochs=15, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping])
 
     # Second phase of training with a reduced learning rate and early stopping.
     print("PHASE 2: REFINE TRAINING (lr=1e-4)")
@@ -49,9 +53,10 @@ def train(model, base_model, train_dataset, val_dataset):
         layer.trainable = False
 
     # Early stopping for refinement phase.
-    early_stopping_2 = ICBHIEarlyStopping(patience=15)
+    early_stopping.patience = 15
+    early_stopping.wait = 0
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights))
-    model.fit(train_dataset, epochs=50, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_2])
+    model.fit(train_dataset, epochs=50, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping])
 
     # Third and final phase of training with an even lower learning rate and early stopping.
     print("PHASE 3: FINE-TUNING (lr=1e-5)")
@@ -60,12 +65,19 @@ def train(model, base_model, train_dataset, val_dataset):
     base_model.trainable = True
 
     # Early stopping for final training stage.
-    early_stopping_3 = ICBHIEarlyStopping(patience=20)
+    early_stopping.patience = 20
+    early_stopping.wait = 0
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights))
-    model.fit(train_dataset, epochs=100, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping_3])
+    model.fit(train_dataset, epochs=100, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping])
+
+    # Restore the best weights found across the entire training run (all three
+    # phases) before saving, so the timestamped checkpoint matches the best
+    # model, i.e. the same one saved as best_model_epoch.keras by icbhi_callback.
+    if early_stopping.best_weights is not None:
+        model.set_weights(early_stopping.best_weights)
 
     # Save the final trained model with a timestamped filename.
-    model.save(os.path.join('models', datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.keras'))
+    model.save(os.path.join('models/pretrained', 'ResNet-50 - ' + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.keras'))
     return model
 
 # Parse command-line arguments.
