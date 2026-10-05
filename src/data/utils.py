@@ -200,7 +200,7 @@ def load_datasets(dir_dataset, seed=12345):
     train_dataset = train_dataset.prefetch(1)
 
     test_dataset = test_dataset.map(lambda x: process_npy(x, training=False), num_parallel_calls=1)
-    test_dataset = test_dataset.batch(16, drop_remainder=True)
+    test_dataset = test_dataset.batch(16, drop_remainder=False)
     test_dataset = test_dataset.prefetch(1)
 
     return train_dataset, test_dataset
