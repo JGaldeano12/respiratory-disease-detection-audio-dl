@@ -103,7 +103,7 @@ def split_patients_by_train_test(aux_file, seed, train_test_split):
 
 def move_spectrograms_by_train_test(input_path, cycles_train, cycles_test):
     """
-    Copy spectrogram images into their corresponding training or testing sets.
+        Move spectrogram images into their corresponding training or testing sets.
 
     The function retrieves spectrogram files from each respiratory sound class
     directory, determines the patient identifier associated with each file, and
@@ -130,6 +130,10 @@ def move_spectrograms_by_train_test(input_path, cycles_train, cycles_test):
 
     # Check and create the necessary directories for training and testing sets if they do not exist
     check_and_create_directories(input_path)
+
+    # Build sets with the patient IDs (first column) of each split for exact and fast lookups.
+    train_ids = set(cycles_train[:, 0])
+    test_ids = set(cycles_test[:, 0])
     
     # Create a list with every spectrogram.
     full_data = [crackle_data, wheeze_data, crackles_and_wheeze_data, healthy_data]
@@ -156,11 +160,15 @@ def move_spectrograms_by_train_test(input_path, cycles_train, cycles_test):
             id_patient = filename_data[0]
 
             # Check which set the patient belongs to.
-            if id_patient in cycles_train:
-                shutil.copy(spectrogram, os.path.join(input_path, 'Train', label))
-                print(f"Moved spectrogram {spectrogram} to Train/{label}")
-            elif id_patient in cycles_test:
-                shutil.copy(spectrogram, os.path.join(input_path, 'Test', label))
-                print(f"Moved spectrogram {spectrogram} to Test/{label}")
+            if id_patient in train_ids:
+                split = 'Train'
+            elif id_patient in test_ids:
+                split = 'Test'
             else:
                 print(f"Patient ID {id_patient} not found in either training or testing sets.")
+                continue
+
+            # Move the spectrogram to its split. The full destination path is given so that an existing file is overwritten.
+            shutil.move(spectrogram, os.path.join(input_path, split, label, os.path.basename(spectrogram)))
+
+    print("Spectrograms moved into Train and Test directories.")
