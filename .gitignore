@@ -1,21 +1,23 @@
-# First, we ignore the raw data and processed data, but mantaining the folders.
+# Raw and processed data are not versioned, but the folder structure is kept.
 data/raw/*
 data/processed/*
-
-# However, do not ignore the created folders, as they are needed for the project structure.
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 
-# Exclude the trained models
-models/custom_cnn/*
-models/pretrained/*
+# Trained models are not versioned, but the folder structure and README are kept.
 models/*
+!models/README.md
+!models/custom_cnn/
+models/custom_cnn/*
+!models/custom_cnn/.gitkeep
 
-# Exclude cache files from data
-src/data/__pycache__
-src/features/__pycache__
-src/training/__pycache__
-src/notebooks/models/*
+# Model weights anywhere in the repository.
+*.h5
+*.keras
 
-# Not include any model
-*/*.h5
+# Python cache files.
+__pycache__/
+*.pyc
+
+# Jupyter checkpoints.
+.ipynb_checkpoints/
