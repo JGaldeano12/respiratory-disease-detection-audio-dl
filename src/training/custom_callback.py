@@ -5,12 +5,15 @@ import numpy as np
 import tensorflow as tf
 from sklearn.metrics import confusion_matrix, recall_score
 
+from src.evaluation.metrics import icbhi_official_score
+
 class ICBHI_Score_PrintingCallback(tf.keras.callbacks.Callback):
     """
     Callback to compute and monitor the ICBHI score during training.
 
     The callback evaluates the model on the validation dataset at the end
-    of each epoch, computes recall, specificity, and the ICBHI score,
+    of each epoch, computes the official ICBHI sensitivity, specificity,
+    and score,
     prints the corresponding metrics, logs the results, and saves the model
     to a model-specific path whenever a new best ICBHI score is achieved.
     """
@@ -47,30 +50,6 @@ class ICBHI_Score_PrintingCallback(tf.keras.callbacks.Callback):
             f"experiments_training_logs_{timestamp}.txt"
         )
 
-    def calculate_specificity_per_class(self, y_true, y_pred):
-        """
-        Calculate the specificity for each class.
-
-        Args:
-            y_true (np.ndarray): True class labels.
-            y_pred (np.ndarray): Predicted class labels.
-
-        Returns:
-            np.ndarray: Specificity value for each class.
-        """
-        num_classes = np.max(y_true) + 1
-        cm = confusion_matrix(y_true, y_pred, labels=np.arange(num_classes))
-
-        specificity_per_class = []
-
-        for i in range(num_classes):
-            true_negatives = np.sum(cm) - (np.sum(cm[i, :]) + np.sum(cm[:, i]) - cm[i, i])
-            false_positives = np.sum(cm[:, i]) - cm[i, i]
-            specificity = true_negatives / (true_negatives + false_positives + np.finfo(float).eps)
-            specificity_per_class.append(specificity)
-
-        return np.array(specificity_per_class)
-
     def on_train_begin(self, logs=None):
         """
         Save the model summary to the training log file.
@@ -90,7 +69,7 @@ class ICBHI_Score_PrintingCallback(tf.keras.callbacks.Callback):
         Evaluate the model and compute the ICBHI score after each epoch.
 
         The validation dataset is used to obtain predictions and true labels.
-        Recall, specificity, and the ICBHI score are then computed. The model
+        The per-class recall and the official ICBHI metrics are then computed. The model
         is saved whenever a new best ICBHI score is achieved.
 
         Args:
@@ -114,21 +93,13 @@ class ICBHI_Score_PrintingCallback(tf.keras.callbacks.Callback):
         predictions_np = np.concatenate(predictions)
         labels_np = np.concatenate(labels)
 
-        # Compute recall and specificity for each class.
+        # Compute recall per class (for diagnostics) and the official ICBHI metrics.
         recall_per_class = recall_score(labels_np, predictions_np, average=None, zero_division=0)
-        specificity_per_class = self.calculate_specificity_per_class(labels_np, predictions_np)
+        sensitivity, specificity, icbhi_score = icbhi_official_score(labels_np, predictions_np)
 
-        # Compute mean recall and specificity.
-        mean_recall = np.mean(recall_per_class)
-        mean_specificity = np.mean(specificity_per_class)
-
-        # Compute the ICBHI score.
-        icbhi_score = (mean_recall + mean_specificity) / 2
-
-        # Display per-class and overall metrics.
+        # Display per-class recall and the official ICBHI metrics.
         print("\nRecall per class:", [round(value, 4) for value in recall_per_class])
-        print("\nSpecificity per class:", [round(value, 4) for value in specificity_per_class])
-        print(f"\nICBHI Score: {icbhi_score:.5f}" f" - Sensitivity: {mean_recall:.5f}" f" - Specificity: {mean_specificity:.5f}")
+        print(f"\nICBHI Score: {icbhi_score:.5f} - Sensitivity: {sensitivity:.5f} - Specificity: {specificity:.5f}")
 
         # Save the model when a new best ICBHI score is achieved.
         if icbhi_score > self.best_icbhi_score:
@@ -148,10 +119,9 @@ class ICBHI_Score_PrintingCallback(tf.keras.callbacks.Callback):
             file.write(
                 f"Epoch {epoch + 1}\n"
                 f"Recall per class: {recall_per_class}\n"
-                f"Specificity per class: {specificity_per_class}\n"
                 f"ICBHI Score: {icbhi_score:.5f}\n"
-                f"Sensitivity: {mean_recall:.5f}\n"
-                f"Specificity: {mean_specificity:.5f}\n"
+                f"Sensitivity: {sensitivity:.5f}\n"
+                f"Specificity: {specificity:.5f}\n"
                 f"Best Score: {self.best_icbhi_score:.5f}\n"
                 f"Confusion Matrix:\n{cm}\n"
                 "--------------------------------------\n"

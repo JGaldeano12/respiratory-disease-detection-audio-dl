@@ -1,15 +1,16 @@
-import os
 import argparse
+import os
 from datetime import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import tensorflow as tf
-from sklearn.metrics import confusion_matrix, recall_score
+from sklearn.metrics import confusion_matrix
 from tensorflow.keras.models import load_model
 
 from src.data.utils import process_npy
+from src.evaluation.metrics import icbhi_official_score
 
 def load_test_dataset(dir_dataset):
     """
@@ -77,74 +78,13 @@ def create_confusion_matrix(labels, predictions, output_path):
 
     return f"Confusion matrix saved to {output_path}"
 
-    return "Confusion matrix saved!"
-
-def calculate_specificity_per_class(labels, predictions):
-    """
-    Calculate the specificity for each class.
-
-    Specificity is calculated as the proportion of true negative samples
-    among all samples that do not belong to the corresponding class.
-
-    Args:
-        labels (np.ndarray): True class labels.
-        predictions (np.ndarray): Predicted class labels.
-
-    Returns:
-        list: Specificity value for each class.
-    """
-    # Determine the number of classes from the true labels.
-    num_classes = np.max(labels) + 1
-    specificities = []
-
-    # Calculate specificity independently for each class.
-    for i in range(num_classes):
-        true_negatives = np.sum((labels != i) & (predictions != i))
-        false_positives = np.sum((labels != i) & (predictions == i))
-        specificity = (true_negatives / (true_negatives + false_positives + np.finfo(float).eps))
-        specificities.append(specificity)
-
-    return specificities
-
-def compute_recall_specificity_score(labels, predictions):
-    """
-    Compute recall, specificity, and the ICBHI score.
-
-    The ICBHI score is calculated as the average of the mean recall and
-    mean specificity across all classes.
-
-    Args:
-        labels (np.ndarray): True class labels.
-        predictions (np.ndarray): Predicted class labels.
-
-    Returns:
-        tuple:
-            float: Mean recall across all classes.
-            float: Mean specificity across all classes.
-            float: ICBHI score.
-    """
-    # Compute recall independently for each class.
-    recall_per_class = recall_score(labels, predictions, average=None)
-
-    # Compute specificity independently for each class.
-    specificity_per_class = calculate_specificity_per_class(labels, predictions)
-
-    # Compute the mean recall and specificity.
-    mean_recall = np.mean(recall_per_class)
-    mean_specificity = np.mean(specificity_per_class)
-
-    # Compute the ICBHI score.
-    icbhi_score = (mean_recall + mean_specificity) / 2
-
-    return mean_recall, mean_specificity, icbhi_score
-
 def evaluate_model(model_path, dir_test_dataset, output_dir):
     """
     Evaluate a trained model on the test dataset.
 
     The function loads the trained model, processes the test dataset,
-    generates predictions, and computes the confusion matrix, recall,
-    specificity, and ICBHI score.
+    generates predictions, and computes the confusion matrix and the
+    official ICBHI sensitivity, specificity, and score.
 
     Args:
         model_path (str): Path to the trained Keras model.
@@ -185,11 +125,11 @@ def evaluate_model(model_path, dir_test_dataset, output_dir):
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     print(create_confusion_matrix(labels, predictions, os.path.join(output_dir, f"confusion_matrix_{model_name}_{timestamp}.png")))
 
-    # Compute recall, specificity, and the ICBHI score.
-    recall, specificity, icbhi_score = (compute_recall_specificity_score(labels, predictions))
+    # Compute the official ICBHI metrics.
+    sensitivity, specificity, icbhi_score = icbhi_official_score(labels, predictions)
 
     # Display the evaluation metrics.
-    print(f"Recall: {recall:.4f}")
+    print(f"Sensitivity: {sensitivity:.4f}")
     print(f"Specificity: {specificity:.4f}")
     print(f"ICBHI Score: {icbhi_score:.4f}")
 
