@@ -1,4 +1,8 @@
-import os, numpy as np, tensorflow as tf, glob
+import glob
+import os
+
+import numpy as np
+import tensorflow as tf
 from sklearn.utils.class_weight import compute_class_weight
 
 def get_label(file_path):

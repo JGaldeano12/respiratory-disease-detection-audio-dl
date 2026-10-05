@@ -1,13 +1,14 @@
-import seaborn as sns
-import numpy as np
-import matplotlib.pyplot as plt
 import os
-import tensorflow as tf
 from datetime import datetime
 
-from tensorflow.keras.models import load_model
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+import tensorflow as tf
 from sklearn.metrics import confusion_matrix, recall_score
-from src.data.utils import get_label, load_npy, process_npy
+from tensorflow.keras.models import load_model
+
+from src.data.utils import process_npy
 
 def load_test_dataset(dir_dataset):
     """

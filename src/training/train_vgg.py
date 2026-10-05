@@ -1,11 +1,15 @@
-import tensorflow as tf, numpy as np, os, random, glob, argparse
-
+import argparse
+import os
+import random
 from datetime import datetime
-from sklearn.utils.class_weight import compute_class_weight
+
+import numpy as np
+import tensorflow as tf
+
+from src.data.utils import get_class_weights_from_paths, load_datasets
+from src.models.vgg_19 import create_vgg_19
 from src.training.custom_callback import ICBHI_Score_PrintingCallback, ICBHIEarlyStopping
 from src.training.losses import focal_loss
-from src.data.utils import load_datasets, get_class_weights_from_paths
-from src.models.vgg_19 import create_vgg_19
 
 def train(model, base_model, train_dataset, val_dataset):
     """
@@ -44,12 +48,12 @@ def train(model, base_model, train_dataset, val_dataset):
     model.fit(train_dataset, epochs=15, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping])
 
     # Second phase of training with a reduced learning rate and early stopping.
-    print("PHASE 2: REFINE TRAINING (lr=1e-4)")
+    print("PHASE 2: REFINE TRAINING (lr=1e-5)")
 
     # Unfreeze the VGG-19 backbone.
     base_model.trainable = True
 
-    # Freeze the first 30 layers of the VGG-19 backbone to retain learned features.
+    # Keep all but the last 30 layers of the backbone frozen to retain low-level features.
     for layer in base_model.layers[:-30]:
         layer.trainable = False
 
@@ -60,7 +64,7 @@ def train(model, base_model, train_dataset, val_dataset):
     model.fit(train_dataset, epochs=50, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping])
 
     # Third and final phase of training with an even lower learning rate and early stopping.
-    print("PHASE 3: FINE-TUNING (lr=1e-5)")
+    print("PHASE 3: FINE-TUNING (lr=5e-5)")
 
     # Unfreeze the VGG-19 backbone.
     base_model.trainable = True

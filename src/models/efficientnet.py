@@ -1,8 +1,7 @@
-import os, random, numpy as np, tensorflow as tf, glob
+import tensorflow as tf
 from tensorflow.keras import layers, models, regularizers
-from tensorflow.keras.applications import ResNet50
 
-def create_efficientnet_model(input_shape=(128, 129, 1), num_classes=4, seed=12345):
+def create_efficientnet_model(input_shape=(128, 255, 1), num_classes=4, seed=12345):
     """
     Create an EfficientNetB2-based model for multi-class image classification.
 
@@ -17,7 +16,7 @@ def create_efficientnet_model(input_shape=(128, 129, 1), num_classes=4, seed=123
 
     Args:
         input_shape (tuple[int, int, int], optional): Shape of a single input
-            sample, excluding the batch dimension. Defaults to (128, 129, 1).
+            sample, excluding the batch dimension. Defaults to (128, 255, 1).
         num_classes (int, optional): Number of output classes. Defaults to 4.
         seed (int, optional): Random seed used for weight initialization and
             dropout. Defaults to 12345.

@@ -2,6 +2,7 @@
 
 cd /app || exit 1
 export PYTHONPATH=/app
+export TF_CPP_MIN_LOG_LEVEL=1
 
 LOG_DIR="experiments"
 SEED=1234

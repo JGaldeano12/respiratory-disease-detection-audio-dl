@@ -38,7 +38,7 @@ def conv_block(x, filters, initializer, pool=True):
     # Return the output tensor of the block.
     return x
 
-def create_custom_cnn(input_shape=(128, 129, 1), num_classes=4, seed=12345):
+def create_custom_cnn(input_shape=(128, 255, 1), num_classes=4, seed=12345):
     """
     Create a custom plain convolutional neural network for image classification.
 
@@ -51,7 +51,7 @@ def create_custom_cnn(input_shape=(128, 129, 1), num_classes=4, seed=12345):
 
     Args:
         input_shape (tuple[int, int, int], optional): Shape of a single input
-            sample, excluding the batch dimension. Defaults to (128, 129, 1).
+            sample, excluding the batch dimension. Defaults to (128, 255, 1).
         num_classes (int, optional): Number of output classes. Defaults to 4.
         seed (int, optional): Random seed used to initialize the Glorot
             initializer and the dropout layer. Defaults to 12345.

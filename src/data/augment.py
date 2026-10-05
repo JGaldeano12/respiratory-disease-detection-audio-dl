@@ -1,8 +1,16 @@
-import nlpaug.augmenter.audio as naa, os, gc, numpy as np, librosa, multiprocessing, argparse, warnings
+import argparse
+import gc
+import multiprocessing
+import os
+import warnings
 
+import librosa
+import nlpaug.augmenter.audio as naa
+import numpy as np
+
+from src.data.divide import split_patients_by_train_test
 from src.data.preprocess import butter_bandpass_filter, check_length_and_padding
 from src.features.extract_features import extract_features
-from src.data.divide import split_patients_by_train_test
 
 warnings.filterwarnings("ignore")
 
@@ -213,7 +221,7 @@ def apply_traditional_augmentation_process_file(cycle, input_path, output_path, 
     except Exception as e:
         print(f"Error while processing {cycle[1]}: {e}")
 
-def apply_traditional_augmentation_lectura_datos_parallel(input_path, output_path, sample_rate, length, cycles, rng, seed):
+def apply_traditional_augmentation_process_files_parallel(input_path, output_path, sample_rate, length, cycles, rng, seed):
     """
     Apply traditional augmentation to multiple respiratory cycles in parallel.
 
@@ -236,11 +244,11 @@ def apply_traditional_augmentation_lectura_datos_parallel(input_path, output_pat
         None
     """
     # Build the argument tuples, passing the shared seed to each worker.
-    argumentos = [(cycle, input_path, output_path, sample_rate, length, rng, seed) for cycle in cycles]
+    task_args = [(cycle, input_path, output_path, sample_rate, length, rng, seed) for cycle in cycles]
 
     # Launch a pool of workers to process files in parallel.
     with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
-        pool.starmap(apply_traditional_augmentation_process_file, argumentos)
+        pool.starmap(apply_traditional_augmentation_process_file, task_args)
 
 def apply_traditional_augmentation(raw_audio, rng, seed, sample_rate=8000, length=8, cycle=None, output_path='/app/data/processed/Train'):
     """
@@ -321,7 +329,7 @@ cycles_selected = select_balanced_and_random_respiratory_cycles(rng=rng,
                                                                 train_test_split=args.test_train_split)
 
 # Apply traditional augmentation techniques to the selected cycles in parallel.
-apply_traditional_augmentation_lectura_datos_parallel(input_path='/app/data/raw', 
+apply_traditional_augmentation_process_files_parallel(input_path='/app/data/raw', 
                                                       output_path='/app/data/processed/Train', 
                                                       sample_rate=args.sample_rate, 
                                                       length=args.duration, 

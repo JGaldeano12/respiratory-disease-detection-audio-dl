@@ -1,4 +1,8 @@
-import librosa, numpy as np, os, gc
+import gc
+import os
+
+import librosa
+import numpy as np
 
 def standardize_audio(audio):
     """

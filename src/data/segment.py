@@ -1,6 +1,9 @@
-from src.features.extract_features import extract_features, save_features
+import gc
+
+import numpy as np
+
 from src.data.preprocess import butter_bandpass_filter, check_length_and_padding
-import gc, numpy as np
+from src.features.extract_features import extract_features
 
 def divide_audio(duration, sample_rate, raw_audio, output_path, patient, cycles):
     """
@@ -20,7 +23,7 @@ def divide_audio(duration, sample_rate, raw_audio, output_path, patient, cycles)
     # Obtain the respiratory cycles for the specific patient
     cycles_filtered = cycles[np.isin(cycles[:, 1], patient)]
 
-    # Auxiliar variable to keep track of the cycle number
+    # Auxiliary variable to keep track of the cycle number
     aux_index_cycle = 0
 
     # Now, for each respiratory cycle, I will extract the corresponding audio segment, apply the Butterworth filter, standardize it, and generate the spectrogram. 
@@ -35,7 +38,7 @@ def divide_audio(duration, sample_rate, raw_audio, output_path, patient, cycles)
         # Apply the Butterworth bandpass filter and standardize the audio segment
         segmented_audio = butter_bandpass_filter(segm, 50, 2000, sample_rate, order=5)
 
-        # Check wether the audio segment is shorter than the target duration. If so, we will apply padding to reach the desired length.
+        # Check whether the audio segment is shorter than the target duration. If so, we will apply padding to reach the desired length.
         segmented_audio = check_length_and_padding(segmented_audio, target_length)
 
         # Generate the Mel Spectrogram for the audio segment:

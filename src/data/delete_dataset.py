@@ -1,4 +1,5 @@
-import shutil, os
+import os
+import shutil
 
 def delete_dataset():
     """

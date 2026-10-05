@@ -1,5 +1,4 @@
 audioread==3.1.0
-cmapy==0.6.6
 contourpy==1.3.2
 cycler==0.12.1
 filelock==3.25.2
@@ -13,11 +12,12 @@ matplotlib==3.10.8
 nlpaug==1.1.11
 numba==0.64.0
 numpy==1.26.4
-opencv-python==4.8.1.78
+pandas==2.2.2
 pillow==12.1.1
 pooch==1.9.0
 PySocks==1.7.1
-SciencePlots==2.2.1
+scikit-learn==1.4.2
+scipy==1.14.0
 seaborn==0.13.2
 soundfile==0.13.1
 soxr==1.0.0

@@ -1,9 +1,9 @@
 import os
+from datetime import datetime
+
 import numpy as np
 import tensorflow as tf
-
 from sklearn.metrics import confusion_matrix, recall_score
-from datetime import datetime
 
 class ICBHI_Score_PrintingCallback(tf.keras.callbacks.Callback):
     """

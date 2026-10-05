@@ -1,10 +1,15 @@
-import tensorflow as tf, numpy as np, os, random, argparse
-
+import argparse
+import os
+import random
 from datetime import datetime
+
+import numpy as np
+import tensorflow as tf
+
+from src.data.utils import get_class_weights_from_paths, load_datasets
+from src.models.resnet_50 import create_resnet_50
 from src.training.custom_callback import ICBHI_Score_PrintingCallback, ICBHIEarlyStopping
 from src.training.losses import focal_loss
-from src.data.utils import load_datasets, get_class_weights_from_paths
-from src.models.resnet_50 import create_resnet_50
 
 def train(model, base_model, train_dataset, val_dataset):
     """
@@ -48,7 +53,7 @@ def train(model, base_model, train_dataset, val_dataset):
     # Unfreeze the ResNet-50 backbone.
     base_model.trainable = True
 
-    # Freeze the first 30 layers of the ResNet-50 backbone to retain learned features.
+    # Keep all but the last 30 layers of the backbone frozen to retain low-level features.
     for layer in base_model.layers[:-30]:
         layer.trainable = False
 

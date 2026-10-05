@@ -1,11 +1,15 @@
-import tensorflow as tf, numpy as np, os, random, glob, argparse
-
+import argparse
+import os
+import random
 from datetime import datetime
-from sklearn.utils.class_weight import compute_class_weight
+
+import numpy as np
+import tensorflow as tf
+
+from src.data.utils import get_class_weights_from_paths, load_datasets
+from src.models.custom_cnn import create_custom_cnn
 from src.training.custom_callback import ICBHI_Score_PrintingCallback, ICBHIEarlyStopping
 from src.training.losses import focal_loss
-from src.data.utils import load_datasets, get_class_weights_from_paths
-from src.models.custom_cnn import create_custom_cnn
 
 def train(model, train_dataset, val_dataset):
     """
@@ -39,7 +43,7 @@ def train(model, train_dataset, val_dataset):
     early_stopping = ICBHIEarlyStopping(patience=5)
 
     # First phase of training with a higher learning rate and early stopping.
-    print("PHASE 1: INITIAL TRAINING (lr=5e-4)")
+    print("PHASE 1: INITIAL TRAINING (lr=3e-4)")
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=3e-4, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights))
     model.fit(train_dataset, epochs=15, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping])
 
@@ -50,7 +54,7 @@ def train(model, train_dataset, val_dataset):
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights))
     model.fit(train_dataset, epochs=50, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping])
 
-    # Third and final phase of training with an even lower learning rate and early stopping.
+    # Third and final phase of training with a slightly higher learning rate and early stopping.
     print("PHASE 3: FINE-TUNING (lr=5e-5)")
     early_stopping.patience = 20
     early_stopping.wait = 0

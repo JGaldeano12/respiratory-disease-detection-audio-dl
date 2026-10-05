@@ -1,4 +1,7 @@
-import shutil, os, numpy as np
+import os
+import shutil
+
+import numpy as np
 
 def create_directories(input_path):
     """
@@ -128,7 +131,7 @@ def move_spectrograms_by_train_test(input_path, cycles_train, cycles_test):
     # Check and create the necessary directories for training and testing sets if they do not exist
     check_and_create_directories(input_path)
     
-    # Create a list with every spectrogrma.
+    # Create a list with every spectrogram.
     full_data = [crackle_data, wheeze_data, crackles_and_wheeze_data, healthy_data]
 
     print("Starting to move spectrograms into Train and Test directories based on patient IDs...")
@@ -152,7 +155,7 @@ def move_spectrograms_by_train_test(input_path, cycles_train, cycles_test):
             filename_data = filename.split("_")
             id_patient = filename_data[0]
 
-            # Consulto a qué conjunto pertenece...
+            # Check which set the patient belongs to.
             if id_patient in cycles_train:
                 shutil.copy(spectrogram, os.path.join(input_path, 'Train', label))
                 print(f"Moved spectrogram {spectrogram} to Train/{label}")

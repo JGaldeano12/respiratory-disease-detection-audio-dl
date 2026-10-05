@@ -1,5 +1,10 @@
+import multiprocessing
+import os
+
+import librosa
+import numpy as np
+
 from src.data.segment import divide_audio
-import os, gc, multiprocessing, librosa, numpy as np, cv2
 
 def process_file(file, input_path, output_path, sample_rate, length, cycles):
     """
@@ -38,7 +43,7 @@ def process_file(file, input_path, output_path, sample_rate, length, cycles):
     except Exception as e:
         print(f"Error while processing {input_path} - Patient {id_patient}: {e}")
 
-def lectura_datos_parallel(input_path, output_path, sample_rate, length, cycles):
+def process_files_parallel(input_path, output_path, sample_rate, length, cycles):
     """
     Process all WAV files in a directory in parallel.
 
@@ -59,16 +64,16 @@ def lectura_datos_parallel(input_path, output_path, sample_rate, length, cycles)
         str: Confirmation message after all audio files have been processed.
     """
     # List of .wav files in the directory
-    archivos_wav = [os.path.join(input_path, f) for f in os.listdir(input_path) if f.endswith(".wav")]
+    wav_files = [os.path.join(input_path, f) for f in os.listdir(input_path) if f.endswith(".wav")]
 
     # Load respiratory cycles
     cycles = np.load(cycles)
 
     # Create tuples of parameters for each file
-    argumentos = [(archivo, input_path, output_path, sample_rate,length, cycles) for archivo in archivos_wav]
+    task_args = [(wav_file, input_path, output_path, sample_rate, length, cycles) for wav_file in wav_files]
 
     # Use multiprocessing to parallelize the processing of files
     with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
-        pool.starmap(process_file, argumentos)
+        pool.starmap(process_file, task_args)
 
     return "Processing completed for all files."

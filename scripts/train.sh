@@ -1,6 +1,7 @@
 #!/bin/bash
 cd /app
 export PYTHONPATH=/app
+export TF_CPP_MIN_LOG_LEVEL=1
 
 LOG_DIR="experiments"
 
