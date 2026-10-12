@@ -107,10 +107,12 @@ tf.config.experimental.enable_op_determinism()
 print("Loading datasets...")
 # The testing dataset is not used during training; it is evaluated afterwards with evaluate.py.
 train_dataset, val_dataset, _ = load_datasets('/app/data/processed', seed=SEED)
+# The input shape (128, width, 1) is taken from the dataset, since the width depends on the segment duration.
+input_shape = tuple(int(d) for d in train_dataset.element_spec[0].shape[1:])
 
 # Create VGG-19-based model with deterministic initialization.
-print("Creating model...")
-model, base_model = create_vgg_19(input_shape=(128, 251, 1), num_classes=4)
+print(f"Creating model with input shape {input_shape}...")
+model, base_model = create_vgg_19(input_shape=input_shape, num_classes=4)
 
 # Start the training process for the model using the loaded datasets.
 print("Starting training...")

@@ -15,10 +15,21 @@ class ICBHI_Score_PrintingCallback(tf.keras.callbacks.Callback):
     of each epoch, computes the official ICBHI sensitivity, specificity,
     and score,
     prints the corresponding metrics, logs the results, and saves the model
-    to a model-specific path whenever a new best ICBHI score is achieved.
+    to a model-specific path whenever a new best selection score is achieved.
+
+    The selection score is the mean validation ICBHI score of the last
+    `smoothing_window` epochs. With a window of 1 (the default) it is the
+    ICBHI score of the current epoch; larger windows avoid selecting
+    checkpoints from isolated peaks of a small validation set. The best
+    3-epoch mean is always tracked as well, so that runs with different
+    windows can be compared with the same criterion.
+
+    Degenerate epochs, in which the sensitivity or the specificity is 0
+    (the model predicts only normal or only abnormal classes), score 0 for
+    checkpoint selection and early stopping.
     """
 
-    def __init__(self, val_dataset, model_name):
+    def __init__(self, val_dataset, model_name, smoothing_window=1):
         """
         Initialize the ICBHI score callback.
 
@@ -30,12 +41,17 @@ class ICBHI_Score_PrintingCallback(tf.keras.callbacks.Callback):
                 model-specific directory and filename for the best checkpoint,
                 so that different architectures don't overwrite each other's
                 best model.
+            smoothing_window (int, optional): Number of epochs averaged to
+                compute the selection score. Defaults to 1.
         """
         super().__init__()
 
         self.best_icbhi_score = 0.0
         self.val_dataset = val_dataset
         self.model_name = model_name
+        self.smoothing_window = max(1, int(smoothing_window))
+        self.score_history = []
+        self.best_smoothed_3 = 0.0
 
         # Build a model-specific save path, e.g. /app/models/ResNet/best_model_ResNet.keras,
         # and make sure the target directory exists.
@@ -101,9 +117,26 @@ class ICBHI_Score_PrintingCallback(tf.keras.callbacks.Callback):
         print("\nRecall per class:", [round(value, 4) for value in recall_per_class])
         print(f"\nICBHI Score: {icbhi_score:.5f} - Sensitivity: {sensitivity:.5f} - Specificity: {specificity:.5f}")
 
-        # Save the model when a new best ICBHI score is achieved.
-        if icbhi_score > self.best_icbhi_score:
-            self.best_icbhi_score = icbhi_score
+        # A degenerate epoch (no abnormal cycle detected, or no normal cycle recognised) is a trivial
+        # classifier: it scores 0 for checkpoint selection and early stopping, so that predicting a single
+        # group (e.g. ICBHI 0.5 when everything is "normal") can never block the training.
+        degenerate = sensitivity == 0.0 or specificity == 0.0
+        if degenerate:
+            print("Degenerate epoch (sensitivity or specificity is 0): not eligible for checkpoint selection.")
+
+        # Selection score: mean ICBHI score of the last `smoothing_window` epochs (the current one if the window is 1).
+        self.score_history.append(0.0 if degenerate else icbhi_score)
+        selection_score = float(np.mean(self.score_history[-self.smoothing_window:]))
+
+        # The 3-epoch mean is always tracked, so that every run can be compared with the same criterion.
+        self.best_smoothed_3 = max(self.best_smoothed_3, float(np.mean(self.score_history[-3:])))
+
+        if self.smoothing_window > 1:
+            print(f"Selection score ({self.smoothing_window}-epoch mean): {selection_score:.5f}")
+
+        # Save the model when a new best selection score is achieved.
+        if selection_score > self.best_icbhi_score:
+            self.best_icbhi_score = selection_score
             self.model.save(self.save_path)
 
         # Compute and display the confusion matrix.
@@ -122,6 +155,7 @@ class ICBHI_Score_PrintingCallback(tf.keras.callbacks.Callback):
                 f"ICBHI Score: {icbhi_score:.5f}\n"
                 f"Sensitivity: {sensitivity:.5f}\n"
                 f"Specificity: {specificity:.5f}\n"
+                f"Selection Score: {selection_score:.5f}\n"
                 f"Best Score: {self.best_icbhi_score:.5f}\n"
                 f"Confusion Matrix:\n{cm}\n"
                 "--------------------------------------\n"
@@ -131,9 +165,10 @@ class ICBHI_Score_PrintingCallback(tf.keras.callbacks.Callback):
             "\n----------------------------------------------------------------------------\n"
         )
 
-        # Store the ICBHI score so that other callbacks can access it.
+        # Store the selection score (used by early stopping) and the raw ICBHI score for other callbacks.
         if logs is not None:
-            logs['icbhi_score'] = icbhi_score
+            logs['icbhi_score'] = selection_score
+            logs['icbhi_score_raw'] = icbhi_score
 
     def on_train_end(self, logs=None):
         """
@@ -142,7 +177,8 @@ class ICBHI_Score_PrintingCallback(tf.keras.callbacks.Callback):
         Args:
             logs (dict, optional): Dictionary containing training logs.
         """
-        final_msg = (f"\nBest ICBHI Score during training: " f"{self.best_icbhi_score:.5f}")
+        final_msg = (f"\nBest ICBHI Score during training: {self.best_icbhi_score:.5f}"
+                     f"\nBest 3-epoch mean ICBHI Score during training: {self.best_smoothed_3:.5f}")
 
         print(final_msg)
 

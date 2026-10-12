@@ -8,7 +8,7 @@ import librosa
 import nlpaug.augmenter.audio as naa
 import numpy as np
 
-from src.data.divide import split_patients_by_train_val_test
+from src.data.divide import get_split
 from src.data.preprocess import butter_bandpass_filter, check_length_and_padding
 from src.features.extract_features import extract_features
 
@@ -148,7 +148,7 @@ def check_balanced_dataset(data_path):
 # including selecting a balanced random subset of respiratory cycles, processing individual audio
 # files, and applying augmentation techniques in parallel across multiple files.
 
-def select_balanced_and_random_respiratory_cycles(rng, control_file_path='/app/src/resources/aux_respiratory_cycles.npy', seed=202506, train_test_split=80, val_split=15):
+def select_balanced_and_random_respiratory_cycles(rng, control_file_path='/app/src/resources/aux_respiratory_cycles.npy', seed=202506, train_test_split=80, val_split=15, split_mode='random', official_file=None, folds_file=None, test_fold=4):
     """
     Select an equal number of respiratory cycles from each class for augmentation.
 
@@ -169,13 +169,21 @@ def select_balanced_and_random_respiratory_cycles(rng, control_file_path='/app/s
             the training + validation block. Defaults to 80.
         val_split (float, optional): Percentage of the training + validation
             patients assigned to the validation set. Defaults to 15.
+        split_mode (str, optional): "random", "official" or "respirenet". Defaults to
+            "random".
+        official_file (str, optional): Path to the official partition file,
+            used in "official" mode.
+        folds_file (str, optional): Path to RespireNet's folds file, used in
+            "respirenet" mode.
+        test_fold (int, optional): RespireNet fold used as the testing set.
+            Defaults to 4.
 
     Returns:
         np.ndarray: Concatenated array containing a balanced random selection
         of respiratory cycles from all classes.
     """
     # Filter the respiratory cycles used for training (validation and testing patients are never augmented).
-    cycles_train, _, _ = split_patients_by_train_val_test(aux_file=control_file_path, seed=seed, train_test_split=train_test_split, val_split=val_split)
+    cycles_train, _, _ = get_split(aux_file=control_file_path, seed=seed, train_test_split=train_test_split, val_split=val_split, split_mode=split_mode, official_file=official_file, folds_file=folds_file, test_fold=test_fold)
 
     # Calculate the minimum number of cycles across all classes to ensure a balanced selection.
     _, counts = np.unique(cycles_train[:, 6], return_counts=True)
@@ -320,6 +328,10 @@ parser.add_argument('--sample_rate', type=int, default=8000, help='Sampling rate
 parser.add_argument('--duration', type=int, default=8, help='Duration of each audio segment')
 parser.add_argument('--test_train_split', type=int, default=80, help='Percentage of patients used for training + validation')
 parser.add_argument('--val_split', type=int, default=15, help='Percentage of the training + validation patients used for validation')
+parser.add_argument('--split_mode', type=str, default='random', choices=['random', 'official', 'respirenet'], help='Seeded patient-wise split, official ICBHI 2017 partition, or RespireNet folds')
+parser.add_argument('--official_split_file', type=str, default='/app/src/resources/ICBHI_challenge_train_test.txt', help='Official ICBHI 2017 partition file')
+parser.add_argument('--folds_file', type=str, default='/app/src/resources/patient_list_foldwise.txt', help='RespireNet patient-wise folds file')
+parser.add_argument('--test_fold', type=int, default=4, help='RespireNet fold used as the testing set')
 args = parser.parse_args()
 
 # Create a single rng from the provided seed, shared across all augmentation steps.
@@ -330,7 +342,11 @@ cycles_selected = select_balanced_and_random_respiratory_cycles(rng=rng,
                                                                 control_file_path='/app/src/resources/aux_respiratory_cycles.npy', 
                                                                 seed=args.seed, 
                                                                 train_test_split=args.test_train_split,
-                                                                val_split=args.val_split)
+                                                                val_split=args.val_split,
+                                                                split_mode=args.split_mode,
+                                                                official_file=args.official_split_file,
+                                                                folds_file=args.folds_file,
+                                                                test_fold=args.test_fold)
 
 # Apply traditional augmentation techniques to the selected cycles in parallel.
 apply_traditional_augmentation_process_files_parallel(input_path='/app/data/raw', 

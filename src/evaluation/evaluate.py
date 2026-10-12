@@ -9,7 +9,7 @@ import tensorflow as tf
 from sklearn.metrics import confusion_matrix
 from tensorflow.keras.models import load_model
 
-from src.data.utils import process_npy
+from src.data.utils import get_spectrogram_width, process_npy
 from src.evaluation.metrics import icbhi_official_score
 
 def load_test_dataset(dir_dataset):
@@ -37,7 +37,8 @@ def load_test_dataset(dir_dataset):
     # Load and preprocess the spectrograms. training=False is passed explicitly
     # so that SpecAugment is not applied at evaluation time (process_npy
     # defaults to training=True, which was silently augmenting the test data).
-    test_dataset = test_dataset.map(lambda x: process_npy(x, training=False), num_parallel_calls=1)
+    width = get_spectrogram_width(dir_dataset)
+    test_dataset = test_dataset.map(lambda x: process_npy(x, width, training=False), num_parallel_calls=1)
 
     # Group samples into batches for model inference.
     test_dataset = test_dataset.batch(1, drop_remainder=True)

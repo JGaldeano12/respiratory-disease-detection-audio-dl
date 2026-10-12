@@ -32,7 +32,26 @@ def get_label(file_path):
     label = table.lookup(label_str)
     return label
 
-def load_npy(path):
+def get_spectrogram_width(dir_dataset):
+    """
+    Read the spectrogram width (number of time frames) from the dataset.
+
+    The width depends on the segment duration used to generate the dataset
+    (e.g. 251 frames for 8 s at 8000 Hz with a hop length of 256), so it is
+    read from the first spectrogram found instead of being hard-coded.
+
+    Args:
+        dir_dataset (str): Root directory containing the split directories.
+
+    Returns:
+        int: Width of the spectrograms.
+    """
+    paths = sorted(glob.glob(os.path.join(dir_dataset, '*', '*', '*.npy')))
+    if not paths:
+        raise FileNotFoundError(f"No spectrograms found in {dir_dataset}")
+    return int(np.load(paths[0], mmap_mode='r').shape[1])
+
+def load_npy(path, width):
     """
     Load a spectrogram from a NumPy file.
 
@@ -42,13 +61,15 @@ def load_npy(path):
 
     Args:
         path (tf.Tensor): Path to the NumPy spectrogram file.
+        width (tf.Tensor): Expected spectrogram width.
 
     Returns:
         np.ndarray: Loaded spectrogram as a 32-bit floating-point array.
     """
     path = path.numpy().decode("utf-8")
+    width = int(width.numpy())
     spec = np.load(path)
-    assert spec.shape[1] == 251, f"Unexpected spectrogram width: {spec.shape[1]}"
+    assert spec.shape[1] == width, f"Unexpected spectrogram width: {spec.shape[1]} (expected {width})"
     return spec.astype(np.float32)
 
 def spec_augment_tf(spec, time_mask_param=20, freq_mask_param=10, num_time_masks=2, num_freq_masks=2):
@@ -98,6 +119,34 @@ def spec_augment_tf(spec, time_mask_param=20, freq_mask_param=10, num_time_masks
 
     return spec
 
+# Mel bins of the 1.5-2 kHz band (n_mels=128, fmin=50 Hz, fmax=2500 Hz; row 0 is the lowest frequency).
+# Recordings from the Littmann 3200 stethoscope have no energy in this band.
+BLANK_BAND_ROWS = (93, 113)
+
+def mask_blank_band(spec, probability=0.3):
+    """
+    Randomly blank the 1.5-2 kHz band of a spectrogram.
+
+    With the given probability, the mel bins of the 1.5-2 kHz band are set to
+    the minimum value of the spectrogram, simulating the empty band of the
+    Littmann 3200 recordings. This teaches the model that an empty band is a
+    property of the device and not a sign of pathology.
+
+    Args:
+        spec (tf.Tensor): Spectrogram of shape (128, width, 1).
+        probability (float, optional): Probability of blanking the band.
+            Defaults to 0.3.
+
+    Returns:
+        tf.Tensor: Spectrogram, with the band blanked or unchanged.
+    """
+    low, high = BLANK_BAND_ROWS
+    rows = tf.range(tf.shape(spec)[0])
+    band = tf.reshape(tf.logical_and(rows >= low, rows < high), (-1, 1, 1))
+    blanked = tf.where(band, tf.reduce_min(spec), spec)
+
+    return tf.cond(tf.random.uniform([]) < probability, lambda: blanked, lambda: spec)
+
 def get_class_weights_from_paths(dir_dataset):
     """
     Compute class weights from the training dataset file paths.
@@ -133,7 +182,7 @@ def get_class_weights_from_paths(dir_dataset):
 
     return dict(enumerate(class_weights)), np.array(class_weights)
 
-def process_npy(file_path, training=True):
+def process_npy(file_path, width, training=True, band_mask=False):
     """
     Load and preprocess a NumPy spectrogram and its corresponding label.
 
@@ -143,8 +192,11 @@ def process_npy(file_path, training=True):
 
     Args:
         file_path (tf.Tensor): Path to the NumPy spectrogram file.
+        width (int): Spectrogram width, as returned by get_spectrogram_width().
         training (bool): Whether the spectrogram is being processed for
             training. If True, SpecAugment may be applied.
+        band_mask (bool): Whether to randomly blank the 1.5-2 kHz band
+            during training (see mask_blank_band). Defaults to False.
 
     Returns:
         tuple:
@@ -154,8 +206,8 @@ def process_npy(file_path, training=True):
     label = get_label(file_path)
     label = tf.one_hot(label, depth=4)
 
-    spec = tf.py_function(load_npy, [file_path], tf.float32)
-    spec.set_shape([128, 251, 1])
+    spec = tf.py_function(load_npy, [file_path, width], tf.float32)
+    spec.set_shape([128, width, 1])
 
     if training:
         spec = tf.cond(
@@ -164,9 +216,12 @@ def process_npy(file_path, training=True):
             lambda: spec
         )
 
+    if training and band_mask:
+        spec = mask_blank_band(spec)
+
     return spec, label
 
-def load_datasets(dir_dataset, seed=12345):
+def load_datasets(dir_dataset, seed=12345, band_mask=False):
     """
     Load and prepare the training, validation and testing datasets.
 
@@ -180,27 +235,37 @@ def load_datasets(dir_dataset, seed=12345):
         dir_dataset (str): Path to the root directory containing the
             Train, Val and Test directories.
         seed (int): Random seed used for shuffling the training dataset.
+        band_mask (bool): Whether to randomly blank the 1.5-2 kHz band of the
+            training spectrograms. Defaults to False.
 
     Returns:
         tuple:
             A tuple containing the prepared training, validation and
-            testing TensorFlow datasets.
+            testing TensorFlow datasets. A split without spectrograms is
+            returned as None.
     """
     options = tf.data.Options()
     options.experimental_deterministic = True
 
+    # Spectrogram width, which depends on the segment duration used to generate the dataset.
+    width = get_spectrogram_width(dir_dataset)
+
     # Training dataset: shuffled, augmented, and batched dropping the last incomplete batch.
     train_dataset = tf.data.Dataset.list_files(os.path.join(dir_dataset, 'Train/*/*'), shuffle=False).with_options(options)
     train_dataset = train_dataset.shuffle(buffer_size=len(train_dataset), seed=seed, reshuffle_each_iteration=True)
-    train_dataset = train_dataset.map(lambda x: process_npy(x, training=True), num_parallel_calls=1)
+    train_dataset = train_dataset.map(lambda x: process_npy(x, width, training=True, band_mask=band_mask), num_parallel_calls=1)
     train_dataset = train_dataset.batch(16, drop_remainder=True)
     train_dataset = train_dataset.prefetch(1)
 
     # Validation and testing datasets: neither shuffled nor augmented, and every sample is kept.
     eval_datasets = []
     for split in ['Val', 'Test']:
+        # A split without spectrograms (e.g. no validation set in the oracle protocol) is returned as None.
+        if not glob.glob(os.path.join(dir_dataset, split, '*', '*')):
+            eval_datasets.append(None)
+            continue
         dataset = tf.data.Dataset.list_files(os.path.join(dir_dataset, split, '*/*'), shuffle=False).with_options(options)
-        dataset = dataset.map(lambda x: process_npy(x, training=False), num_parallel_calls=1)
+        dataset = dataset.map(lambda x: process_npy(x, width, training=False), num_parallel_calls=1)
         dataset = dataset.batch(16, drop_remainder=False)
         dataset = dataset.prefetch(1)
         eval_datasets.append(dataset)

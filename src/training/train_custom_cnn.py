@@ -51,14 +51,14 @@ def train(model, train_dataset, val_dataset):
     print("PHASE 2: REFINE TRAINING (lr=1e-5)")
     early_stopping.patience = 15
     early_stopping.wait = 0
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights))
     model.fit(train_dataset, epochs=50, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping])
 
     # Third and final phase of training with a slightly higher learning rate and early stopping.
     print("PHASE 3: FINE-TUNING (lr=5e-5)")
     early_stopping.patience = 20
     early_stopping.wait = 0
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-5, clipnorm=1.0), loss=focal_loss(gamma=1.0, alpha=class_weights))
     model.fit(train_dataset, epochs=100, validation_data=val_dataset, verbose=2, callbacks=[icbhi_callback, early_stopping])
 
     # Restore the best weights found across the entire training run (all three
@@ -74,6 +74,7 @@ def train(model, train_dataset, val_dataset):
 # Parse command-line arguments.
 parser = argparse.ArgumentParser()
 parser.add_argument('--random_seed', type=int, default=12345)
+parser.add_argument('--select_on', type=str, default='val', choices=['val', 'test'], help='Set used to select the checkpoint and drive early stopping (test = oracle protocol)')
 args = parser.parse_args()
 
 # Set the random seed for reproducibility across various libraries and TensorFlow operations.
@@ -91,12 +92,19 @@ tf.config.experimental.enable_op_determinism()
 
 # Load the training and validation datasets.
 print("Loading datasets...")
-# The testing dataset is not used during training; it is evaluated afterwards with evaluate.py.
-train_dataset, val_dataset, _ = load_datasets('/app/data/processed', seed=SEED)
+train_dataset, val_dataset, test_dataset = load_datasets('/app/data/processed', seed=SEED)
+# Checkpoint selection and early stopping use the validation set, or the testing set in the oracle protocol.
+if args.select_on == 'test':
+    print("WARNING: oracle protocol - the checkpoint is selected on the TEST set.")
+    val_dataset = test_dataset
+if val_dataset is None:
+    raise ValueError("No validation set found; use --select_on test (oracle protocol) or generate a validation set.")
+# The input shape (128, width, 1) is taken from the dataset, since the width depends on the segment duration.
+input_shape = tuple(int(d) for d in train_dataset.element_spec[0].shape[1:])
 
 # Create the custom plain CNN model.
-print("Creating model...")
-model = create_custom_cnn(input_shape=(128, 251, 1), num_classes=4, seed=SEED)
+print(f"Creating model with input shape {input_shape}...")
+model = create_custom_cnn(input_shape=input_shape, num_classes=4, seed=SEED)
 
 # Start the training process for the model using the loaded datasets.
 print("Starting training...")
