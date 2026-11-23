@@ -5,7 +5,7 @@ import numpy as np
 from src.data.preprocess import butter_bandpass_filter, check_length_and_padding
 from src.features.extract_features import extract_features
 
-def divide_audio(duration, sample_rate, raw_audio, output_path, patient, cycles):
+def divide_audio(duration, sample_rate, raw_audio, output_path, patient, cycles, highcut=2000, fmax=2500):
     """
     Function to divide the audio into segments based on the respiratory cycles and generate spectrograms for each segment.
 
@@ -15,7 +15,8 @@ def divide_audio(duration, sample_rate, raw_audio, output_path, patient, cycles)
     output_path: destination path.
     patient: patient ID.
     cycles: respiratory cycles information.
-    cycles_train: training respiratory cycles information.
+    highcut: upper cutoff frequency (Hz) of the Butterworth bandpass filter.
+    fmax: highest frequency (Hz) of the Mel filterbank.
     """
     # Define the target duration in number of samples
     target_length = int(duration * sample_rate)
@@ -36,13 +37,13 @@ def divide_audio(duration, sample_rate, raw_audio, output_path, patient, cycles)
         segm = raw_audio[start:end]
 
         # Apply the Butterworth bandpass filter and standardize the audio segment
-        segmented_audio = butter_bandpass_filter(segm, 50, 2000, sample_rate, order=5)
+        segmented_audio = butter_bandpass_filter(segm, 50, highcut, sample_rate, order=5)
 
         # Check whether the audio segment is shorter than the target duration. If so, we will apply padding to reach the desired length.
         segmented_audio = check_length_and_padding(segmented_audio, target_length)
 
         # Generate the Mel Spectrogram for the audio segment:
-        extract_features(segmented_audio, sample_rate, output_path, label = index_cycle[6], patient = patient, index_cycle = aux_index_cycle, type = "Original")
+        extract_features(segmented_audio, sample_rate, output_path, label = index_cycle[6], patient = patient, index_cycle = aux_index_cycle, type = "Original", fmax = fmax)
 
         # Increment the cycle index for the next iteration
         aux_index_cycle += 1

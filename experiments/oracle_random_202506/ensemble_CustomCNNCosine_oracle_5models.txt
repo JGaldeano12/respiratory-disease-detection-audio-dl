@@ -1,0 +1,15 @@
+Ensemble: CustomCNNCosine_oracle_5models (5 models)
+
+[Test]
+Model                              Se       Sp    ICBHI
+andom_val_seed_202506_oracle   0.2630   0.9063   0.5847
+02506_trainseed202501_oracle   0.3123   0.9103   0.6113
+02506_trainseed202502_oracle   0.4192   0.7577   0.5884
+02506_trainseed202503_oracle   0.4082   0.7764   0.5923
+02506_trainseed202504_oracle   0.2630   0.9371   0.6000
+ENSEMBLE (mean)                0.2712   0.9465   0.6088
+  Ensemble per device:
+  AKGC417L                       0.3515   0.9291   0.6403
+  Meditron                       0.1111   0.9810   0.5460
+  LittC2SE                       0.0714   0.9643   0.5179
+  Litt3200                       0.1500   0.8125   0.4813

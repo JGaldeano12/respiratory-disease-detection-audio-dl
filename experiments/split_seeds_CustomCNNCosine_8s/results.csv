@@ -1,0 +1,4 @@
+split_seed,best_val_icbhi,test_sensitivity,test_specificity,test_icbhi
+202508,0.61812,0.3183,0.6245,0.4714
+202509,0.52697,0.3353,0.3948,0.3651
+202510,0.53231,0.1264,0.8664,0.4964

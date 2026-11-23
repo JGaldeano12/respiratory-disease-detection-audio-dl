@@ -1,0 +1,29 @@
+2026-10-11 04:47:28.019146: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-11 04:47:48.479138: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-11 04:48:02.843843: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-11 04:48:17.529031: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-11 04:48:30.497249: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-11 04:48:44.265201: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-11 04:48:57.835809: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-11 04:49:11.431265: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-11 04:49:25.423523: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-11 04:49:38.652705: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+Ensemble: CustomCNNCosine_oracle_9models (9 models)
+
+[Test]
+Model                              Se       Sp    ICBHI
+andom_val_seed_202506_oracle   0.2630   0.9063   0.5847
+02506_trainseed202501_oracle   0.3123   0.9103   0.6113
+02506_trainseed202502_oracle   0.4192   0.7577   0.5884
+02506_trainseed202503_oracle   0.4082   0.7764   0.5923
+02506_trainseed202504_oracle   0.2630   0.9371   0.6000
+02506_trainseed202505_oracle   0.4740   0.7671   0.6205
+02506_trainseed202506_oracle   0.5425   0.6037   0.5731
+02506_trainseed202507_oracle   0.4411   0.7925   0.6168
+02506_trainseed202508_oracle   0.3205   0.8661   0.5933
+ENSEMBLE (mean)                0.3041   0.9357   0.6199
+  Ensemble per device:
+  AKGC417L                       0.3808   0.9155   0.6481
+  Meditron                       0.1250   0.9734   0.5492
+  LittC2SE                       0.1429   0.9714   0.5571
+  Litt3200                       0.2250   0.7500   0.4875

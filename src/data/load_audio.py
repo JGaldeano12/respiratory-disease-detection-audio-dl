@@ -6,12 +6,12 @@ import numpy as np
 
 from src.data.segment import divide_audio
 
-def process_file(file, input_path, output_path, sample_rate, length, cycles):
+def process_file(file, input_path, output_path, sample_rate, length, cycles, highcut=2000, fmax=2500):
     """
     Load and process a single audio file.
 
     The function extracts the patient identifier from the filename, loads the
-    audio at a sampling rate of 8000 Hz, and delegates its segmentation to
+    audio at the given sampling rate, and delegates its segmentation to
     `divide_audio`.
 
     Args:
@@ -22,6 +22,10 @@ def process_file(file, input_path, output_path, sample_rate, length, cycles):
         length (float): Duration of each generated audio segment.
         cycles (np.ndarray): Respiratory cycle information used during audio
             segmentation.
+        highcut (float, optional): Upper cutoff frequency of the bandpass
+            filter in Hz. Defaults to 2000.
+        fmax (float, optional): Highest frequency of the Mel filterbank in Hz.
+            Defaults to 2500.
 
     Returns:
         None
@@ -38,12 +42,12 @@ def process_file(file, input_path, output_path, sample_rate, length, cycles):
         raw_audio, sample_rate = librosa.load(os.path.join(input_path, file), sr = sample_rate)
 
         # Proceed to audio segmentation
-        divide_audio(duration = length, sample_rate = sample_rate, raw_audio = raw_audio, output_path = output_path, patient = id_patient, cycles = cycles)
+        divide_audio(duration = length, sample_rate = sample_rate, raw_audio = raw_audio, output_path = output_path, patient = id_patient, cycles = cycles, highcut = highcut, fmax = fmax)
         
     except Exception as e:
         print(f"Error while processing {input_path} - Patient {id_patient}: {e}")
 
-def process_files_parallel(input_path, output_path, sample_rate, length, cycles):
+def process_files_parallel(input_path, output_path, sample_rate, length, cycles, highcut=2000, fmax=2500):
     """
     Process all WAV files in a directory in parallel.
 
@@ -59,6 +63,10 @@ def process_files_parallel(input_path, output_path, sample_rate, length, cycles)
         length (float): Duration of each generated audio segment.
         cycles (str): Path to the NumPy file containing the respiratory cycle
             information.
+        highcut (float, optional): Upper cutoff frequency of the bandpass
+            filter in Hz. Defaults to 2000.
+        fmax (float, optional): Highest frequency of the Mel filterbank in Hz.
+            Defaults to 2500.
 
     Returns:
         str: Confirmation message after all audio files have been processed.
@@ -70,7 +78,7 @@ def process_files_parallel(input_path, output_path, sample_rate, length, cycles)
     cycles = np.load(cycles)
 
     # Create tuples of parameters for each file
-    task_args = [(wav_file, input_path, output_path, sample_rate, length, cycles) for wav_file in wav_files]
+    task_args = [(wav_file, input_path, output_path, sample_rate, length, cycles, highcut, fmax) for wav_file in wav_files]
 
     # Use multiprocessing to parallelize the processing of files
     with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:

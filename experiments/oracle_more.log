@@ -1,0 +1,104 @@
+nohup: ignoring input
+########## ORACLE PLAN STARTED (random split, seed 202506): 2026-10-10 22:44:22 ##########
+Skipping CustomCNN seed 1234 (already completed).
+Skipping CustomCNNCosine seed 1234 (already completed).
+>>> Oracle scores: three phases 0.49799, cosine 0.58465 -> CustomCNNCosine
+Skipping CustomCNNCosine trainseed202501 (already completed).
+Skipping CustomCNNCosine trainseed202502 (already completed).
+Skipping CustomCNNCosine trainseed202503 (already completed).
+Skipping CustomCNNCosine trainseed202504 (already completed).
+========== RANDOM 80:20 SPLIT | CustomCNNCosine | trainseed202505 | split seed 202506 | 8 s | oracle | 2026-10-10 22:44:22 ==========
+Training options:  --select_on test
+Reusing the existing dataset (random_202506_oracle_8s).
+Best validation ICBHI: 0.62119
+Sensitivity: 0.4740
+Specificity: 0.7684
+ICBHI Score: 0.6212
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       296       239   0.4728   0.8209   0.6469
+Meditron       263        72   0.2361   0.7833   0.5097
+LittC2SE       140        14   0.5000   0.8714   0.6857
+Litt3200        48        40   0.9000   0.0417   0.4708
+All            747       365   0.4740   0.7671   0.6205
+Logs and confusion matrix saved in experiments/random_split/CustomCNNCosine_val_seed_202506_trainseed202505_oracle
+========== RANDOM 80:20 SPLIT | CustomCNNCosine | trainseed202506 | split seed 202506 | 8 s | oracle | 2026-10-11 00:23:15 ==========
+Training options:  --select_on test
+Reusing the existing dataset (random_202506_oracle_8s).
+Best validation ICBHI: 0.57311
+Sensitivity: 0.5425
+Specificity: 0.6037
+ICBHI Score: 0.5731
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       296       239   0.5565   0.5372   0.5468
+Meditron       263        72   0.3472   0.6540   0.5006
+LittC2SE       140        14   0.5000   0.7857   0.6429
+Litt3200        48        40   0.8250   0.2083   0.5167
+All            747       365   0.5425   0.6037   0.5731
+Logs and confusion matrix saved in experiments/random_split/CustomCNNCosine_val_seed_202506_trainseed202506_oracle
+========== RANDOM 80:20 SPLIT | CustomCNNCosine | trainseed202507 | split seed 202506 | 8 s | oracle | 2026-10-11 01:49:35 ==========
+Training options:  --select_on test
+Reusing the existing dataset (random_202506_oracle_8s).
+Best validation ICBHI: 0.61680
+Sensitivity: 0.4411
+Specificity: 0.7925
+ICBHI Score: 0.6168
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       296       239   0.5565   0.6959   0.6262
+Meditron       263        72   0.2778   0.8555   0.5666
+LittC2SE       140        14   0.2857   0.8286   0.5571
+Litt3200        48        40   0.1000   0.9375   0.5188
+All            747       365   0.4411   0.7925   0.6168
+Logs and confusion matrix saved in experiments/random_split/CustomCNNCosine_val_seed_202506_trainseed202507_oracle
+========== RANDOM 80:20 SPLIT | CustomCNNCosine | trainseed202508 | split seed 202506 | 8 s | oracle | 2026-10-11 03:10:48 ==========
+Training options:  --select_on test
+Reusing the existing dataset (random_202506_oracle_8s).
+Best validation ICBHI: 0.59334
+Sensitivity: 0.3205
+Specificity: 0.8661
+ICBHI Score: 0.5933
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       296       239   0.3640   0.8480   0.6060
+Meditron       263        72   0.1528   0.8935   0.5232
+LittC2SE       140        14   0.3571   0.9500   0.6536
+Litt3200        48        40   0.3500   0.5833   0.4667
+All            747       365   0.3205   0.8661   0.5933
+Logs and confusion matrix saved in experiments/random_split/CustomCNNCosine_val_seed_202506_trainseed202508_oracle
+ORACLE SUMMARY (2026-10-11 04:49:39) - random split, seed 202506
+Checkpoints selected on the TEST set (RespireNet-like protocol); scores are optimistic.
+
+Run                                            Test Se   Test Sp Test ICBHI
+CustomCNNCosine_oracle                          0.2630    0.9063    0.5847
+CustomCNNCosine_trainseed202501_oracle          0.3123    0.9103    0.6113
+CustomCNNCosine_trainseed202502_oracle          0.4164    0.7590    0.5877
+CustomCNNCosine_trainseed202503_oracle          0.4082    0.7764    0.5923
+CustomCNNCosine_trainseed202504_oracle          0.2630    0.9371    0.6000
+CustomCNNCosine_trainseed202505_oracle          0.4740    0.7684    0.6212
+CustomCNNCosine_trainseed202506_oracle          0.5425    0.6037    0.5731
+CustomCNNCosine_trainseed202507_oracle          0.4411    0.7925    0.6168
+CustomCNNCosine_trainseed202508_oracle          0.3205    0.8661    0.5933
+CustomCNN_oracle                                0.2740    0.9090    0.5915
+
+Ensemble: CustomCNNCosine_oracle_9models (9 models)
+
+[Test]
+Model                              Se       Sp    ICBHI
+andom_val_seed_202506_oracle   0.2630   0.9063   0.5847
+02506_trainseed202501_oracle   0.3123   0.9103   0.6113
+02506_trainseed202502_oracle   0.4192   0.7577   0.5884
+02506_trainseed202503_oracle   0.4082   0.7764   0.5923
+02506_trainseed202504_oracle   0.2630   0.9371   0.6000
+02506_trainseed202505_oracle   0.4740   0.7671   0.6205
+02506_trainseed202506_oracle   0.5425   0.6037   0.5731
+02506_trainseed202507_oracle   0.4411   0.7925   0.6168
+02506_trainseed202508_oracle   0.3205   0.8661   0.5933
+ENSEMBLE (mean)                0.3041   0.9357   0.6199
+  Ensemble per device:
+  AKGC417L                       0.3808   0.9155   0.6481
+  Meditron                       0.1250   0.9734   0.5492
+  LittC2SE                       0.1429   0.9714   0.5571
+  Litt3200                       0.2250   0.7500   0.4875
+########## ORACLE PLAN FINISHED: 2026-10-11 04:49:40 ##########

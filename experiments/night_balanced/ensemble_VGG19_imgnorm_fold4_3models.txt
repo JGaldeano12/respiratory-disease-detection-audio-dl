@@ -1,0 +1,13 @@
+Ensemble: VGG19_imgnorm_fold4_3models (3 models)
+
+[Test]
+Model                              Se       Sp    ICBHI
+l_seed_202506_imgnorm_oracle   0.4006   0.8477   0.6242
+gnorm_trainseed202501_oracle   0.4574   0.7471   0.6022
+gnorm_trainseed202502_oracle   0.5037   0.6942   0.5990
+ENSEMBLE (mean)                0.4395   0.8155   0.6275
+  Ensemble per device:
+  AKGC417L                       0.4640   0.7669   0.6154
+  Meditron                       0.2059   0.9110   0.5584
+  LittC2SE                       0.5294   0.8915   0.7104
+  Litt3200                       0.0000   0.7710   0.3855

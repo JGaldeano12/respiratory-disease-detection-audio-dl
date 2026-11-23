@@ -11,7 +11,7 @@ from src.models.vgg_19 import create_vgg_19
 from src.training.custom_callback import ICBHI_Score_PrintingCallback, ICBHIEarlyStopping
 from src.training.losses import focal_loss
 
-def train(model, base_model, train_dataset, val_dataset):
+def train(model, base_model, train_dataset, val_dataset, balanced=False):
     """
     Train the model using a three-phase training strategy.
 
@@ -26,6 +26,9 @@ def train(model, base_model, train_dataset, val_dataset):
             the model parameters.
         val_dataset (tf.data.Dataset): Validation dataset used to monitor
             the model performance during training.
+        balanced (bool, optional): Whether the training batches are
+            class-balanced; if so, the focal loss is not reweighted.
+            Defaults to False.
 
     Returns:
         tf.keras.Model: Trained model after completing the three training
@@ -36,6 +39,11 @@ def train(model, base_model, train_dataset, val_dataset):
 
     # Get the class weights based on the training dataset to handle class imbalance.
     _, class_weights = get_class_weights_from_paths('/app/data/processed')
+
+    # With class-balanced batches the imbalance is already compensated, so the focal loss is not reweighted.
+    if balanced:
+        class_weights = np.ones_like(class_weights)
+    print(f"Focal loss class weights: {np.round(class_weights, 3)}")
 
     # Single early stopping instance reused across all three phases, so that
     # best_score/best_weights track the best model across the entire training
@@ -88,6 +96,8 @@ def train(model, base_model, train_dataset, val_dataset):
 # Parse command-line arguments.
 parser = argparse.ArgumentParser()
 parser.add_argument('--random_seed', type=int, default=12345)
+parser.add_argument('--balanced_batches', action='store_true', help='Class-balanced training batches (RespireNet-like); disables the focal loss class weights')
+parser.add_argument('--select_on', type=str, default='val', choices=['val', 'test'], help='Set used to select the checkpoint and drive early stopping (test = oracle protocol)')
 args = parser.parse_args()
 
 # Set the random seed for reproducibility across various libraries and TensorFlow operations.
@@ -105,8 +115,13 @@ tf.config.experimental.enable_op_determinism()
 
 # Load the training and validation datasets.
 print("Loading datasets...")
-# The testing dataset is not used during training; it is evaluated afterwards with evaluate.py.
-train_dataset, val_dataset, _ = load_datasets('/app/data/processed', seed=SEED)
+train_dataset, val_dataset, test_dataset = load_datasets('/app/data/processed', seed=SEED, balanced=args.balanced_batches)
+# Checkpoint selection and early stopping use the validation set, or the testing set in the oracle protocol.
+if args.select_on == 'test':
+    print("WARNING: oracle protocol - the checkpoint is selected on the TEST set.")
+    val_dataset = test_dataset
+if val_dataset is None:
+    raise ValueError("No validation set found; use --select_on test (oracle protocol) or generate a validation set.")
 # The input shape (128, width, 1) is taken from the dataset, since the width depends on the segment duration.
 input_shape = tuple(int(d) for d in train_dataset.element_spec[0].shape[1:])
 
@@ -116,4 +131,4 @@ model, base_model = create_vgg_19(input_shape=input_shape, num_classes=4)
 
 # Start the training process for the model using the loaded datasets.
 print("Starting training...")
-model = train(model, base_model, train_dataset, val_dataset)
+model = train(model, base_model, train_dataset, val_dataset, balanced=args.balanced_batches)

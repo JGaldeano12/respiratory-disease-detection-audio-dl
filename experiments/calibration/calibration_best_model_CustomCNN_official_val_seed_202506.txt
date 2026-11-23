@@ -1,0 +1,8 @@
+Model: models/official_split/best_model_CustomCNN_official_val_seed_202506.keras
+Selected offset (on validation): -0.00
+
+Set      Offset       Se       Sp    ICBHI
+Val       +0.00   0.5776   0.7230   0.6503
+Val       -0.00   0.5776   0.7230   0.6503
+Test      +0.00   0.2668   0.6593   0.4630
+Test      -0.00   0.2668   0.6593   0.4630

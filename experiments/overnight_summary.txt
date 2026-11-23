@@ -1,0 +1,10 @@
+OVERNIGHT SUMMARY (2026-10-07 07:55:45)
+Decisions taken on validation: duration = 8 s, Custom CNN variant = custom_cnn_cosine
+
+Model              Duration  Val ICBHI   Test Se   Test Sp Test ICBHI
+CustomCNNCosine         8 s    0.65157    0.2472    0.6352    0.4412
+CustomCNN               8 s    0.64862    0.2668    0.6593    0.4630
+CustomCNN               5 s    0.58993    0.4894    0.4009    0.4451
+CustomCNN               6 s    0.59003    0.5064    0.3192    0.4128
+CustomCNN               7 s    0.57172    0.4817    0.2280    0.3549
+EfficientNet            8 s    0.64922    0.3976    0.5845    0.4911

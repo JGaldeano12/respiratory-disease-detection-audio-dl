@@ -1,0 +1,852 @@
+Options: select_on=test, smoothing_window=1, freq_norm=False, band_mask=False, alpha=balanced
+Loading datasets...
+WARNING: oracle protocol - the checkpoint is selected on the TEST set.
+Creating model with input shape (128, 251, 1)...
+Starting training...
+Focal loss class weights (balanced): [0.625 0.994 1.289 1.619]
+SINGLE PHASE: COSINE DECAY (lr=0.0003 -> 3e-06, max 100 epochs, patience 20)
+Epoch 1/100
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1791717598.758900   34960 service.cc:145] XLA service 0x70d4a3054350 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+I0000 00:00:1791717598.759520   34960 service.cc:153]   StreamExecutor device (0): NVIDIA GeForce RTX 3060, Compute Capability 8.6
+I0000 00:00:1791717598.940259   34960 device_compiler.h:188] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.
+2026-10-11 11:22:16.130702: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.2382, 0.3524, 0.0984, 0.5284]
+
+ICBHI Score: 0.29207 - Sensitivity: 0.34591 - Specificity: 0.23823
+
+Confusion Matrix:
+[[172 271  27 252]
+ [ 69 191   9 273]
+ [ 29  44  18  92]
+ [ 26  66  16 121]]
+
+Best ICBHI Score found: 0.29207
+
+
+----------------------------------------------------------------------------
+
+672/672 - 160s - loss: 1.8423 - val_loss: 1.2337 - icbhi_score: 0.2921 - icbhi_score_raw: 0.2921 - 160s/epoch - 239ms/step
+Epoch 2/100
+2026-10-11 11:24:27.161580: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.1427, 0.3007, 0.7049, 0.1266]
+
+ICBHI Score: 0.23957 - Sensitivity: 0.33648 - Specificity: 0.14266
+
+Confusion Matrix:
+[[103 174 373  72]
+ [ 32 163 276  71]
+ [ 13  23 129  18]
+ [ 16  35 149  29]]
+
+Best ICBHI Score found: 0.29207
+
+
+----------------------------------------------------------------------------
+
+672/672 - 130s - loss: 1.4716 - val_loss: 1.6947 - icbhi_score: 0.2396 - icbhi_score_raw: 0.2396 - 130s/epoch - 194ms/step
+Epoch 3/100
+2026-10-11 11:26:40.252420: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.3587, 0.1863, 0.6776, 0.0]
+
+ICBHI Score: 0.29729 - Sensitivity: 0.23585 - Specificity: 0.35873
+
+Confusion Matrix:
+[[259 124 339   0]
+ [142 101 299   0]
+ [ 39  20 124   0]
+ [ 62  14 153   0]]
+
+Best ICBHI Score found: 0.29729
+
+
+----------------------------------------------------------------------------
+
+672/672 - 133s - loss: 1.3151 - val_loss: 1.6457 - icbhi_score: 0.2973 - icbhi_score_raw: 0.2973 - 133s/epoch - 198ms/step
+Epoch 4/100
+2026-10-11 11:28:58.227041: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.1316, 0.3026, 0.4262, 0.3057]
+
+ICBHI Score: 0.22931 - Sensitivity: 0.32704 - Specificity: 0.13158
+
+Confusion Matrix:
+[[ 95 218 215 194]
+ [ 33 164 142 203]
+ [ 15  30  78  60]
+ [ 15  45  99  70]]
+
+Best ICBHI Score found: 0.29729
+
+
+----------------------------------------------------------------------------
+
+672/672 - 138s - loss: 1.2133 - val_loss: 1.1730 - icbhi_score: 0.2293 - icbhi_score_raw: 0.2293 - 138s/epoch - 205ms/step
+Epoch 5/100
+2026-10-11 11:31:19.299726: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.1773, 0.2196, 0.6448, 0.1878]
+
+ICBHI Score: 0.23539 - Sensitivity: 0.29350 - Specificity: 0.17729
+
+Confusion Matrix:
+[[128  92 409  93]
+ [ 79 119 161 183]
+ [ 19  14 118  32]
+ [ 42  24 120  43]]
+
+Best ICBHI Score found: 0.29729
+
+
+----------------------------------------------------------------------------
+
+672/672 - 141s - loss: 1.1468 - val_loss: 1.1700 - icbhi_score: 0.2354 - icbhi_score_raw: 0.2354 - 141s/epoch - 210ms/step
+Epoch 6/100
+2026-10-11 11:33:39.574917: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.072, 0.3579, 0.2404, 0.5022]
+
+ICBHI Score: 0.22102 - Sensitivity: 0.37002 - Specificity: 0.07202
+
+Confusion Matrix:
+[[ 52 256 175 239]
+ [ 24 194  58 266]
+ [ 11  38  44  90]
+ [  5  62  47 115]]
+
+Best ICBHI Score found: 0.29729
+
+
+----------------------------------------------------------------------------
+
+672/672 - 140s - loss: 1.1107 - val_loss: 1.0738 - icbhi_score: 0.2210 - icbhi_score_raw: 0.2210 - 140s/epoch - 209ms/step
+Epoch 7/100
+2026-10-11 11:35:57.648896: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.5305, 0.2177, 0.3607, 0.1092]
+
+ICBHI Score: 0.37477 - Sensitivity: 0.21908 - Specificity: 0.53047
+
+Confusion Matrix:
+[[383 124 150  65]
+ [234 118 134  56]
+ [ 87  19  66  11]
+ [101  23  80  25]]
+
+Best ICBHI Score found: 0.37477
+
+
+----------------------------------------------------------------------------
+
+672/672 - 138s - loss: 1.0835 - val_loss: 1.2556 - icbhi_score: 0.3748 - icbhi_score_raw: 0.3748 - 138s/epoch - 206ms/step
+Epoch 8/100
+2026-10-11 11:38:14.734952: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.3629, 0.2491, 0.4973, 0.2358]
+
+ICBHI Score: 0.32819 - Sensitivity: 0.29350 - Specificity: 0.36288
+
+Confusion Matrix:
+[[262 117 232 111]
+ [ 76 135 142 189]
+ [ 46  15  91  31]
+ [ 42  24 109  54]]
+
+Best ICBHI Score found: 0.37477
+
+
+----------------------------------------------------------------------------
+
+672/672 - 137s - loss: 1.0651 - val_loss: 1.2286 - icbhi_score: 0.3282 - icbhi_score_raw: 0.3282 - 137s/epoch - 204ms/step
+Epoch 9/100
+2026-10-11 11:40:29.467450: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.072, 0.2731, 0.5301, 0.3581]
+
+ICBHI Score: 0.20739 - Sensitivity: 0.34277 - Specificity: 0.07202
+
+Confusion Matrix:
+[[ 52 151 314 205]
+ [ 25 148 113 256]
+ [  6  16  97  64]
+ [ 12  30 105  82]]
+
+Best ICBHI Score found: 0.37477
+
+
+----------------------------------------------------------------------------
+
+672/672 - 135s - loss: 1.0483 - val_loss: 1.1505 - icbhi_score: 0.2074 - icbhi_score_raw: 0.2074 - 135s/epoch - 200ms/step
+Epoch 10/100
+2026-10-11 11:42:44.674919: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.259, 0.1771, 0.3005, 0.3057]
+
+ICBHI Score: 0.24533 - Sensitivity: 0.23166 - Specificity: 0.25900
+
+Confusion Matrix:
+[[187 154 151 230]
+ [139  96  44 263]
+ [ 26  29  55  73]
+ [ 58  36  65  70]]
+
+Best ICBHI Score found: 0.37477
+
+
+----------------------------------------------------------------------------
+
+672/672 - 135s - loss: 1.0481 - val_loss: 1.1712 - icbhi_score: 0.2453 - icbhi_score_raw: 0.2453 - 135s/epoch - 201ms/step
+Epoch 11/100
+2026-10-11 11:45:01.769986: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.1427, 0.7841, 0.0055, 0.0786]
+
+ICBHI Score: 0.30403 - Sensitivity: 0.46541 - Specificity: 0.14266
+
+Confusion Matrix:
+[[103 523   7  89]
+ [ 96 425   0  21]
+ [ 17 145   1  20]
+ [ 33 178   0  18]]
+
+Best ICBHI Score found: 0.37477
+
+
+----------------------------------------------------------------------------
+
+672/672 - 137s - loss: 1.0300 - val_loss: 1.2817 - icbhi_score: 0.3040 - icbhi_score_raw: 0.3040 - 137s/epoch - 204ms/step
+Epoch 12/100
+2026-10-11 11:47:18.157342: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.0776, 0.2583, 0.082, 0.6157]
+
+ICBHI Score: 0.19392 - Sensitivity: 0.31027 - Specificity: 0.07756
+
+Confusion Matrix:
+[[ 56 242  73 351]
+ [ 24 140  19 359]
+ [  4  45  15 119]
+ [ 17  59  12 141]]
+
+Best ICBHI Score found: 0.37477
+
+
+----------------------------------------------------------------------------
+
+672/672 - 136s - loss: 1.0251 - val_loss: 1.0667 - icbhi_score: 0.1939 - icbhi_score_raw: 0.1939 - 136s/epoch - 203ms/step
+Epoch 13/100
+2026-10-11 11:49:33.894731: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.3657, 0.2601, 0.1967, 0.2882]
+
+ICBHI Score: 0.31018 - Sensitivity: 0.25472 - Specificity: 0.36565
+
+Confusion Matrix:
+[[264 167 132 159]
+ [ 98 141  65 238]
+ [ 69  31  36  47]
+ [ 75  51  37  66]]
+
+Best ICBHI Score found: 0.37477
+
+
+----------------------------------------------------------------------------
+
+672/672 - 136s - loss: 1.0069 - val_loss: 1.1570 - icbhi_score: 0.3102 - icbhi_score_raw: 0.3102 - 136s/epoch - 202ms/step
+Epoch 14/100
+2026-10-11 11:51:51.711209: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.2036, 0.2841, 0.3552, 0.345]
+
+ICBHI Score: 0.25799 - Sensitivity: 0.31237 - Specificity: 0.20360
+
+Confusion Matrix:
+[[147 192 195 188]
+ [ 49 154  83 256]
+ [ 23  31  65  64]
+ [ 35  41  74  79]]
+
+Best ICBHI Score found: 0.37477
+
+
+----------------------------------------------------------------------------
+
+672/672 - 138s - loss: 1.0001 - val_loss: 1.1739 - icbhi_score: 0.2580 - icbhi_score_raw: 0.2580 - 138s/epoch - 205ms/step
+Epoch 15/100
+2026-10-11 11:54:15.589299: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.1219, 0.0, 0.9016, 0.0]
+
+ICBHI Score: 0.14742 - Sensitivity: 0.17296 - Specificity: 0.12188
+
+Confusion Matrix:
+[[ 88   0 634   0]
+ [ 42   0 500   0]
+ [ 18   0 165   0]
+ [ 15   0 214   0]]
+
+Best ICBHI Score found: 0.37477
+
+
+----------------------------------------------------------------------------
+
+672/672 - 140s - loss: 0.9749 - val_loss: 2.5461 - icbhi_score: 0.1474 - icbhi_score_raw: 0.1474 - 140s/epoch - 208ms/step
+Epoch 16/100
+2026-10-11 11:56:38.774447: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.1662, 0.6402, 0.2951, 0.4541]
+
+ICBHI Score: 0.34778 - Sensitivity: 0.52935 - Specificity: 0.16620
+
+Confusion Matrix:
+[[120 391 132  79]
+ [ 32 347  49 114]
+ [ 11  39  54  79]
+ [ 16  63  46 104]]
+
+Best ICBHI Score found: 0.37477
+
+
+----------------------------------------------------------------------------
+
+672/672 - 143s - loss: 0.9203 - val_loss: 0.9600 - icbhi_score: 0.3478 - icbhi_score_raw: 0.3478 - 143s/epoch - 213ms/step
+Epoch 17/100
+2026-10-11 11:59:06.134747: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.5069, 0.5148, 0.623, 0.2882]
+
+ICBHI Score: 0.49403 - Sensitivity: 0.48113 - Specificity: 0.50693
+
+Confusion Matrix:
+[[366 229 104  23]
+ [139 279  65  59]
+ [ 25   6 114  38]
+ [ 38  15 110  66]]
+
+Best ICBHI Score found: 0.49403
+
+
+----------------------------------------------------------------------------
+
+672/672 - 148s - loss: 0.8680 - val_loss: 0.9596 - icbhi_score: 0.4940 - icbhi_score_raw: 0.4940 - 148s/epoch - 220ms/step
+Epoch 18/100
+2026-10-11 12:01:28.021879: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.4654, 0.6273, 0.4863, 0.2838]
+
+ICBHI Score: 0.49160 - Sensitivity: 0.51782 - Specificity: 0.46537
+
+Confusion Matrix:
+[[336 287  88  11]
+ [127 340  43  32]
+ [ 41  14  89  39]
+ [ 55  36  73  65]]
+
+Best ICBHI Score found: 0.49403
+
+
+----------------------------------------------------------------------------
+
+672/672 - 142s - loss: 0.8378 - val_loss: 0.9991 - icbhi_score: 0.4916 - icbhi_score_raw: 0.4916 - 142s/epoch - 211ms/step
+Epoch 19/100
+2026-10-11 12:03:41.733415: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.4778, 0.607, 0.224, 0.3231]
+
+ICBHI Score: 0.47162 - Sensitivity: 0.46541 - Specificity: 0.47784
+
+Confusion Matrix:
+[[345 295  68  14]
+ [168 329  35  10]
+ [ 41  33  41  68]
+ [ 48  68  39  74]]
+
+Best ICBHI Score found: 0.49403
+
+
+----------------------------------------------------------------------------
+
+672/672 - 134s - loss: 0.8058 - val_loss: 1.0230 - icbhi_score: 0.4716 - icbhi_score_raw: 0.4716 - 134s/epoch - 199ms/step
+Epoch 20/100
+2026-10-11 12:05:55.425246: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.5097, 0.3044, 0.4973, 0.3755]
+
+ICBHI Score: 0.43409 - Sensitivity: 0.35849 - Specificity: 0.50970
+
+Confusion Matrix:
+[[368 185  92  77]
+ [155 165  71 151]
+ [ 40   3  91  49]
+ [ 52  13  78  86]]
+
+Best ICBHI Score found: 0.49403
+
+
+----------------------------------------------------------------------------
+
+672/672 - 134s - loss: 0.7893 - val_loss: 1.0652 - icbhi_score: 0.4341 - icbhi_score_raw: 0.4341 - 134s/epoch - 199ms/step
+Epoch 21/100
+2026-10-11 12:08:09.556945: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.2798, 0.8137, 0.3224, 0.2227]
+
+ICBHI Score: 0.42867 - Sensitivity: 0.57757 - Specificity: 0.27978
+
+Confusion Matrix:
+[[202 447  58  15]
+ [ 76 441  18   7]
+ [ 27  47  59  50]
+ [ 25 105  48  51]]
+
+Best ICBHI Score found: 0.49403
+
+
+----------------------------------------------------------------------------
+
+672/672 - 134s - loss: 0.7524 - val_loss: 0.9712 - icbhi_score: 0.4287 - icbhi_score_raw: 0.4287 - 134s/epoch - 199ms/step
+Epoch 22/100
+2026-10-11 12:10:23.909844: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.331, 0.5387, 0.4809, 0.3624]
+
+ICBHI Score: 0.40817 - Sensitivity: 0.48532 - Specificity: 0.33102
+
+Confusion Matrix:
+[[239 294 138  51]
+ [ 97 292  76  77]
+ [ 29  11  88  55]
+ [ 27  24  95  83]]
+
+Best ICBHI Score found: 0.49403
+
+
+----------------------------------------------------------------------------
+
+672/672 - 134s - loss: 0.7468 - val_loss: 0.9914 - icbhi_score: 0.4082 - icbhi_score_raw: 0.4082 - 134s/epoch - 200ms/step
+Epoch 23/100
+2026-10-11 12:12:36.872384: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.8172, 0.0923, 0.5574, 0.0262]
+
+ICBHI Score: 0.49140 - Sensitivity: 0.16562 - Specificity: 0.81717
+
+Confusion Matrix:
+[[590  33  97   2]
+ [430  50  56   6]
+ [ 74   2 102   5]
+ [107   5 111   6]]
+
+Best ICBHI Score found: 0.49403
+
+
+----------------------------------------------------------------------------
+
+672/672 - 133s - loss: 0.7137 - val_loss: 1.8452 - icbhi_score: 0.4914 - icbhi_score_raw: 0.4914 - 133s/epoch - 198ms/step
+Epoch 24/100
+2026-10-11 12:14:50.674334: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.7008, 0.4668, 0.4153, 0.2009]
+
+ICBHI Score: 0.54696 - Sensitivity: 0.39308 - Specificity: 0.70083
+
+Confusion Matrix:
+[[506 155  45  16]
+ [229 253  34  26]
+ [ 64  13  76  30]
+ [ 74  35  74  46]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 134s - loss: 0.7012 - val_loss: 1.0901 - icbhi_score: 0.5470 - icbhi_score_raw: 0.5470 - 134s/epoch - 199ms/step
+Epoch 25/100
+2026-10-11 12:16:57.751004: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.4584, 0.155, 0.5574, 0.214]
+
+ICBHI Score: 0.35239 - Sensitivity: 0.24633 - Specificity: 0.45845
+
+Confusion Matrix:
+[[331  50 271  70]
+ [208  84 212  38]
+ [ 25   3 102  53]
+ [ 33   3 144  49]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 127s - loss: 0.6786 - val_loss: 1.1438 - icbhi_score: 0.3524 - icbhi_score_raw: 0.3524 - 127s/epoch - 189ms/step
+Epoch 26/100
+2026-10-11 12:19:04.467093: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.2576, 0.7343, 0.2459, 0.4061]
+
+ICBHI Score: 0.40973 - Sensitivity: 0.56184 - Specificity: 0.25762
+
+Confusion Matrix:
+[[186 407  80  49]
+ [ 57 398  57  30]
+ [ 12  40  45  86]
+ [  8  77  51  93]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 127s - loss: 0.6592 - val_loss: 1.0279 - icbhi_score: 0.4097 - icbhi_score_raw: 0.4097 - 127s/epoch - 188ms/step
+Epoch 27/100
+2026-10-11 12:21:12.932001: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.2216, 0.8376, 0.1202, 0.0437]
+
+ICBHI Score: 0.36552 - Sensitivity: 0.50943 - Specificity: 0.22161
+
+Confusion Matrix:
+[[160 520  40   2]
+ [ 62 454  26   0]
+ [ 54  94  22  13]
+ [ 49 138  32  10]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 128s - loss: 0.6385 - val_loss: 1.6930 - icbhi_score: 0.3655 - icbhi_score_raw: 0.3655 - 128s/epoch - 191ms/step
+Epoch 28/100
+2026-10-11 12:23:21.284379: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.2784, 0.7251, 0.1257, 0.4629]
+
+ICBHI Score: 0.41278 - Sensitivity: 0.54717 - Specificity: 0.27839
+
+Confusion Matrix:
+[[201 456  19  46]
+ [ 71 393  21  57]
+ [ 21  52  23  87]
+ [ 17  80  26 106]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 128s - loss: 0.5987 - val_loss: 1.1008 - icbhi_score: 0.4128 - icbhi_score_raw: 0.4128 - 128s/epoch - 191ms/step
+Epoch 29/100
+2026-10-11 12:25:28.459556: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.5152, 0.4686, 0.3989, 0.31]
+
+ICBHI Score: 0.46621 - Sensitivity: 0.41719 - Specificity: 0.51524
+
+Confusion Matrix:
+[[372 225  92  33]
+ [178 254  58  52]
+ [ 38  18  73  54]
+ [ 38  46  74  71]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 127s - loss: 0.5855 - val_loss: 1.0915 - icbhi_score: 0.4662 - icbhi_score_raw: 0.4662 - 127s/epoch - 189ms/step
+Epoch 30/100
+2026-10-11 12:27:37.402461: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.1856, 0.3063, 0.3989, 0.4803]
+
+ICBHI Score: 0.27571 - Sensitivity: 0.36583 - Specificity: 0.18560
+
+Confusion Matrix:
+[[134 228 208 152]
+ [ 50 166 127 199]
+ [ 18   4  73  88]
+ [ 15  12  92 110]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 129s - loss: 0.5754 - val_loss: 1.2840 - icbhi_score: 0.2757 - icbhi_score_raw: 0.2757 - 129s/epoch - 192ms/step
+Epoch 31/100
+2026-10-11 12:29:45.858917: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.8075, 0.0037, 0.5574, 0.0742]
+
+ICBHI Score: 0.46716 - Sensitivity: 0.12683 - Specificity: 0.80748
+
+Confusion Matrix:
+[[583   9 111  19]
+ [447   2  82  11]
+ [ 64   0 102  17]
+ [ 93   0 119  17]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 128s - loss: 0.5529 - val_loss: 1.4113 - icbhi_score: 0.4672 - icbhi_score_raw: 0.4672 - 128s/epoch - 191ms/step
+Epoch 32/100
+2026-10-11 12:31:54.018728: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.3601, 0.7399, 0.1475, 0.1441]
+
+ICBHI Score: 0.42167 - Sensitivity: 0.48323 - Specificity: 0.36011
+
+Confusion Matrix:
+[[260 438  22   2]
+ [113 401  22   6]
+ [ 60  70  27  26]
+ [ 64 110  22  33]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 128s - loss: 0.5350 - val_loss: 1.8415 - icbhi_score: 0.4217 - icbhi_score_raw: 0.4217 - 128s/epoch - 191ms/step
+Epoch 33/100
+2026-10-11 12:34:01.311756: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.6828, 0.1716, 0.3005, 0.3799]
+
+ICBHI Score: 0.46458 - Sensitivity: 0.24633 - Specificity: 0.68283
+
+Confusion Matrix:
+[[493 102  72  55]
+ [299  93  53  97]
+ [ 43   4  55  81]
+ [ 59  11  72  87]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 127s - loss: 0.5153 - val_loss: 1.1931 - icbhi_score: 0.4646 - icbhi_score_raw: 0.4646 - 127s/epoch - 189ms/step
+Epoch 34/100
+2026-10-11 12:36:09.299565: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.7978, 0.0277, 0.6721, 0.0044]
+
+ICBHI Score: 0.47174 - Sensitivity: 0.14570 - Specificity: 0.79778
+
+Confusion Matrix:
+[[576  15 131   0]
+ [446  15  79   2]
+ [ 59   0 123   1]
+ [ 80   0 148   1]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 128s - loss: 0.4885 - val_loss: 2.1158 - icbhi_score: 0.4717 - icbhi_score_raw: 0.4717 - 128s/epoch - 190ms/step
+Epoch 35/100
+2026-10-11 12:38:16.092262: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.7825, 0.0867, 0.6011, 0.0218]
+
+ICBHI Score: 0.47618 - Sensitivity: 0.16981 - Specificity: 0.78255
+
+Confusion Matrix:
+[[565  55  97   5]
+ [402  47  79  14]
+ [ 67   3 110   3]
+ [ 87   2 135   5]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 127s - loss: 0.4763 - val_loss: 1.9595 - icbhi_score: 0.4762 - icbhi_score_raw: 0.4762 - 127s/epoch - 189ms/step
+Epoch 36/100
+2026-10-11 12:40:26.007657: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.5596, 0.4317, 0.4536, 0.0873]
+
+ICBHI Score: 0.45640 - Sensitivity: 0.35325 - Specificity: 0.55956
+
+Confusion Matrix:
+[[404 239  72   7]
+ [262 234  36  10]
+ [ 53  31  83  16]
+ [ 68  48  93  20]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 130s - loss: 0.4576 - val_loss: 1.3830 - icbhi_score: 0.4564 - icbhi_score_raw: 0.4564 - 130s/epoch - 193ms/step
+Epoch 37/100
+2026-10-11 12:42:35.417529: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.6814, 0.2306, 0.4262, 0.0873]
+
+ICBHI Score: 0.45760 - Sensitivity: 0.23375 - Specificity: 0.68144
+
+Confusion Matrix:
+[[492 143  66  21]
+ [336 125  45  36]
+ [ 84   7  78  14]
+ [110   8  91  20]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 129s - loss: 0.4430 - val_loss: 1.4546 - icbhi_score: 0.4576 - icbhi_score_raw: 0.4576 - 129s/epoch - 192ms/step
+Epoch 38/100
+2026-10-11 12:44:44.293526: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.1302, 0.7749, 0.0492, 0.6463]
+
+ICBHI Score: 0.36751 - Sensitivity: 0.60482 - Specificity: 0.13019
+
+Confusion Matrix:
+[[ 94 518  30  80]
+ [ 26 420  27  69]
+ [ 15  52   9 107]
+ [ 12  56  13 148]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 129s - loss: 0.4414 - val_loss: 1.3902 - icbhi_score: 0.3675 - icbhi_score_raw: 0.3675 - 129s/epoch - 192ms/step
+Epoch 39/100
+2026-10-11 12:46:53.780351: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.4571, 0.5978, 0.1585, 0.0786]
+
+ICBHI Score: 0.42298 - Sensitivity: 0.38889 - Specificity: 0.45706
+
+Confusion Matrix:
+[[330 381   6   5]
+ [215 324   1   2]
+ [ 73  61  29  20]
+ [108  75  28  18]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 129s - loss: 0.4108 - val_loss: 2.0870 - icbhi_score: 0.4230 - icbhi_score_raw: 0.4230 - 129s/epoch - 193ms/step
+Epoch 40/100
+2026-10-11 12:49:00.218415: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.2687, 0.7214, 0.2514, 0.3624]
+
+ICBHI Score: 0.40689 - Sensitivity: 0.54507 - Specificity: 0.26870
+
+Confusion Matrix:
+[[194 374  83  71]
+ [ 55 391  45  51]
+ [ 32  48  46  57]
+ [ 12  80  54  83]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 126s - loss: 0.4109 - val_loss: 1.3008 - icbhi_score: 0.4069 - icbhi_score_raw: 0.4069 - 126s/epoch - 188ms/step
+Epoch 41/100
+2026-10-11 12:51:09.950370: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.7258, 0.0554, 0.623, 0.131]
+
+ICBHI Score: 0.45408 - Sensitivity: 0.18239 - Specificity: 0.72576
+
+Confusion Matrix:
+[[524  23 140  35]
+ [401  30  89  22]
+ [ 54   1 114  14]
+ [ 59   1 139  30]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 130s - loss: 0.3856 - val_loss: 1.6610 - icbhi_score: 0.4541 - icbhi_score_raw: 0.4541 - 130s/epoch - 193ms/step
+Epoch 42/100
+2026-10-11 12:53:16.936661: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.1454, 0.8321, 0.1421, 0.2489]
+
+ICBHI Score: 0.35259 - Sensitivity: 0.55975 - Specificity: 0.14543
+
+Confusion Matrix:
+[[105 570  14  33]
+ [ 69 451   4  18]
+ [ 17  91  26  49]
+ [ 25 124  23  57]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 127s - loss: 0.3724 - val_loss: 1.7607 - icbhi_score: 0.3526 - icbhi_score_raw: 0.3526 - 127s/epoch - 189ms/step
+Epoch 43/100
+2026-10-11 12:55:27.017503: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.3019, 0.393, 0.7541, 0.0873]
+
+ICBHI Score: 0.34541 - Sensitivity: 0.38889 - Specificity: 0.30194
+
+Confusion Matrix:
+[[218 217 243  44]
+ [118 213 178  33]
+ [ 16  13 138  16]
+ [ 16  18 175  20]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+672/672 - 130s - loss: 0.3672 - val_loss: 1.6897 - icbhi_score: 0.3454 - icbhi_score_raw: 0.3454 - 130s/epoch - 193ms/step
+Epoch 44/100
+2026-10-11 12:57:33.702401: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+
+Recall per class: [0.7313, 0.1863, 0.3934, 0.2183]
+
+ICBHI Score: 0.48253 - Sensitivity: 0.23375 - Specificity: 0.73130
+
+Confusion Matrix:
+[[528 114  55  25]
+ [376 101  43  22]
+ [ 77   8  72  26]
+ [ 84  14  81  50]]
+
+Best ICBHI Score found: 0.54696
+
+
+----------------------------------------------------------------------------
+
+
+Early stopping: best ICBHI Score = 0.54696
+672/672 - 127s - loss: 0.3461 - val_loss: 1.5582 - icbhi_score: 0.4825 - icbhi_score_raw: 0.4825 - 127s/epoch - 189ms/step
+
+Best ICBHI Score during training: 0.54696
+Best 3-epoch mean ICBHI Score during training: 0.48575

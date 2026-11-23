@@ -1,0 +1,8 @@
+Model: models/official_split/best_model_CustomCNNCosine_official_val_seed_202506_sr4000_hc1900_fm2000_trainseed202503_oracle.keras
+
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       940       896   0.1462   0.8872   0.5167
+Meditron       314       145   0.1517   0.9554   0.5536
+Litt3200       325       136   0.2647   0.6923   0.4785
+All           1579      1177   0.1606   0.8607   0.5106

@@ -7,6 +7,8 @@ from src.data.load_audio import process_files_parallel
 parser = argparse.ArgumentParser(description='Generate dataset with a given random seed.')
 parser.add_argument('--seed', type=int, default=202506, help='Random seed for the patient-wise split')
 parser.add_argument('--sample_rate', type=int, default=8000, help='Sampling rate for audio processing')
+parser.add_argument('--highcut', type=float, default=2000, help='Upper cutoff frequency (Hz) of the bandpass filter; must be below sample_rate / 2')
+parser.add_argument('--fmax', type=float, default=2500, help='Highest frequency (Hz) of the Mel filterbank')
 parser.add_argument('--duration', type=int, default=8, help='Duration of each audio segment')
 parser.add_argument('--test_train_split', type=int, default=80, help='Percentage of patients used for training + validation')
 parser.add_argument('--val_split', type=int, default=15, help='Percentage of the training + validation patients used for validation')
@@ -20,7 +22,7 @@ args = parser.parse_args()
 create_directories(input_path='/app/data/processed')
 
 # Then, process the raw audio files and create spectrograms
-process_files_parallel(input_path='/app/data/raw', output_path='/app/data/processed', sample_rate=args.sample_rate, length=args.duration, cycles='/app/src/resources/aux_respiratory_cycles.npy')
+process_files_parallel(input_path='/app/data/raw', output_path='/app/data/processed', sample_rate=args.sample_rate, length=args.duration, cycles='/app/src/resources/aux_respiratory_cycles.npy', highcut=args.highcut, fmax=args.fmax)
 
 # Afterwards, create the Train-Val-Test directories and split the spectrograms accordingly
 cycles_train, cycles_val, cycles_test = get_split(aux_file='/app/src/resources/aux_respiratory_cycles.npy', seed=args.seed, train_test_split=args.test_train_split, val_split=args.val_split, split_mode=args.split_mode, official_file=args.official_split_file, folds_file=args.folds_file, test_fold=args.test_fold)

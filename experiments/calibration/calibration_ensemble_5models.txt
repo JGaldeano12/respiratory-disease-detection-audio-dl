@@ -1,0 +1,13 @@
+Models (5, probabilities averaged):
+  models/official_split/best_model_CustomCNNCosine_official_val_seed_202506_smooth3.keras
+  models/official_split/best_model_CustomCNNCosine_official_val_seed_202506_smooth3_trainseed101.keras
+  models/official_split/best_model_CustomCNNCosine_official_val_seed_202506_smooth3_trainseed202.keras
+  models/official_split/best_model_CustomCNNCosine_official_val_seed_202506_smooth3_trainseed303.keras
+  models/official_split/best_model_CustomCNNCosine_official_val_seed_202506_smooth3_trainseed404.keras
+Selected offset (on validation): +0.40
+
+Set      Offset       Se       Sp    ICBHI
+Val       +0.00   0.7205   0.5608   0.6407
+Val       +0.40   0.6335   0.7162   0.6749
+Test      +0.00   0.5123   0.3661   0.4392
+Test      +0.40   0.3509   0.5858   0.4684

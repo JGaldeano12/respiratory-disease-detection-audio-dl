@@ -1,0 +1,9 @@
+Models (1, probabilities averaged):
+  models/official_split/best_model_EfficientNet_official_val_seed_202506.keras
+Selected offset (on validation): +0.05
+
+Set      Offset       Se       Sp    ICBHI
+Val       +0.00   0.6025   0.6959   0.6492
+Val       +0.05   0.6025   0.7061   0.6543
+Test      +0.00   0.3976   0.5845   0.4911
+Test      +0.05   0.3942   0.5902   0.4922

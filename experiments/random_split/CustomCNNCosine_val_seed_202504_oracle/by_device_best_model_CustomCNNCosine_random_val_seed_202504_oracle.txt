@@ -1,0 +1,9 @@
+Model: models/random_split/best_model_CustomCNNCosine_random_val_seed_202504_oracle.keras
+
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       449       332   0.3976   0.7751   0.5863
+Meditron       185        92   0.2826   0.9459   0.6143
+LittC2SE        56        22   0.3636   0.7857   0.5747
+Litt3200       104        37   0.1081   0.9038   0.5060
+All            794       483   0.3520   0.8325   0.5922

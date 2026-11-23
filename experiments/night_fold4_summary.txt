@@ -1,0 +1,32 @@
+NIGHT SUMMARY (2026-10-13 11:02:45) - oracle protocol: checkpoints selected on the TEST set
+
+RespireNet fold 4 (RespireNet reports 68.5% on this test fold):
+Model                Test Se   Test Sp Test ICBHI
+CustomCNNCosine       0.4993    0.6271    0.5632
+EfficientNet          0.4454    0.7226    0.5840
+ResNet                0.4380    0.6374    0.5377
+VGG19                 0.4469    0.7755    0.6112
+
+Runs trained again because of degenerate epochs:
+AFFECTED  experiments/random_split/CustomCNNCosine_val_seed_202505_oracle/train.log  (epoch 5: ICBHI 0.50000, Se 0.00000, Sp 1.00000; 31 epochs trained)
+AFFECTED  experiments/random_split/CustomCNNCosine_val_seed_202512_oracle/train.log  (epoch 4: ICBHI 0.50000, Se 0.00000, Sp 1.00000; 24 epochs trained)
+
+ORACLE SPLIT SWEEP - Custom CNN (cosine), checkpoint selected on the TEST set, one model per split
+
+ split_seed  test_se  test_sp  test_icbhi  test_patients  normal  crackle  wheeze  both
+     202501   0.3931   0.7008      0.5470             26     722      542     183   229
+     202502   0.5202   0.6334      0.5768             26     952      630     192   120
+     202503   0.2105   0.9205      0.5655             26     566      274     175   102
+     202504   0.3520   0.8312      0.5916             26     794      301     156    26
+     202505   0.3278   0.7405      0.5342             26     894      363     161    83
+     202506   0.2630   0.9063      0.5847             26     747      141     190    34
+     202507   0.2356   0.9358      0.5857             26     872      355     197    72
+     202508   0.1935   0.8774      0.5354             26     791      271     181   101
+     202509   0.3824   0.7668      0.5746             26     965      180     121    39
+     202510   0.3187   0.7783      0.5485             26     636      572     334   186
+     202511   0.0847   0.9429      0.5138             26     980      687     234   142
+     202512   0.2232   0.7562      0.4897             26     767      138     104    85
+
+test_se: mean 0.2921 ± 0.1145 | min 0.0847 | max 0.5202
+test_sp: mean 0.8158 ± 0.1015 | min 0.6334 | max 0.9429
+test_icbhi: mean 0.5540 ± 0.0316 | min 0.4897 | max 0.5916

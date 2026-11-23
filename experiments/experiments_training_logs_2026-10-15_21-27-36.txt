@@ -1,0 +1,984 @@
+Model: "model"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ input_1 (InputLayer)        [(None, 128, 251, 1)]     0         
+                                                                 
+ to_imagenet_input (Lambda)  (None, 128, 251, 3)       0         
+                                                                 
+ vgg19 (Functional)          (None, 4, 7, 512)         20024384  
+                                                                 
+ global_average_pooling2d (  (None, 512)               0         
+ GlobalAveragePooling2D)                                         
+                                                                 
+ dense (Dense)               (None, 128)               65664     
+                                                                 
+ batch_normalization (Batch  (None, 128)               512       
+ Normalization)                                                  
+                                                                 
+ activation (Activation)     (None, 128)               0         
+                                                                 
+ dropout (Dropout)           (None, 128)               0         
+                                                                 
+ dense_1 (Dense)             (None, 128)               16512     
+                                                                 
+ batch_normalization_1 (Bat  (None, 128)               512       
+ chNormalization)                                                
+                                                                 
+ activation_1 (Activation)   (None, 128)               0         
+                                                                 
+ dropout_1 (Dropout)         (None, 128)               0         
+                                                                 
+ dense_2 (Dense)             (None, 4)                 516       
+                                                                 
+=================================================================
+Total params: 20108100 (76.71 MB)
+Trainable params: 83204 (325.02 KB)
+Non-trainable params: 20024896 (76.39 MB)
+_________________________________________________________________
+
+Epoch 1
+Recall per class: [0.25677419 0.33503836 0.23300971 0.48611111]
+ICBHI Score: 0.28833
+Sensitivity: 0.31988
+Specificity: 0.25677
+Selection Score: 0.28833
+Best Score: 0.28833
+Confusion Matrix:
+[[199 217 174 185]
+ [ 32 131  47 181]
+ [ 38  19  48 101]
+ [  4   7  26  35]]
+--------------------------------------
+Epoch 2
+Recall per class: [0.20387097 0.5831202  0.19417476 0.56944444]
+ICBHI Score: 0.33288
+Sensitivity: 0.46188
+Specificity: 0.20387
+Selection Score: 0.33288
+Best Score: 0.33288
+Confusion Matrix:
+[[158 322 170 125]
+ [ 38 228  46  79]
+ [ 33  36  40  97]
+ [  4  13  14  41]]
+--------------------------------------
+Epoch 3
+Recall per class: [0.41548387 0.49872123 0.26213592 0.48611111]
+ICBHI Score: 0.42000
+Sensitivity: 0.42451
+Specificity: 0.41548
+Selection Score: 0.42000
+Best Score: 0.42000
+Confusion Matrix:
+[[322 241 104 108]
+ [ 72 195  48  76]
+ [ 48  37  54  67]
+ [  6  11  20  35]]
+--------------------------------------
+Epoch 4
+Recall per class: [0.19354839 0.49360614 0.23300971 0.44444444]
+ICBHI Score: 0.30081
+Sensitivity: 0.40807
+Specificity: 0.19355
+Selection Score: 0.30081
+Best Score: 0.42000
+Confusion Matrix:
+[[150 327 163 135]
+ [ 29 193  41 128]
+ [ 31  47  48  80]
+ [  2  11  27  32]]
+--------------------------------------
+Epoch 5
+Recall per class: [0.36387097 0.46547315 0.33495146 0.34722222]
+ICBHI Score: 0.38821
+Sensitivity: 0.41256
+Specificity: 0.36387
+Selection Score: 0.38821
+Best Score: 0.42000
+Confusion Matrix:
+[[282 239 166  88]
+ [ 87 182  40  82]
+ [ 51  33  69  53]
+ [  5  10  32  25]]
+--------------------------------------
+Epoch 6
+Recall per class: [0.26322581 0.55498721 0.25242718 0.41666667]
+ICBHI Score: 0.35508
+Sensitivity: 0.44694
+Specificity: 0.26323
+Selection Score: 0.35508
+Best Score: 0.42000
+Confusion Matrix:
+[[204 299 168 104]
+ [ 51 217  39  84]
+ [ 33  47  52  74]
+ [  3  13  26  30]]
+--------------------------------------
+Epoch 7
+Recall per class: [0.38451613 0.52429668 0.14563107 0.61111111]
+ICBHI Score: 0.40078
+Sensitivity: 0.41704
+Specificity: 0.38452
+Selection Score: 0.40078
+Best Score: 0.42000
+Confusion Matrix:
+[[298 239 119 119]
+ [ 63 205  29  94]
+ [ 46  36  30  94]
+ [  4  13  11  44]]
+--------------------------------------
+Epoch 8
+Recall per class: [0.32774194 0.57033248 0.24757282 0.31944444]
+ICBHI Score: 0.38584
+Sensitivity: 0.44395
+Specificity: 0.32774
+Selection Score: 0.38584
+Best Score: 0.42000
+Confusion Matrix:
+[[254 273 158  90]
+ [ 72 223  34  62]
+ [ 39  47  51  69]
+ [  4  14  31  23]]
+--------------------------------------
+
+Best ICBHI Score during training: 0.42000
+Best 3-epoch mean ICBHI Score during training: 0.38136
+Model: "model"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ input_1 (InputLayer)        [(None, 128, 251, 1)]     0         
+                                                                 
+ to_imagenet_input (Lambda)  (None, 128, 251, 3)       0         
+                                                                 
+ vgg19 (Functional)          (None, 4, 7, 512)         20024384  
+                                                                 
+ global_average_pooling2d (  (None, 512)               0         
+ GlobalAveragePooling2D)                                         
+                                                                 
+ dense (Dense)               (None, 128)               65664     
+                                                                 
+ batch_normalization (Batch  (None, 128)               512       
+ Normalization)                                                  
+                                                                 
+ activation (Activation)     (None, 128)               0         
+                                                                 
+ dropout (Dropout)           (None, 128)               0         
+                                                                 
+ dense_1 (Dense)             (None, 128)               16512     
+                                                                 
+ batch_normalization_1 (Bat  (None, 128)               512       
+ chNormalization)                                                
+                                                                 
+ activation_1 (Activation)   (None, 128)               0         
+                                                                 
+ dropout_1 (Dropout)         (None, 128)               0         
+                                                                 
+ dense_2 (Dense)             (None, 4)                 516       
+                                                                 
+=================================================================
+Total params: 20108100 (76.71 MB)
+Trainable params: 20107588 (76.70 MB)
+Non-trainable params: 512 (2.00 KB)
+_________________________________________________________________
+
+Epoch 1
+Recall per class: [0.38451613 0.53452685 0.50485437 0.25      ]
+ICBHI Score: 0.43964
+Sensitivity: 0.49477
+Specificity: 0.38452
+Selection Score: 0.43964
+Best Score: 0.43964
+Confusion Matrix:
+[[298 224 154  99]
+ [ 78 209  42  62]
+ [ 24  11 104  67]
+ [  5   6  43  18]]
+--------------------------------------
+Epoch 2
+Recall per class: [0.45806452 0.62148338 0.33980583 0.34722222]
+ICBHI Score: 0.48165
+Sensitivity: 0.50523
+Specificity: 0.45806
+Selection Score: 0.48165
+Best Score: 0.48165
+Confusion Matrix:
+[[355 279  82  59]
+ [ 90 243  18  40]
+ [ 33  19  70  84]
+ [  7   8  32  25]]
+--------------------------------------
+Epoch 3
+Recall per class: [0.6283871  0.57544757 0.41262136 0.22222222]
+ICBHI Score: 0.55784
+Sensitivity: 0.48729
+Specificity: 0.62839
+Selection Score: 0.55784
+Best Score: 0.55784
+Confusion Matrix:
+[[487 149 119  20]
+ [136 225  20  10]
+ [ 37  25  85  59]
+ [  7   9  40  16]]
+--------------------------------------
+Epoch 4
+Recall per class: [0.57032258 0.59079284 0.45145631 0.26388889]
+ICBHI Score: 0.54151
+Sensitivity: 0.51271
+Specificity: 0.57032
+Selection Score: 0.54151
+Best Score: 0.55784
+Confusion Matrix:
+[[442 140 145  48]
+ [104 231  19  37]
+ [ 36  17  93  60]
+ [  4   6  43  19]]
+--------------------------------------
+Epoch 5
+Recall per class: [0.6516129  0.54987212 0.47087379 0.13888889]
+ICBHI Score: 0.56646
+Sensitivity: 0.48132
+Specificity: 0.65161
+Selection Score: 0.56646
+Best Score: 0.56646
+Confusion Matrix:
+[[505 175  76  19]
+ [122 215  24  30]
+ [ 58  12  97  39]
+ [  6   7  49  10]]
+--------------------------------------
+Epoch 6
+Recall per class: [0.54709677 0.59079284 0.47087379 0.11111111]
+ICBHI Score: 0.52467
+Sensitivity: 0.50224
+Specificity: 0.54710
+Selection Score: 0.52467
+Best Score: 0.56646
+Confusion Matrix:
+[[424 215  99  37]
+ [116 231  16  28]
+ [ 30  23  97  56]
+ [  7  11  46   8]]
+--------------------------------------
+Epoch 7
+Recall per class: [0.60903226 0.67519182 0.45145631 0.29166667]
+ICBHI Score: 0.58703
+Sensitivity: 0.56502
+Specificity: 0.60903
+Selection Score: 0.58703
+Best Score: 0.58703
+Confusion Matrix:
+[[472 208  86   9]
+ [103 264  12  12]
+ [ 49  28  93  36]
+ [ 12  11  28  21]]
+--------------------------------------
+Epoch 8
+Recall per class: [0.63483871 0.6112532  0.49029126 0.08333333]
+ICBHI Score: 0.57601
+Sensitivity: 0.51719
+Specificity: 0.63484
+Selection Score: 0.57601
+Best Score: 0.58703
+Confusion Matrix:
+[[492 179  87  17]
+ [132 239  13   7]
+ [ 58  22 101  25]
+ [ 18   9  39   6]]
+--------------------------------------
+Epoch 9
+Recall per class: [0.52129032 0.69309463 0.5631068  0.125     ]
+ICBHI Score: 0.55661
+Sensitivity: 0.59193
+Specificity: 0.52129
+Selection Score: 0.55661
+Best Score: 0.58703
+Confusion Matrix:
+[[404 235 110  26]
+ [ 78 271  18  24]
+ [ 33  18 116  39]
+ [  7  11  45   9]]
+--------------------------------------
+Epoch 10
+Recall per class: [0.72903226 0.53452685 0.43203883 0.19444444]
+ICBHI Score: 0.59770
+Sensitivity: 0.46637
+Specificity: 0.72903
+Selection Score: 0.59770
+Best Score: 0.59770
+Confusion Matrix:
+[[565 124  78   8]
+ [159 209  14   9]
+ [ 68  18  89  31]
+ [ 15  10  33  14]]
+--------------------------------------
+Epoch 11
+Recall per class: [0.76129032 0.44757033 0.4368932  0.20833333]
+ICBHI Score: 0.58991
+Sensitivity: 0.41854
+Specificity: 0.76129
+Selection Score: 0.58991
+Best Score: 0.59770
+Confusion Matrix:
+[[590  97  79   9]
+ [182 175  17  17]
+ [ 91   7  90  18]
+ [ 10  12  35  15]]
+--------------------------------------
+Epoch 12
+Recall per class: [0.57032258 0.63938619 0.5        0.08333333]
+ICBHI Score: 0.55347
+Sensitivity: 0.53662
+Specificity: 0.57032
+Selection Score: 0.55347
+Best Score: 0.59770
+Confusion Matrix:
+[[442 225  98  10]
+ [114 250  23   4]
+ [ 57  24 103  22]
+ [ 12  12  42   6]]
+--------------------------------------
+Epoch 13
+Recall per class: [0.78064516 0.44501279 0.35436893 0.23611111]
+ICBHI Score: 0.58763
+Sensitivity: 0.39462
+Specificity: 0.78065
+Selection Score: 0.58763
+Best Score: 0.59770
+Confusion Matrix:
+[[605 124  39   7]
+ [196 174  10  11]
+ [ 79  20  73  34]
+ [ 16  13  26  17]]
+--------------------------------------
+Epoch 14
+Recall per class: [0.58064516 0.6112532  0.45145631 0.15277778]
+ICBHI Score: 0.54668
+Sensitivity: 0.51271
+Specificity: 0.58065
+Selection Score: 0.54668
+Best Score: 0.59770
+Confusion Matrix:
+[[450 214  96  15]
+ [111 239  22  19]
+ [ 63  19  93  31]
+ [ 11   9  41  11]]
+--------------------------------------
+Epoch 15
+Recall per class: [0.62967742 0.657289   0.31067961 0.16666667]
+ICBHI Score: 0.56372
+Sensitivity: 0.49776
+Specificity: 0.62968
+Selection Score: 0.56372
+Best Score: 0.59770
+Confusion Matrix:
+[[488 245  35   7]
+ [124 257   7   3]
+ [ 73  43  64  26]
+ [ 14  17  29  12]]
+--------------------------------------
+Epoch 16
+Recall per class: [0.68258065 0.51662404 0.41747573 0.22222222]
+ICBHI Score: 0.56850
+Sensitivity: 0.45441
+Specificity: 0.68258
+Selection Score: 0.56850
+Best Score: 0.59770
+Confusion Matrix:
+[[529 152  78  16]
+ [161 202  13  15]
+ [ 57  15  86  48]
+ [ 14   7  35  16]]
+--------------------------------------
+Epoch 17
+Recall per class: [0.83225806 0.35294118 0.50970874 0.04166667]
+ICBHI Score: 0.59999
+Sensitivity: 0.36771
+Specificity: 0.83226
+Selection Score: 0.59999
+Best Score: 0.59999
+Confusion Matrix:
+[[645  69  55   6]
+ [241 138   9   3]
+ [ 75  12 105  14]
+ [ 13   8  48   3]]
+--------------------------------------
+Epoch 18
+Recall per class: [0.75096774 0.43222506 0.44174757 0.13888889]
+ICBHI Score: 0.57728
+Sensitivity: 0.40359
+Specificity: 0.75097
+Selection Score: 0.57728
+Best Score: 0.59999
+Confusion Matrix:
+[[582  95  94   4]
+ [201 169  19   2]
+ [ 72  15  91  28]
+ [ 15   9  38  10]]
+--------------------------------------
+Epoch 19
+Recall per class: [0.62580645 0.51918159 0.53883495 0.16666667]
+ICBHI Score: 0.55655
+Sensitivity: 0.48729
+Specificity: 0.62581
+Selection Score: 0.55655
+Best Score: 0.59999
+Confusion Matrix:
+[[485 174  94  22]
+ [139 203  29  20]
+ [ 48   9 111  38]
+ [  8   8  44  12]]
+--------------------------------------
+Epoch 20
+Recall per class: [0.82322581 0.31713555 0.48543689 0.06944444]
+ICBHI Score: 0.58276
+Sensitivity: 0.34230
+Specificity: 0.82323
+Selection Score: 0.58276
+Best Score: 0.59999
+Confusion Matrix:
+[[638  40  86  11]
+ [239 124  20   8]
+ [ 79   5 100  22]
+ [ 21   4  42   5]]
+--------------------------------------
+Epoch 21
+Recall per class: [0.81935484 0.36061381 0.40291262 0.20833333]
+ICBHI Score: 0.58830
+Sensitivity: 0.35725
+Specificity: 0.81935
+Selection Score: 0.58830
+Best Score: 0.59999
+Confusion Matrix:
+[[635  82  45  13]
+ [231 141   9  10]
+ [ 83   9  83  31]
+ [ 20   6  31  15]]
+--------------------------------------
+Epoch 22
+Recall per class: [0.71225806 0.58567775 0.38834951 0.22222222]
+ICBHI Score: 0.59903
+Sensitivity: 0.48580
+Specificity: 0.71226
+Selection Score: 0.59903
+Best Score: 0.59999
+Confusion Matrix:
+[[552 175  41   7]
+ [146 229  10   6]
+ [ 75  16  80  35]
+ [ 15  10  31  16]]
+--------------------------------------
+Epoch 23
+Recall per class: [0.82193548 0.46035806 0.3592233  0.11111111]
+ICBHI Score: 0.60678
+Sensitivity: 0.39163
+Specificity: 0.82194
+Selection Score: 0.60678
+Best Score: 0.60678
+Confusion Matrix:
+[[637 104  29   5]
+ [202 180   5   4]
+ [ 90  22  74  20]
+ [ 21  10  33   8]]
+--------------------------------------
+Epoch 24
+Recall per class: [0.76774194 0.46547315 0.41262136 0.19444444]
+ICBHI Score: 0.59389
+Sensitivity: 0.42003
+Specificity: 0.76774
+Selection Score: 0.59389
+Best Score: 0.60678
+Confusion Matrix:
+[[595 102  67  11]
+ [188 182  11  10]
+ [ 75  13  85  33]
+ [ 17   9  32  14]]
+--------------------------------------
+Epoch 25
+Recall per class: [0.70709677 0.40153453 0.59708738 0.125     ]
+ICBHI Score: 0.56954
+Sensitivity: 0.43199
+Specificity: 0.70710
+Selection Score: 0.56954
+Best Score: 0.60678
+Confusion Matrix:
+[[548  77 135  15]
+ [178 157  32  24]
+ [ 42   8 123  33]
+ [  6   8  49   9]]
+--------------------------------------
+Epoch 26
+Recall per class: [0.64129032 0.53964194 0.47087379 0.15277778]
+ICBHI Score: 0.55906
+Sensitivity: 0.47683
+Specificity: 0.64129
+Selection Score: 0.55906
+Best Score: 0.60678
+Confusion Matrix:
+[[497 154 107  17]
+ [128 211  34  18]
+ [ 52   8  97  49]
+ [  9   9  43  11]]
+--------------------------------------
+Epoch 27
+Recall per class: [0.71483871 0.47570332 0.51941748 0.125     ]
+ICBHI Score: 0.58313
+Sensitivity: 0.45142
+Specificity: 0.71484
+Selection Score: 0.58313
+Best Score: 0.60678
+Confusion Matrix:
+[[554 119  97   5]
+ [167 186  31   7]
+ [ 68   6 107  25]
+ [ 12   9  42   9]]
+--------------------------------------
+Epoch 28
+Recall per class: [0.7716129  0.46547315 0.4223301  0.13888889]
+ICBHI Score: 0.59433
+Sensitivity: 0.41704
+Specificity: 0.77161
+Selection Score: 0.59433
+Best Score: 0.60678
+Confusion Matrix:
+[[598 118  52   7]
+ [191 182  15   3]
+ [ 81  10  87  28]
+ [ 21   7  34  10]]
+--------------------------------------
+Epoch 29
+Recall per class: [0.80387097 0.34015345 0.50970874 0.08333333]
+ICBHI Score: 0.58430
+Sensitivity: 0.36472
+Specificity: 0.80387
+Selection Score: 0.58430
+Best Score: 0.60678
+Confusion Matrix:
+[[623  45 101   6]
+ [226 133  25   7]
+ [ 73   7 105  21]
+ [ 18   6  42   6]]
+--------------------------------------
+Epoch 30
+Recall per class: [0.66967742 0.59335038 0.33009709 0.31944444]
+ICBHI Score: 0.57624
+Sensitivity: 0.48281
+Specificity: 0.66968
+Selection Score: 0.57624
+Best Score: 0.60678
+Confusion Matrix:
+[[519 183  47  26]
+ [135 232  11  13]
+ [ 59  21  68  58]
+ [ 14   9  26  23]]
+--------------------------------------
+Epoch 31
+Recall per class: [0.83483871 0.27109974 0.47087379 0.15277778]
+ICBHI Score: 0.57736
+Sensitivity: 0.31988
+Specificity: 0.83484
+Selection Score: 0.57736
+Best Score: 0.60678
+Confusion Matrix:
+[[647  54  67   7]
+ [262 106  21   2]
+ [ 86   3  97  20]
+ [ 21   5  35  11]]
+--------------------------------------
+Epoch 32
+Recall per class: [0.79096774 0.42966752 0.4223301  0.22222222]
+ICBHI Score: 0.59802
+Sensitivity: 0.40508
+Specificity: 0.79097
+Selection Score: 0.59802
+Best Score: 0.60678
+Confusion Matrix:
+[[613 111  44   7]
+ [199 168  14  10]
+ [ 83  15  87  21]
+ [ 24   6  26  16]]
+--------------------------------------
+Epoch 33
+Recall per class: [0.69806452 0.42710997 0.40291262 0.25      ]
+ICBHI Score: 0.54933
+Sensitivity: 0.40060
+Specificity: 0.69806
+Selection Score: 0.54933
+Best Score: 0.60678
+Confusion Matrix:
+[[541 135  86  13]
+ [199 167  15  10]
+ [ 68  12  83  43]
+ [ 13  12  29  18]]
+--------------------------------------
+Epoch 34
+Recall per class: [0.64258065 0.62148338 0.39320388 0.31944444]
+ICBHI Score: 0.58063
+Sensitivity: 0.51868
+Specificity: 0.64258
+Selection Score: 0.58063
+Best Score: 0.60678
+Confusion Matrix:
+[[498 190  66  21]
+ [118 243  21   9]
+ [ 57  21  81  47]
+ [  8  13  28  23]]
+--------------------------------------
+Epoch 35
+Recall per class: [0.74322581 0.52685422 0.33980583 0.375     ]
+ICBHI Score: 0.59807
+Sensitivity: 0.45291
+Specificity: 0.74323
+Selection Score: 0.59807
+Best Score: 0.60678
+Confusion Matrix:
+[[576 123  45  31]
+ [163 206   6  16]
+ [ 61  17  70  58]
+ [ 11  11  23  27]]
+--------------------------------------
+Epoch 36
+Recall per class: [0.76774194 0.4629156  0.39320388 0.26388889]
+ICBHI Score: 0.59389
+Sensitivity: 0.42003
+Specificity: 0.76774
+Selection Score: 0.59389
+Best Score: 0.60678
+Confusion Matrix:
+[[595 117  52  11]
+ [186 181  15   9]
+ [ 71  13  81  41]
+ [ 13  12  28  19]]
+--------------------------------------
+Epoch 37
+Recall per class: [0.81935484 0.42455243 0.41262136 0.125     ]
+ICBHI Score: 0.60400
+Sensitivity: 0.38864
+Specificity: 0.81935
+Selection Score: 0.60400
+Best Score: 0.60678
+Confusion Matrix:
+[[635  87  46   7]
+ [206 166  13   6]
+ [ 89  12  85  20]
+ [ 21   8  34   9]]
+--------------------------------------
+Epoch 38
+Recall per class: [0.72258065 0.40409207 0.46601942 0.31944444]
+ICBHI Score: 0.56832
+Sensitivity: 0.41405
+Specificity: 0.72258
+Selection Score: 0.56832
+Best Score: 0.60678
+Confusion Matrix:
+[[560 106  80  29]
+ [179 158  25  29]
+ [ 57   3  96  50]
+ [ 13   6  30  23]]
+--------------------------------------
+
+Best ICBHI Score during training: 0.60678
+Best 3-epoch mean ICBHI Score during training: 0.59990
+Model: "model"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ input_1 (InputLayer)        [(None, 128, 251, 1)]     0         
+                                                                 
+ to_imagenet_input (Lambda)  (None, 128, 251, 3)       0         
+                                                                 
+ vgg19 (Functional)          (None, 4, 7, 512)         20024384  
+                                                                 
+ global_average_pooling2d (  (None, 512)               0         
+ GlobalAveragePooling2D)                                         
+                                                                 
+ dense (Dense)               (None, 128)               65664     
+                                                                 
+ batch_normalization (Batch  (None, 128)               512       
+ Normalization)                                                  
+                                                                 
+ activation (Activation)     (None, 128)               0         
+                                                                 
+ dropout (Dropout)           (None, 128)               0         
+                                                                 
+ dense_1 (Dense)             (None, 128)               16512     
+                                                                 
+ batch_normalization_1 (Bat  (None, 128)               512       
+ chNormalization)                                                
+                                                                 
+ activation_1 (Activation)   (None, 128)               0         
+                                                                 
+ dropout_1 (Dropout)         (None, 128)               0         
+                                                                 
+ dense_2 (Dense)             (None, 4)                 516       
+                                                                 
+=================================================================
+Total params: 20108100 (76.71 MB)
+Trainable params: 20107588 (76.70 MB)
+Non-trainable params: 512 (2.00 KB)
+_________________________________________________________________
+
+Epoch 1
+Recall per class: [0.47741935 0.70332481 0.22330097 0.5       ]
+ICBHI Score: 0.50553
+Sensitivity: 0.53363
+Specificity: 0.47742
+Selection Score: 0.50553
+Best Score: 0.60678
+Confusion Matrix:
+[[370 345  19  41]
+ [ 92 275   5  19]
+ [ 42  43  46  75]
+ [  9  12  15  36]]
+--------------------------------------
+Epoch 2
+Recall per class: [0.48903226 0.56777494 0.47572816 0.27777778]
+ICBHI Score: 0.49863
+Sensitivity: 0.50822
+Specificity: 0.48903
+Selection Score: 0.49863
+Best Score: 0.60678
+Confusion Matrix:
+[[379 241  84  71]
+ [104 222  17  48]
+ [ 28  20  98  60]
+ [  7  10  35  20]]
+--------------------------------------
+Epoch 3
+Recall per class: [0.32387097 0.55498721 0.38349515 0.48611111]
+ICBHI Score: 0.40932
+Sensitivity: 0.49477
+Specificity: 0.32387
+Selection Score: 0.40932
+Best Score: 0.60678
+Confusion Matrix:
+[[251 259 178  87]
+ [ 60 217  41  73]
+ [ 25  13  79  89]
+ [  4   6  27  35]]
+--------------------------------------
+Epoch 4
+Recall per class: [0.69419355 0.55498721 0.51941748 0.05555556]
+ICBHI Score: 0.59224
+Sensitivity: 0.49028
+Specificity: 0.69419
+Selection Score: 0.59224
+Best Score: 0.60678
+Confusion Matrix:
+[[538 180  52   5]
+ [163 217  10   1]
+ [ 70  20 107   9]
+ [ 14  14  40   4]]
+--------------------------------------
+Epoch 5
+Recall per class: [0.75612903 0.33503836 0.44660194 0.23611111]
+ICBHI Score: 0.55744
+Sensitivity: 0.35874
+Specificity: 0.75613
+Selection Score: 0.55744
+Best Score: 0.60678
+Confusion Matrix:
+[[586  52  86  51]
+ [203 131  18  39]
+ [ 52   7  92  55]
+ [ 10   5  40  17]]
+--------------------------------------
+Epoch 6
+Recall per class: [0.56774194 0.59846547 0.38349515 0.16666667]
+ICBHI Score: 0.52677
+Sensitivity: 0.48580
+Specificity: 0.56774
+Selection Score: 0.52677
+Best Score: 0.60678
+Confusion Matrix:
+[[440 234  95   6]
+ [131 234  20   6]
+ [ 63  43  79  21]
+ [ 14  22  24  12]]
+--------------------------------------
+Epoch 7
+Recall per class: [0.57806452 0.60358056 0.25242718 0.48611111]
+ICBHI Score: 0.53044
+Sensitivity: 0.48281
+Specificity: 0.57806
+Selection Score: 0.53044
+Best Score: 0.60678
+Confusion Matrix:
+[[448 253  36  38]
+ [116 236   7  32]
+ [ 49  36  52  69]
+ [  4  16  17  35]]
+--------------------------------------
+Epoch 8
+Recall per class: [0.43483871 0.70076726 0.21359223 0.52777778]
+ICBHI Score: 0.48349
+Sensitivity: 0.53214
+Specificity: 0.43484
+Selection Score: 0.48349
+Best Score: 0.60678
+Confusion Matrix:
+[[337 322  78  38]
+ [ 89 274   9  19]
+ [ 36  36  44  90]
+ [  9  17   8  38]]
+--------------------------------------
+Epoch 9
+Recall per class: [0.65677419 0.39386189 0.61650485 0.04166667]
+ICBHI Score: 0.54064
+Sensitivity: 0.42451
+Specificity: 0.65677
+Selection Score: 0.54064
+Best Score: 0.60678
+Confusion Matrix:
+[[509  95 141  30]
+ [152 154  44  41]
+ [ 36  13 127  30]
+ [ 11   6  52   3]]
+--------------------------------------
+Epoch 10
+Recall per class: [0.80387097 0.47314578 0.35436893 0.13888889]
+ICBHI Score: 0.60223
+Sensitivity: 0.40060
+Specificity: 0.80387
+Selection Score: 0.60223
+Best Score: 0.60678
+Confusion Matrix:
+[[623  96  55   1]
+ [191 185  11   4]
+ [104   9  73  20]
+ [ 24   8  30  10]]
+--------------------------------------
+Epoch 11
+Recall per class: [0.73806452 0.45268542 0.2815534  0.29166667]
+ICBHI Score: 0.56036
+Sensitivity: 0.38266
+Specificity: 0.73806
+Selection Score: 0.56036
+Best Score: 0.60678
+Confusion Matrix:
+[[572 118  67  18]
+ [196 177   5  13]
+ [ 85  17  58  46]
+ [ 17  14  20  21]]
+--------------------------------------
+Epoch 12
+Recall per class: [0.52516129 0.64961637 0.35436893 0.29166667]
+ICBHI Score: 0.52267
+Sensitivity: 0.52018
+Specificity: 0.52516
+Selection Score: 0.52267
+Best Score: 0.60678
+Confusion Matrix:
+[[407 259  85  24]
+ [112 254  14  11]
+ [ 40  33  73  60]
+ [ 15  16  20  21]]
+--------------------------------------
+Epoch 13
+Recall per class: [0.73032258 0.44757033 0.44660194 0.13888889]
+ICBHI Score: 0.57219
+Sensitivity: 0.41405
+Specificity: 0.73032
+Selection Score: 0.57219
+Best Score: 0.60678
+Confusion Matrix:
+[[566 102  89  18]
+ [190 175  15  11]
+ [ 59  12  92  43]
+ [ 15  10  37  10]]
+--------------------------------------
+Epoch 14
+Recall per class: [0.67612903 0.40409207 0.51456311 0.11111111]
+ICBHI Score: 0.54135
+Sensitivity: 0.40658
+Specificity: 0.67613
+Selection Score: 0.54135
+Best Score: 0.60678
+Confusion Matrix:
+[[524 114 115  22]
+ [208 158  16   9]
+ [ 57  22 106  21]
+ [ 17   8  39   8]]
+--------------------------------------
+Epoch 15
+Recall per class: [0.61806452 0.45780051 0.33980583 0.25      ]
+ICBHI Score: 0.50858
+Sensitivity: 0.39910
+Specificity: 0.61806
+Selection Score: 0.50858
+Best Score: 0.60678
+Confusion Matrix:
+[[479 172 105  19]
+ [179 179  20  13]
+ [ 69  26  70  41]
+ [ 18  10  26  18]]
+--------------------------------------
+Epoch 16
+Recall per class: [0.79612903 0.45780051 0.39805825 0.05555556]
+ICBHI Score: 0.59612
+Sensitivity: 0.39611
+Specificity: 0.79613
+Selection Score: 0.59612
+Best Score: 0.60678
+Confusion Matrix:
+[[617  98  53   7]
+ [203 179   5   4]
+ [ 92  21  82  11]
+ [ 19  17  32   4]]
+--------------------------------------
+Epoch 17
+Recall per class: [0.71483871 0.52941176 0.36893204 0.11111111]
+ICBHI Score: 0.57491
+Sensitivity: 0.43498
+Specificity: 0.71484
+Selection Score: 0.57491
+Best Score: 0.60678
+Confusion Matrix:
+[[554 162  45  14]
+ [170 207   7   7]
+ [ 75  27  76  28]
+ [ 12  24  28   8]]
+--------------------------------------
+Epoch 18
+Recall per class: [0.84129032 0.21994885 0.37864078 0.13888889]
+ICBHI Score: 0.55069
+Sensitivity: 0.26009
+Specificity: 0.84129
+Selection Score: 0.55069
+Best Score: 0.60678
+Confusion Matrix:
+[[652  63  48  12]
+ [287  86  14   4]
+ [103   8  78  17]
+ [ 29   1  32  10]]
+--------------------------------------
+Epoch 19
+Recall per class: [0.61935484 0.58823529 0.34951456 0.125     ]
+ICBHI Score: 0.54211
+Sensitivity: 0.46487
+Specificity: 0.61935
+Selection Score: 0.54211
+Best Score: 0.60678
+Confusion Matrix:
+[[480 212  66  17]
+ [130 230  24   7]
+ [ 77  25  72  32]
+ [ 16  13  34   9]]
+--------------------------------------
+Epoch 20
+Recall per class: [0.64129032 0.59846547 0.2815534  0.25      ]
+ICBHI Score: 0.55233
+Sensitivity: 0.46338
+Specificity: 0.64129
+Selection Score: 0.55233
+Best Score: 0.60678
+Confusion Matrix:
+[[497 211  35  32]
+ [134 234  11  12]
+ [ 69  28  58  51]
+ [ 12  17  25  18]]
+--------------------------------------
+
+Best ICBHI Score during training: 0.60678
+Best 3-epoch mean ICBHI Score during training: 0.59990

@@ -1,0 +1,5 @@
+nohup: ignoring input
+========== RESPIRENET FOLD 4 | EfficientNet | validation seed 202506 | 8 s | oracle | 2026-10-12 20:47:28 ==========
+Training options:  --select_on test
+Reusing the existing dataset (respirenet_oracle_8s).
+Training failed

@@ -1,0 +1,177 @@
+nohup: ignoring input
+########## ORACLE SPLIT SWEEP STARTED: 2026-10-11 11:11:29 ##########
+========== RANDOM 80:20 SPLIT | CustomCNNCosine | split seed 202501 | 8 s | oracle | 2026-10-11 11:11:30 ==========
+Training options:  --select_on test
+Best validation ICBHI: 0.54696
+Sensitivity: 0.3931
+Specificity: 0.7008
+ICBHI Score: 0.5470
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       442       753   0.4489   0.6041   0.5265
+Meditron       154        84   0.0714   0.8831   0.4773
+LittC2SE        70        68   0.4118   0.7286   0.5702
+Litt3200        56        49   0.0612   0.9286   0.4949
+All            722       954   0.3931   0.7008   0.5470
+Logs and confusion matrix saved in experiments/random_split/CustomCNNCosine_val_seed_202501_oracle
+========== RANDOM 80:20 SPLIT | CustomCNNCosine | split seed 202502 | 8 s | oracle | 2026-10-11 13:00:22 ==========
+Training options:  --select_on test
+Best validation ICBHI: 0.57679
+Sensitivity: 0.5202
+Specificity: 0.6334
+ICBHI Score: 0.5768
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       457       823   0.5553   0.5405   0.5479
+Meditron       261        53   0.3019   0.8084   0.5552
+LittC2SE        94        14   0.3571   0.4149   0.3860
+Litt3200       140        52   0.2500   0.7571   0.5036
+All            952       942   0.5212   0.6334   0.5773
+Logs and confusion matrix saved in experiments/random_split/CustomCNNCosine_val_seed_202502_oracle
+========== RANDOM 80:20 SPLIT | CustomCNNCosine | split seed 202503 | 8 s | oracle | 2026-10-11 14:49:20 ==========
+Training options:  --select_on test
+Best validation ICBHI: 0.56551
+Sensitivity: 0.2105
+Specificity: 0.9205
+ICBHI Score: 0.5655
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       156       348   0.1322   0.8269   0.4796
+Meditron       172        60   0.0833   0.9651   0.5242
+LittC2SE       151       127   0.4567   0.9735   0.7151
+Litt3200        87        16   0.4375   0.9080   0.6728
+All            566       551   0.2105   0.9205   0.5655
+Logs and confusion matrix saved in experiments/random_split/CustomCNNCosine_val_seed_202503_oracle
+========== RANDOM 80:20 SPLIT | CustomCNNCosine | split seed 202504 | 8 s | oracle | 2026-10-11 16:32:36 ==========
+Training options:  --select_on test
+Best validation ICBHI: 0.59160
+Sensitivity: 0.3520
+Specificity: 0.8312
+ICBHI Score: 0.5916
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       449       332   0.3976   0.7751   0.5863
+Meditron       185        92   0.2826   0.9459   0.6143
+LittC2SE        56        22   0.3636   0.7857   0.5747
+Litt3200       104        37   0.1081   0.9038   0.5060
+All            794       483   0.3520   0.8325   0.5922
+Logs and confusion matrix saved in experiments/random_split/CustomCNNCosine_val_seed_202504_oracle
+========== RANDOM 80:20 SPLIT | CustomCNNCosine | split seed 202505 | 8 s | oracle | 2026-10-11 18:06:21 ==========
+Training options:  --select_on test
+Best validation ICBHI: 0.53417
+Sensitivity: 0.3278
+Specificity: 0.7405
+ICBHI Score: 0.5342
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       606       489   0.3885   0.6650   0.5268
+Meditron       100        45   0.1333   0.9600   0.5467
+LittC2SE       149        43   0.0698   0.8322   0.4510
+Litt3200        39        30   0.0000   1.0000   0.5000
+All            894       607   0.3278   0.7405   0.5342
+Logs and confusion matrix saved in experiments/random_split/CustomCNNCosine_val_seed_202505_oracle
+Skipping split seed 202506 (already completed).
+========== RANDOM 80:20 SPLIT | CustomCNNCosine | split seed 202507 | 8 s | oracle | 2026-10-11 19:34:43 ==========
+Training options:  --select_on test
+Best validation ICBHI: 0.58568
+Sensitivity: 0.2356
+Specificity: 0.9358
+ICBHI Score: 0.5857
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       370       453   0.2053   0.9459   0.5756
+Meditron       247       116   0.2759   0.9757   0.6258
+LittC2SE       201        54   0.3889   0.9602   0.6745
+Litt3200        54         1   1.0000   0.5926   0.7963
+All            872       624   0.2356   0.9358   0.5857
+Logs and confusion matrix saved in experiments/random_split/CustomCNNCosine_val_seed_202507_oracle
+========== RANDOM 80:20 SPLIT | CustomCNNCosine | split seed 202508 | 8 s | oracle | 2026-10-11 21:25:33 ==========
+Training options:  --select_on test
+Best validation ICBHI: 0.53543
+Sensitivity: 0.1935
+Specificity: 0.8774
+ICBHI Score: 0.5354
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       380       349   0.2178   0.8026   0.5102
+Meditron       340       141   0.1702   0.9529   0.5616
+LittC2SE        17         8   0.2500   1.0000   0.6250
+Litt3200        54        55   0.0909   0.8889   0.4899
+All            791       553   0.1935   0.8774   0.5354
+Logs and confusion matrix saved in experiments/random_split/CustomCNNCosine_val_seed_202508_oracle
+========== RANDOM 80:20 SPLIT | CustomCNNCosine | split seed 202509 | 8 s | oracle | 2026-10-12 00:34:03 ==========
+Training options:  --select_on test
+Best validation ICBHI: 0.57460
+Sensitivity: 0.3824
+Specificity: 0.7668
+ICBHI Score: 0.5746
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       351       203   0.3300   0.6752   0.5026
+Meditron       326        75   0.2000   0.8528   0.5264
+LittC2SE       184        61   0.7705   0.7826   0.7766
+Litt3200       104         1   1.0000   0.7788   0.8894
+All            965       340   0.3824   0.7668   0.5746
+Logs and confusion matrix saved in experiments/random_split/CustomCNNCosine_val_seed_202509_oracle
+========== RANDOM 80:20 SPLIT | CustomCNNCosine | split seed 202510 | 8 s | oracle | 2026-10-12 02:25:31 ==========
+Training options:  --select_on test
+Best validation ICBHI: 0.54849
+Sensitivity: 0.3187
+Specificity: 0.7783
+ICBHI Score: 0.5485
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       312       871   0.3330   0.7372   0.5351
+Meditron       155       116   0.3190   0.8194   0.5692
+LittC2SE        81        57   0.3158   0.9012   0.6085
+Litt3200        88        48   0.0625   0.7386   0.4006
+All            636      1092   0.3187   0.7783   0.5485
+Logs and confusion matrix saved in experiments/random_split/CustomCNNCosine_val_seed_202510_oracle
+========== RANDOM 80:20 SPLIT | CustomCNNCosine | split seed 202511 | 8 s | oracle | 2026-10-12 04:23:41 ==========
+Training options:  --select_on test
+Best validation ICBHI: 0.51376
+Sensitivity: 0.0847
+Specificity: 0.9429
+ICBHI Score: 0.5138
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       706       952   0.0494   0.9263   0.4879
+Meditron        69        60   0.6167   0.9855   0.8011
+LittC2SE       172        36   0.1389   1.0000   0.5694
+Litt3200        33        15   0.0667   0.9091   0.4879
+All            980      1063   0.0847   0.9429   0.5138
+Logs and confusion matrix saved in experiments/random_split/CustomCNNCosine_val_seed_202511_oracle
+========== RANDOM 80:20 SPLIT | CustomCNNCosine | split seed 202512 | 8 s | oracle | 2026-10-12 06:54:26 ==========
+Training options:  --select_on test
+Best validation ICBHI: 0.50000
+Sensitivity: 0.0000
+Specificity: 1.0000
+ICBHI Score: 0.5000
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       255        73   0.0000   1.0000   0.5000
+Meditron       355       159   0.0000   1.0000   0.5000
+LittC2SE        52        26   0.0000   1.0000   0.5000
+Litt3200       105        69   0.0000   1.0000   0.5000
+All            767       327   0.0000   1.0000   0.5000
+Logs and confusion matrix saved in experiments/random_split/CustomCNNCosine_val_seed_202512_oracle
+ORACLE SPLIT SWEEP - Custom CNN (cosine), checkpoint selected on the TEST set, one model per split
+
+ split_seed  test_se  test_sp  test_icbhi  test_patients  normal  crackle  wheeze  both
+     202501   0.3931   0.7008      0.5470             26     722      542     183   229
+     202502   0.5202   0.6334      0.5768             26     952      630     192   120
+     202503   0.2105   0.9205      0.5655             26     566      274     175   102
+     202504   0.3520   0.8312      0.5916             26     794      301     156    26
+     202505   0.3278   0.7405      0.5342             26     894      363     161    83
+     202506   0.2630   0.9063      0.5847             26     747      141     190    34
+     202507   0.2356   0.9358      0.5857             26     872      355     197    72
+     202508   0.1935   0.8774      0.5354             26     791      271     181   101
+     202509   0.3824   0.7668      0.5746             26     965      180     121    39
+     202510   0.3187   0.7783      0.5485             26     636      572     334   186
+     202511   0.0847   0.9429      0.5138             26     980      687     234   142
+     202512   0.0000   1.0000      0.5000             26     767      138     104    85
+
+test_se: mean 0.2735 ± 0.1416 | min 0.0000 | max 0.5202
+test_sp: mean 0.8362 ± 0.1123 | min 0.6334 | max 1.0000
+test_icbhi: mean 0.5548 ± 0.0298 | min 0.5000 | max 0.5916
+########## ORACLE SPLIT SWEEP FINISHED: 2026-10-12 08:04:22 ##########

@@ -1,0 +1,14 @@
+Ensemble: CustomCNN_balanced_fold4_4models (4 models)
+
+[Test]
+Model                              Se       Sp    ICBHI
+_seed_202506_balanced_oracle   0.5366   0.6348   0.5857
+anced_trainseed202501_oracle   0.4200   0.6890   0.5545
+anced_trainseed202502_oracle   0.4290   0.7045   0.5668
+anced_trainseed202503_oracle   0.4783   0.6077   0.5430
+ENSEMBLE (mean)                0.4933   0.7484   0.6208
+  Ensemble per device:
+  AKGC417L                       0.5360   0.6314   0.5837
+  Meditron                       0.1471   0.8562   0.5016
+  LittC2SE                       0.4559   0.8915   0.6737
+  Litt3200                       0.1538   0.8168   0.4853

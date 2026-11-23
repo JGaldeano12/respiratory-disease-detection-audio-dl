@@ -1,0 +1,15 @@
+Model: models/official_split/best_model_CustomCNN_official_val_seed_202506_5s.keras
+
+[Val]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       204       137   0.7591   0.3922   0.5756
+Meditron        37        19   0.1579   0.8378   0.4979
+LittC2SE        55         5   0.6000   0.6727   0.6364
+All            296       161   0.6832   0.5000   0.5916
+
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       940       896   0.5112   0.4074   0.4593
+Meditron       314       145   0.2207   0.6815   0.4511
+Litt3200       325       136   0.6103   0.1231   0.3667
+All           1579      1177   0.4868   0.4034   0.4451

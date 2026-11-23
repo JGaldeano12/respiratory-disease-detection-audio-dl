@@ -1,0 +1,26 @@
+RESPIRENET FOLD 4 (2026-10-15 02:05:06) - oracle protocol (checkpoint selected on the TEST set). RespireNet: 68.5%
+
+Model            Configuration                        Test Se   Test Sp Test ICBHI
+CustomCNNCosine  class-weighted focal loss             0.4993    0.6271    0.5632
+CustomCNNCosine  balanced batches                      0.5366    0.6361    0.5864
+VGG19            dB input                              0.4469    0.7755    0.6112
+VGG19            ImageNet input, seed 1234             0.4006    0.8477    0.6242
+VGG19            ImageNet input, seed 202501           0.4574    0.7471    0.6022
+VGG19            ImageNet input, seed 202502           0.5037    0.6942    0.5990
+VGG19            ImageNet input + balanced batches     0.4738    0.7819    0.6279
+EfficientNet     ImageNet input                        0.4215    0.6968    0.5591
+ResNet           ImageNet input                                        no results
+
+Ensemble: VGG19_imgnorm_fold4_3models (3 models)
+
+[Test]
+Model                              Se       Sp    ICBHI
+l_seed_202506_imgnorm_oracle   0.4006   0.8477   0.6242
+gnorm_trainseed202501_oracle   0.4574   0.7471   0.6022
+gnorm_trainseed202502_oracle   0.5037   0.6942   0.5990
+ENSEMBLE (mean)                0.4395   0.8155   0.6275
+  Ensemble per device:
+  AKGC417L                       0.4640   0.7669   0.6154
+  Meditron                       0.2059   0.9110   0.5584
+  LittC2SE                       0.5294   0.8915   0.7104
+  Litt3200                       0.0000   0.7710   0.3855

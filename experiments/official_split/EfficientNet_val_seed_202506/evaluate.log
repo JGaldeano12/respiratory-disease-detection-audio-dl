@@ -1,0 +1,8 @@
+/usr/local/lib/python3.10/dist-packages/tf_keras/src/layers/core/lambda_layer.py:327: UserWarning: src.models.efficientnet is not loaded, but a Lambda layer uses it. It may cause errors.
+  function = cls._parse_function_from_config(
+2026-10-06 18:33:40.760674: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+Confusion matrix saved to experiments/official_split/EfficientNet_val_seed_202506/confusion_matrix_best_model_EfficientNet_official_val_seed_202506_2026-10-06_18-33-40.png
+Sensitivity: 0.3976
+Specificity: 0.5845
+ICBHI Score: 0.4911
+Evaluation complete!

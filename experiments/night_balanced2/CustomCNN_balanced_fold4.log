@@ -1,0 +1,42 @@
+2026-10-15 21:25:56.291097: I tensorflow/core/platform/cpu_feature_guard.cc:211] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-10-15 21:25:58.619093: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-10-15 21:25:58.693053: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-10-15 21:25:58.693401: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-10-15 21:25:58.696283: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-10-15 21:25:58.696580: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-10-15 21:25:58.696809: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-10-15 21:25:58.883303: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-10-15 21:25:58.883619: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-10-15 21:25:58.883803: I tensorflow/core/common_runtime/gpu/gpu_device.cc:2019] Could not identify NUMA node of platform GPU id 0, defaulting to 0.  Your kernel may not have been built with NUMA support.
+2026-10-15 21:25:58.884031: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:07:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2026-10-15 21:25:58.884309: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1928] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 9445 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 3060, pci bus id: 0000:07:00.0, compute capability: 8.6
+2026-10-15 21:26:07.230041: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-15 21:26:15.751956: I external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:465] Loaded cuDNN version 90300
+2026-10-15 21:26:31.586323: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-15 21:26:49.255907: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-15 21:27:06.335308: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-15 21:27:24.675394: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+Ensemble: CustomCNN_balanced_fold4_4models (4 models)
+
+[Test]
+Model                              Se       Sp    ICBHI
+_seed_202506_balanced_oracle   0.5366   0.6348   0.5857
+anced_trainseed202501_oracle   0.4200   0.6890   0.5545
+anced_trainseed202502_oracle   0.4290   0.7045   0.5668
+anced_trainseed202503_oracle   0.4783   0.6077   0.5430
+ENSEMBLE (mean)                0.4933   0.7484   0.6208
+  Ensemble per device:
+  AKGC417L                       0.5360   0.6314   0.5837
+  Meditron                       0.1471   0.8562   0.5016
+  LittC2SE                       0.4559   0.8915   0.6737
+  Litt3200                       0.1538   0.8168   0.4853

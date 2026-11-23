@@ -3,14 +3,14 @@ from tensorflow.keras import layers, models
 from tensorflow.keras.applications import VGG19
 
 
-def create_vgg_19(input_shape=(128, 255, 1), num_classes=4):
+def create_vgg_19(input_shape=(128, 251, 1), num_classes=4):
     """
     Create a VGG19-based model for multi-class image classification.
 
     The model uses VGG19 pre-trained on ImageNet as a frozen feature extractor.
-    Since the input data contains a single channel, the channel is replicated
-    three times to match the three-channel input expected by the pre-trained
-    VGG19 model.
+    Since the input data contains a single channel, each spectrogram is scaled
+    to [0, 255], replicated three times and normalized with the ImageNet
+    channel means, to match the input expected by the pre-trained VGG19 model.
 
     The extracted features are aggregated with global average pooling and
     processed by two fully connected layers (with batch normalization and
@@ -18,7 +18,7 @@ def create_vgg_19(input_shape=(128, 255, 1), num_classes=4):
 
     Args:
         input_shape (tuple[int, int, int], optional): Shape of a single input
-            sample, excluding the batch dimension. Defaults to (128, 255, 1).
+            sample, excluding the batch dimension. Defaults to (128, 251, 1).
         num_classes (int, optional): Number of output classes. Defaults to 4.
 
     Returns:
@@ -30,9 +30,11 @@ def create_vgg_19(input_shape=(128, 255, 1), num_classes=4):
     # Define the input tensor using the shape expected by the dataset.
     inputs = layers.Input(shape=input_shape)
 
-    # Convert the single-channel input into a three-channel representation
-    # to make it compatible with the ImageNet pre-trained VGG19 model.
-    x = layers.Lambda(lambda t: tf.repeat(t, 3, axis=-1))(inputs)
+    # Convert the single-channel input into the input expected by the ImageNet pre-trained VGG19: each
+    # spectrogram is scaled to [0, 255] (min-max per spectrogram, as in RespireNet), repeated into 3 channels,
+    # and the ImageNet channel means are subtracted (Keras' Caffe-style preprocess_input; since the three
+    # channels are identical, the RGB-to-BGR swap has no effect).
+    x = layers.Lambda(lambda t: tf.repeat(255.0 * (t - tf.reduce_min(t, axis=[1, 2, 3], keepdims=True)) / (tf.reduce_max(t, axis=[1, 2, 3], keepdims=True) - tf.reduce_min(t, axis=[1, 2, 3], keepdims=True) + 1e-6), 3, axis=-1) - tf.constant([103.939, 116.779, 123.68]), output_shape=input_shape[:-1] + (3,), name='to_imagenet_input')(inputs)
 
     # Load VGG19 without its original ImageNet classification layers.
     base_model = VGG19(weights='imagenet', include_top=False, input_shape=input_shape[:-1] + (3,))

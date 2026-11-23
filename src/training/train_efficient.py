@@ -88,6 +88,7 @@ def train(model, base_model, train_dataset, val_dataset):
 # Parse command-line arguments.
 parser = argparse.ArgumentParser()
 parser.add_argument('--random_seed', type=int, default=12345)
+parser.add_argument('--select_on', type=str, default='val', choices=['val', 'test'], help='Set used to select the checkpoint and drive early stopping (test = oracle protocol)')
 args = parser.parse_args()
 
 # Set the random seed for reproducibility across various libraries and TensorFlow operations.
@@ -105,8 +106,13 @@ tf.config.experimental.enable_op_determinism()
 
 # Load the training and validation datasets.
 print("Loading datasets...")
-# The testing dataset is not used during training; it is evaluated afterwards with evaluate.py.
-train_dataset, val_dataset, _ = load_datasets('/app/data/processed', seed=SEED)
+train_dataset, val_dataset, test_dataset = load_datasets('/app/data/processed', seed=SEED)
+# Checkpoint selection and early stopping use the validation set, or the testing set in the oracle protocol.
+if args.select_on == 'test':
+    print("WARNING: oracle protocol - the checkpoint is selected on the TEST set.")
+    val_dataset = test_dataset
+if val_dataset is None:
+    raise ValueError("No validation set found; use --select_on test (oracle protocol) or generate a validation set.")
 # The input shape (128, width, 1) is taken from the dataset, since the width depends on the segment duration.
 input_shape = tuple(int(d) for d in train_dataset.element_spec[0].shape[1:])
 

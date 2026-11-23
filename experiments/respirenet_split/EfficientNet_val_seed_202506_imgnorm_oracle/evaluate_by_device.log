@@ -1,0 +1,12 @@
+/usr/local/lib/python3.10/dist-packages/tf_keras/src/layers/core/lambda_layer.py:327: UserWarning: src.models.efficientnet is not loaded, but a Lambda layer uses it. It may cause errors.
+  function = cls._parse_function_from_config(
+2026-10-13 22:50:28.967211: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+Model: models/respirenet_split/best_model_EfficientNet_respirenet_val_seed_202506_imgnorm_oracle.keras
+
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       369       541   0.4325   0.6287   0.5306
+Meditron       146        34   0.0882   0.8151   0.4517
+LittC2SE       129        68   0.6029   0.7209   0.6619
+Litt3200       131        26   0.0769   0.7328   0.4049
+All            775       669   0.4185   0.6968   0.5577

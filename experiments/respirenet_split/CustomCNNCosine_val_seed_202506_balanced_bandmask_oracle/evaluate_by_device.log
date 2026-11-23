@@ -1,0 +1,10 @@
+2026-10-15 16:00:37.687857: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+Model: models/respirenet_split/best_model_CustomCNNCosine_respirenet_val_seed_202506_balanced_bandmask_oracle.keras
+
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       369       541   0.5009   0.5908   0.5459
+Meditron       146        34   0.1471   0.8288   0.4879
+LittC2SE       129        68   0.4559   0.8760   0.6659
+Litt3200       131        26   0.1538   0.5344   0.3441
+All            775       669   0.4649   0.6735   0.5692

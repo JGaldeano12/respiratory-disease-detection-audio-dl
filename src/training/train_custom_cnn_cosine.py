@@ -59,8 +59,9 @@ def train(model, train_dataset, val_dataset, smoothing_window=1, alpha_mode='bal
         smoothing_window (int, optional): Number of epochs averaged to select
             the checkpoint and drive early stopping. Defaults to 1.
         alpha_mode (str, optional): Class weighting of the focal loss:
-            "balanced" (balanced class weights) or "sqrt" (their square root,
-            a milder compensation). Defaults to "balanced".
+            "balanced" (balanced class weights), "sqrt" (their square root,
+            a milder compensation) or "none" (no class weights, used with
+            class-balanced batches). Defaults to "balanced".
 
     Returns:
         tf.keras.Model: Trained model with the best weights found.
@@ -73,6 +74,8 @@ def train(model, train_dataset, val_dataset, smoothing_window=1, alpha_mode='bal
     _, class_weights = get_class_weights_from_paths('/app/data/processed')
     if alpha_mode == 'sqrt':
         class_weights = np.sqrt(class_weights)
+    elif alpha_mode == 'none':
+        class_weights = np.ones_like(class_weights)
     print(f"Focal loss class weights ({alpha_mode}): {np.round(class_weights, 3)}")
 
     # Early stopping on the validation ICBHI score over the whole run.
@@ -108,9 +111,12 @@ parser.add_argument('--select_on', type=str, default='val', choices=['val', 'tes
 parser.add_argument('--smoothing_window', type=int, default=1, help='Epochs averaged to select the checkpoint (1 = no smoothing)')
 parser.add_argument('--freq_norm', action='store_true', help='Subtract the time mean of each mel band (per spectrogram)')
 parser.add_argument('--band_mask', action='store_true', help='Randomly blank the 1.5-2 kHz band during training')
-parser.add_argument('--alpha', type=str, default='balanced', choices=['balanced', 'sqrt'], help='Class weighting of the focal loss')
+parser.add_argument('--alpha', type=str, default='balanced', choices=['balanced', 'sqrt', 'none'], help='Class weighting of the focal loss')
+parser.add_argument('--balanced_batches', action='store_true', help='Class-balanced training batches (RespireNet-like); disables the focal loss class weights')
 args = parser.parse_args()
-print(f"Options: select_on={args.select_on}, smoothing_window={args.smoothing_window}, freq_norm={args.freq_norm}, band_mask={args.band_mask}, alpha={args.alpha}")
+if args.balanced_batches:
+    args.alpha = 'none'
+print(f"Options: select_on={args.select_on}, smoothing_window={args.smoothing_window}, freq_norm={args.freq_norm}, band_mask={args.band_mask}, alpha={args.alpha}, balanced_batches={args.balanced_batches}")
 
 # Set the random seed for reproducibility across various libraries and TensorFlow operations.
 SEED = args.random_seed
@@ -127,7 +133,7 @@ tf.config.experimental.enable_op_determinism()
 
 # Load the training and validation datasets.
 print("Loading datasets...")
-train_dataset, val_dataset, test_dataset = load_datasets('/app/data/processed', seed=SEED, band_mask=args.band_mask)
+train_dataset, val_dataset, test_dataset = load_datasets('/app/data/processed', seed=SEED, band_mask=args.band_mask, balanced=args.balanced_batches)
 # Checkpoint selection and early stopping use the validation set, or the testing set in the oracle protocol.
 if args.select_on == 'test':
     print("WARNING: oracle protocol - the checkpoint is selected on the TEST set.")

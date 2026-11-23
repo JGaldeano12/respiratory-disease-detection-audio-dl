@@ -1,0 +1,12 @@
+/usr/local/lib/python3.10/dist-packages/tf_keras/src/layers/core/lambda_layer.py:327: UserWarning: src.models.vgg_19 is not loaded, but a Lambda layer uses it. It may cause errors.
+  function = cls._parse_function_from_config(
+2026-10-16 01:41:54.706290: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+Model: models/respirenet_split/best_model_VGG19_respirenet_val_seed_202506_imgnorm_balanced_trainseed202501_oracle.keras
+
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       369       541   0.4085   0.7913   0.5999
+Meditron       146        34   0.0882   0.9247   0.5064
+LittC2SE       129        68   0.5441   0.6899   0.6170
+Litt3200       131        26   0.0385   0.9237   0.4811
+All            775       669   0.3916   0.8219   0.6068

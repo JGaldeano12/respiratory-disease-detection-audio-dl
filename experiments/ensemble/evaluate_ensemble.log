@@ -1,0 +1,39 @@
+2026-10-08 05:42:45.702352: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-08 05:43:00.672656: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-08 05:43:15.204476: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-08 05:43:41.800956: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-08 05:44:02.885514: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-08 05:44:29.428524: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-08 05:44:35.867496: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-08 05:45:02.638068: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-08 05:45:10.127201: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-08 05:45:36.615318: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-08 05:45:43.400078: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2026-10-08 05:46:10.491801: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+Ensemble: CustomCNNCosine_smooth3_5models (5 models)
+
+[Val]
+Model                              Se       Sp    ICBHI
+cial_val_seed_202506_smooth3   0.6646   0.5405   0.6026
+_202506_smooth3_trainseed101   0.5839   0.5473   0.5656
+_202506_smooth3_trainseed202   0.7516   0.4493   0.6004
+_202506_smooth3_trainseed303   0.6957   0.5507   0.6232
+_202506_smooth3_trainseed404   0.7267   0.5338   0.6302
+ENSEMBLE (mean)                0.7205   0.5608   0.6407
+  Ensemble per device:
+  AKGC417L                       0.8175   0.4510   0.6342
+  Meditron                       0.1053   0.8378   0.4716
+  LittC2SE                       0.4000   0.7818   0.5909
+
+[Test]
+Model                              Se       Sp    ICBHI
+cial_val_seed_202506_smooth3   0.3730   0.3984   0.3857
+_202506_smooth3_trainseed101   0.4240   0.4465   0.4352
+_202506_smooth3_trainseed202   0.5021   0.2590   0.3806
+_202506_smooth3_trainseed303   0.4987   0.3756   0.4371
+_202506_smooth3_trainseed404   0.4299   0.4642   0.4471
+ENSEMBLE (mean)                0.5123   0.3661   0.4392
+  Ensemble per device:
+  AKGC417L                       0.5301   0.3947   0.4624
+  Meditron                       0.3448   0.5287   0.4367
+  Litt3200                       0.5735   0.1262   0.3498

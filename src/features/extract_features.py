@@ -23,12 +23,18 @@ def standardize_audio(audio):
     standardized_audio = (audio - mean) / std
     return standardized_audio
 
-def extract_features(audio, sample_rate, output_path, label, patient, index_cycle, type):
+# STFT window and hop in seconds (2048 and 256 samples at 8000 Hz). They are fixed in time, so the
+# spectrogram width (number of frames) does not depend on the sampling rate.
+WINDOW_SECONDS = 0.256
+HOP_SECONDS = 0.032
+
+def extract_features(audio, sample_rate, output_path, label, patient, index_cycle, type, fmax=2500):
     """
     Extract a Mel spectrogram from an audio segment and save it as a NumPy array.
 
     The input audio is first standardized. A Mel spectrogram is then computed
-    and converted from power values to the decibel scale. The resulting
+    (128 Mel bins between 50 Hz and `fmax`, with a 256 ms window and a 32 ms
+    hop at any sampling rate) and converted from power values to the decibel scale. The resulting
     spectrogram is expanded with a channel dimension and saved as a `.npy`
     file using the provided metadata.
 
@@ -40,13 +46,18 @@ def extract_features(audio, sample_rate, output_path, label, patient, index_cycl
         patient (str): Identifier of the patient associated with the recording.
         index_cycle (str): Identifier of the respiratory cycle.
         type (str): Type of audio sample or augmentation applied.
+        fmax (float, optional): Highest frequency of the Mel filterbank in Hz.
+            Defaults to 2500.
 
     Returns:
         None
     """
+    n_fft = int(round(WINDOW_SECONDS * sample_rate))
+    hop_length = int(round(HOP_SECONDS * sample_rate))
+
     # Generate the Mel Spectrogram for the audio segment:
     audio = standardize_audio(audio)
-    spectrogram = librosa.feature.melspectrogram(y = audio, sr=sample_rate, n_fft=2048, hop_length=256, n_mels=128, fmin=50, fmax=2500)
+    spectrogram = librosa.feature.melspectrogram(y = audio, sr=sample_rate, n_fft=n_fft, hop_length=hop_length, n_mels=128, fmin=50, fmax=fmax)
     spectrogram = librosa.power_to_db(spectrogram, ref=np.max)
 
     # Concatenate the spectrogram, MFCC, and delta features along the channel dimension

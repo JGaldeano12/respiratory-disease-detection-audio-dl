@@ -1,0 +1,19 @@
+nohup: ignoring input
+========== OFFICIAL SPLIT | EfficientNet | validation seed 202506 | 2026-10-06 15:39:59 ==========
+find: ‘data/processed/Test/Wheeze’: No such file or directory
+find: ‘data/processed/Test/Wheeze & Crackle’: No such file or directory
+find: ‘data/processed/Train/Wheeze’: No such file or directory
+find: ‘data/processed/Train/Wheeze & Crackle’: No such file or directory
+Recording 226_1b1_Pl_sc_LittC2SE not found in the official file; matched ignoring the device (train).
+Warning: the official partition places patients ['156', '218'] in both the training and testing sets.
+Best validation ICBHI: 0.64922
+Sensitivity: 0.3976
+Specificity: 0.5845
+ICBHI Score: 0.4911
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       940       896   0.4185   0.6191   0.5188
+Meditron       314       145   0.2207   0.7803   0.5005
+Litt3200       325       136   0.4485   0.2954   0.3720
+All           1579      1177   0.3976   0.5845   0.4911
+Logs and confusion matrix saved in experiments/official_split/EfficientNet_val_seed_202506

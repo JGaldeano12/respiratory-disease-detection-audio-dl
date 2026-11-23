@@ -221,7 +221,7 @@ def process_npy(file_path, width, training=True, band_mask=False):
 
     return spec, label
 
-def load_datasets(dir_dataset, seed=12345, band_mask=False):
+def load_datasets(dir_dataset, seed=12345, band_mask=False, balanced=False):
     """
     Load and prepare the training, validation and testing datasets.
 
@@ -237,6 +237,10 @@ def load_datasets(dir_dataset, seed=12345, band_mask=False):
         seed (int): Random seed used for shuffling the training dataset.
         band_mask (bool): Whether to randomly blank the 1.5-2 kHz band of the
             training spectrograms. Defaults to False.
+        balanced (bool): Whether to build class-balanced training batches: the
+            four classes are sampled with equal probability (with replacement),
+            as RespireNet's weighted random sampler does. An epoch keeps the
+            same number of batches as the unbalanced pipeline. Defaults to False.
 
     Returns:
         tuple:
@@ -252,10 +256,25 @@ def load_datasets(dir_dataset, seed=12345, band_mask=False):
 
     # Training dataset: shuffled, augmented, and batched dropping the last incomplete batch.
     train_dataset = tf.data.Dataset.list_files(os.path.join(dir_dataset, 'Train/*/*'), shuffle=False).with_options(options)
-    train_dataset = train_dataset.shuffle(buffer_size=len(train_dataset), seed=seed, reshuffle_each_iteration=True)
-    train_dataset = train_dataset.map(lambda x: process_npy(x, width, training=True, band_mask=band_mask), num_parallel_calls=1)
-    train_dataset = train_dataset.batch(16, drop_remainder=True)
-    train_dataset = train_dataset.prefetch(1)
+
+    if balanced:
+        # One endless, reshuffled stream per class, mixed with equal probability. The epoch length is
+        # fixed to the number of batches of the unbalanced pipeline, so the training schedules are unchanged.
+        steps_per_epoch = len(train_dataset) // 16
+        class_streams = []
+        for i, class_name in enumerate(['Healthy', 'Crackle', 'Wheeze', 'Wheeze & Crackle']):
+            files = sorted(glob.glob(os.path.join(dir_dataset, 'Train', class_name, '*')))
+            stream = tf.data.Dataset.from_tensor_slices(files).shuffle(len(files), seed=seed + i, reshuffle_each_iteration=True).repeat()
+            class_streams.append(stream)
+        train_dataset = tf.data.Dataset.sample_from_datasets(class_streams, weights=[0.25] * 4, seed=seed, rerandomize_each_iteration=True).with_options(options)
+        train_dataset = train_dataset.map(lambda x: process_npy(x, width, training=True, band_mask=band_mask), num_parallel_calls=1)
+        train_dataset = train_dataset.batch(16, drop_remainder=True).take(steps_per_epoch)
+        train_dataset = train_dataset.prefetch(1)
+    else:
+        train_dataset = train_dataset.shuffle(buffer_size=len(train_dataset), seed=seed, reshuffle_each_iteration=True)
+        train_dataset = train_dataset.map(lambda x: process_npy(x, width, training=True, band_mask=band_mask), num_parallel_calls=1)
+        train_dataset = train_dataset.batch(16, drop_remainder=True)
+        train_dataset = train_dataset.prefetch(1)
 
     # Validation and testing datasets: neither shuffled nor augmented, and every sample is kept.
     eval_datasets = []

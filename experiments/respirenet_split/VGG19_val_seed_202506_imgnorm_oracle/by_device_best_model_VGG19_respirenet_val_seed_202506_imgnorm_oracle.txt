@@ -1,0 +1,9 @@
+Model: models/respirenet_split/best_model_VGG19_respirenet_val_seed_202506_imgnorm_oracle.keras
+
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       369       541   0.4270   0.8049   0.6159
+Meditron       146        34   0.2059   0.9247   0.5653
+LittC2SE       129        68   0.4412   0.8915   0.6663
+Litt3200       131        26   0.0000   0.8397   0.4198
+All            775       669   0.4006   0.8477   0.6242

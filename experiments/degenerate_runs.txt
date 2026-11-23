@@ -1,0 +1,14 @@
+ok        experiments/random_split/CustomCNNCosine_val_seed_202501_oracle/train.log  (44 epochs trained)
+ok        experiments/random_split/CustomCNNCosine_val_seed_202502_oracle/train.log  (38 epochs trained)
+ok        experiments/random_split/CustomCNNCosine_val_seed_202503_oracle/train.log  (39 epochs trained)
+ok        experiments/random_split/CustomCNNCosine_val_seed_202504_oracle/train.log  (31 epochs trained)
+AFFECTED  experiments/random_split/CustomCNNCosine_val_seed_202505_oracle/train.log  (epoch 5: ICBHI 0.50000, Se 0.00000, Sp 1.00000; 31 epochs trained)
+ok        experiments/random_split/CustomCNNCosine_val_seed_202506_oracle/train.log  (47 epochs trained)
+ok        experiments/random_split/CustomCNNCosine_val_seed_202507_oracle/train.log  (38 epochs trained)
+ok        experiments/random_split/CustomCNNCosine_val_seed_202508_oracle/train.log  (74 epochs trained)
+ok        experiments/random_split/CustomCNNCosine_val_seed_202509_oracle/train.log  (39 epochs trained)
+ok        experiments/random_split/CustomCNNCosine_val_seed_202510_oracle/train.log  (48 epochs trained)
+ok        experiments/random_split/CustomCNNCosine_val_seed_202511_oracle/train.log  (56 epochs trained)
+AFFECTED  experiments/random_split/CustomCNNCosine_val_seed_202512_oracle/train.log  (epoch 4: ICBHI 0.50000, Se 0.00000, Sp 1.00000; 24 epochs trained)
+
+2 affected run(s) out of 12.

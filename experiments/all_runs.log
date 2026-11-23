@@ -1,0 +1,56 @@
+nohup: ignoring input
+========== OFFICIAL SPLIT (validation seed 202506, 2026-10-05 21:06:49) ==========
+find: ‘data/processed/Train/Healthy’: No such file or directory
+find: ‘data/processed/Train/Wheeze’: No such file or directory
+find: ‘data/processed/Train/Wheeze & Crackle’: No such file or directory
+Recording 226_1b1_Pl_sc_LittC2SE not found in the official file; matched ignoring the device (train).
+Warning: the official partition places patients ['156', '218'] in both the training and testing sets.
+Best validation ICBHI: 0.64862
+Sensitivity: 0.2668
+Specificity: 0.6593
+ICBHI Score: 0.4630
+Logs and confusion matrix saved in experiments/official_split/val_seed_202506
+========== SPLIT SEED 202501 (2026-10-05 23:00:50) ==========
+find: ‘data/processed/Test/Wheeze’: No such file or directory
+find: ‘data/processed/Test/Wheeze & Crackle’: No such file or directory
+find: ‘data/processed/Train/Healthy’: No such file or directory
+find: ‘data/processed/Train/Wheeze’: No such file or directory
+find: ‘data/processed/Train/Wheeze & Crackle’: No such file or directory
+Seed 202501 -> val ICBHI: 0.52943 | test Se: 0.1950 | Sp: 0.4612 | ICBHI: 0.3281
+========== SPLIT SEED 202502 (2026-10-06 00:31:43) ==========
+find: ‘data/processed/Train/Healthy’: No such file or directory
+find: ‘data/processed/Train/Wheeze’: No such file or directory
+find: ‘data/processed/Train/Wheeze & Crackle’: No such file or directory
+Seed 202502 -> val ICBHI: 0.51059 | test Se: 0.2187 | Sp: 0.7931 | ICBHI: 0.5059
+========== SPLIT SEED 202503 (2026-10-06 02:27:24) ==========
+find: ‘data/processed/Train/Healthy’: No such file or directory
+find: ‘data/processed/Train/Wheeze’: No such file or directory
+find: ‘data/processed/Train/Wheeze & Crackle’: No such file or directory
+find: ‘data/processed/Val/Wheeze & Crackle’: No such file or directory
+Seed 202503 -> val ICBHI: 0.49734 | test Se: 0.0254 | Sp: 0.9452 | ICBHI: 0.4853
+========== SPLIT SEED 202504 (2026-10-06 04:05:29) ==========
+find: ‘data/processed/Train/Healthy’: No such file or directory
+find: ‘data/processed/Train/Wheeze’: No such file or directory
+find: ‘data/processed/Train/Wheeze & Crackle’: No such file or directory
+Seed 202504 -> val ICBHI: 0.56567 | test Se: 0.4596 | Sp: 0.5176 | ICBHI: 0.4886
+========== SPLIT SEED 202505 (2026-10-06 06:17:00) ==========
+find: ‘data/processed/Train/Healthy’: No such file or directory
+find: ‘data/processed/Train/Wheeze’: No such file or directory
+find: ‘data/processed/Train/Wheeze & Crackle’: No such file or directory
+Seed 202505 -> val ICBHI: 0.42772 | test Se: 0.0148 | Sp: 0.8501 | ICBHI: 0.4325
+========== SPLIT SEED 202506 (2026-10-06 07:40:18) ==========
+find: ‘data/processed/Train/Healthy’: No such file or directory
+find: ‘data/processed/Train/Wheeze’: No such file or directory
+find: ‘data/processed/Train/Wheeze & Crackle’: No such file or directory
+Seed 202506 -> val ICBHI: 0.55490 | test Se: 0.3288 | Sp: 0.7791 | ICBHI: 0.5539
+========== SPLIT SEED 202507 (2026-10-06 10:22:29) ==========
+find: ‘data/processed/Train/Healthy’: No such file or directory
+find: ‘data/processed/Train/Wheeze’: No such file or directory
+find: ‘data/processed/Train/Wheeze & Crackle’: No such file or directory
+Seed 202507 -> val ICBHI: 0.55778 | test Se: 0.4679 | Sp: 0.5069 | ICBHI: 0.4874
+========== SPLIT SEED 202508 (2026-10-06 13:34:33) ==========
+find: ‘data/processed/Train/Healthy’: No such file or directory
+find: ‘data/processed/Train/Wheeze’: No such file or directory
+find: ‘data/processed/Train/Wheeze & Crackle’: No such file or directory
+find: ‘data/processed/Val/Wheeze’: No such file or directory
+find: ‘data/processed/Val/Wheeze & Crackle’: No such file or directory

@@ -1,0 +1,40 @@
+RESPIRENET FOLD 4 (2026-10-16 05:53:58) - oracle protocol (checkpoint selected on the TEST set). RespireNet: 68.5%
+
+Model            Configuration                              Test Se   Test Sp Test ICBHI
+CustomCNNCosine  balanced batches, seed 1234                 0.5366    0.6361    0.5864
+CustomCNNCosine  balanced batches, seed 202501               0.4185    0.6877    0.5531
+CustomCNNCosine  balanced batches, seed 202502               0.4290    0.7045    0.5668
+CustomCNNCosine  balanced batches, seed 202503               0.4783    0.6077    0.5430
+CustomCNNCosine  balanced batches + band blanking            0.4634    0.6787    0.5710
+VGG19            ImageNet input + balanced, seed 1234        0.4738    0.7819    0.6279
+VGG19            ImageNet input + balanced, seed 202501      0.3916    0.8232    0.6074
+VGG19            ImageNet input + balanced, seed 202502      0.3961    0.8361    0.6161
+
+Ensemble: CustomCNN_balanced_fold4_4models (4 models)
+
+[Test]
+Model                              Se       Sp    ICBHI
+_seed_202506_balanced_oracle   0.5366   0.6348   0.5857
+anced_trainseed202501_oracle   0.4200   0.6890   0.5545
+anced_trainseed202502_oracle   0.4290   0.7045   0.5668
+anced_trainseed202503_oracle   0.4783   0.6077   0.5430
+ENSEMBLE (mean)                0.4933   0.7484   0.6208
+  Ensemble per device:
+  AKGC417L                       0.5360   0.6314   0.5837
+  Meditron                       0.1471   0.8562   0.5016
+  LittC2SE                       0.4559   0.8915   0.6737
+  Litt3200                       0.1538   0.8168   0.4853
+
+Ensemble: VGG19_balanced_fold4_3models (3 models)
+
+[Test]
+Model                              Se       Sp    ICBHI
+2506_imgnorm_balanced_oracle   0.4723   0.7819   0.6271
+anced_trainseed202501_oracle   0.3916   0.8219   0.6068
+anced_trainseed202502_oracle   0.3961   0.8361   0.6161
+ENSEMBLE (mean)                0.3991   0.8594   0.6292
+  Ensemble per device:
+  AKGC417L                       0.4233   0.8130   0.6181
+  Meditron                       0.1176   0.9384   0.5280
+  LittC2SE                       0.5000   0.8605   0.6802
+  Litt3200                       0.0000   0.9008   0.4504

@@ -1,0 +1,95 @@
+nohup: ignoring input
+########## OVERNIGHT PLAN STARTED: 2026-10-06 20:16:13 ##########
+Skipping CustomCNN with 8 s (already completed).
+========== OFFICIAL SPLIT | CustomCNN | validation seed 202506 | 7 s | 2026-10-06 20:16:13 ==========
+Recording 226_1b1_Pl_sc_LittC2SE not found in the official file; matched ignoring the device (train).
+Warning: the official partition places patients ['156', '218'] in both the training and testing sets.
+Best validation ICBHI: 0.57172
+Sensitivity: 0.4817
+Specificity: 0.2280
+ICBHI Score: 0.3549
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       940       896   0.5223   0.2138   0.3681
+Meditron       314       145   0.1586   0.4459   0.3022
+Litt3200       325       136   0.5662   0.0523   0.3092
+All           1579      1177   0.4826   0.2267   0.3547
+Logs and confusion matrix saved in experiments/official_split/CustomCNN_val_seed_202506_7s
+========== OFFICIAL SPLIT | CustomCNN | validation seed 202506 | 6 s | 2026-10-06 21:43:04 ==========
+Recording 226_1b1_Pl_sc_LittC2SE not found in the official file; matched ignoring the device (train).
+Warning: the official partition places patients ['156', '218'] in both the training and testing sets.
+Best validation ICBHI: 0.59003
+Sensitivity: 0.5064
+Specificity: 0.3192
+ICBHI Score: 0.4128
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       940       896   0.5413   0.3011   0.4212
+Meditron       314       145   0.1793   0.6210   0.4002
+Litt3200       325       136   0.6250   0.0800   0.3525
+All           1579      1177   0.5064   0.3192   0.4128
+Logs and confusion matrix saved in experiments/official_split/CustomCNN_val_seed_202506_6s
+========== OFFICIAL SPLIT | CustomCNN | validation seed 202506 | 5 s | 2026-10-06 23:16:24 ==========
+Recording 226_1b1_Pl_sc_LittC2SE not found in the official file; matched ignoring the device (train).
+Warning: the official partition places patients ['156', '218'] in both the training and testing sets.
+Best validation ICBHI: 0.58993
+Sensitivity: 0.4894
+Specificity: 0.4009
+ICBHI Score: 0.4451
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       940       896   0.5112   0.4074   0.4593
+Meditron       314       145   0.2207   0.6815   0.4511
+Litt3200       325       136   0.6103   0.1231   0.3667
+All           1579      1177   0.4868   0.4034   0.4451
+Logs and confusion matrix saved in experiments/official_split/CustomCNN_val_seed_202506_5s
+Custom CNN, 8 s -> validation ICBHI: 0.64862
+Custom CNN, 7 s -> validation ICBHI: 0.57172
+Custom CNN, 6 s -> validation ICBHI: 0.59003
+Custom CNN, 5 s -> validation ICBHI: 0.58993
+>>> Chosen duration (by validation): 8 s
+========== OFFICIAL SPLIT | CustomCNNCosine | validation seed 202506 | 8 s | 2026-10-07 01:15:51 ==========
+Recording 226_1b1_Pl_sc_LittC2SE not found in the official file; matched ignoring the device (train).
+Warning: the official partition places patients ['156', '218'] in both the training and testing sets.
+Best validation ICBHI: 0.65157
+Sensitivity: 0.2472
+Specificity: 0.6352
+ICBHI Score: 0.4412
+[Test]
+Device      Normal  Abnormal       Se       Sp    ICBHI
+AKGC417L       940       896   0.2277   0.7362   0.4819
+Meditron       314       145   0.2690   0.6975   0.4832
+Litt3200       325       136   0.3529   0.2831   0.3180
+All           1579      1177   0.2472   0.6352   0.4412
+Logs and confusion matrix saved in experiments/official_split/CustomCNNCosine_val_seed_202506
+>>> Chosen Custom CNN variant (by validation): custom_cnn_cosine (three phases: 0.64862, cosine: 0.65157)
+Skipping EfficientNet with 8 s (already completed).
+========== SPLIT SEED 202508 | CustomCNNCosine | 8 s | 2026-10-07 03:09:41 ==========
+Seed 202508 -> val ICBHI: 0.61812 | test Se: 0.3183 | Sp: 0.6245 | ICBHI: 0.4714
+========== SPLIT SEED 202509 | CustomCNNCosine | 8 s | 2026-10-07 05:00:40 ==========
+Seed 202509 -> val ICBHI: 0.52697 | test Se: 0.3353 | Sp: 0.3948 | ICBHI: 0.3651
+========== SPLIT SEED 202510 | CustomCNNCosine | 8 s | 2026-10-07 06:08:19 ==========
+Seed 202510 -> val ICBHI: 0.53231 | test Se: 0.1264 | Sp: 0.8664 | ICBHI: 0.4964
+
+========== RESULTS PER SPLIT SEED ==========
+ split_seed  best_val_icbhi  test_sensitivity  test_specificity  test_icbhi
+     202508         0.61812            0.3183            0.6245      0.4714
+     202509         0.52697            0.3353            0.3948      0.3651
+     202510         0.53231            0.1264            0.8664      0.4964
+
+========== MEAN ± STD ==========
+best_val_icbhi: 0.5591 ± 0.0512
+test_sensitivity: 0.2600 ± 0.1160
+test_specificity: 0.6286 ± 0.2358
+test_icbhi: 0.4443 ± 0.0697
+OVERNIGHT SUMMARY (2026-10-07 07:55:45)
+Decisions taken on validation: duration = 8 s, Custom CNN variant = custom_cnn_cosine
+
+Model              Duration  Val ICBHI   Test Se   Test Sp Test ICBHI
+CustomCNNCosine         8 s    0.65157    0.2472    0.6352    0.4412
+CustomCNN               8 s    0.64862    0.2668    0.6593    0.4630
+CustomCNN               5 s    0.58993    0.4894    0.4009    0.4451
+CustomCNN               6 s    0.59003    0.5064    0.3192    0.4128
+CustomCNN               7 s    0.57172    0.4817    0.2280    0.3549
+EfficientNet            8 s    0.64922    0.3976    0.5845    0.4911
+########## OVERNIGHT PLAN FINISHED: 2026-10-07 07:55:46 ##########

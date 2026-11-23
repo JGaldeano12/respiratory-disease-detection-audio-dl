@@ -1,0 +1,6 @@
+2026-10-05 23:00:49.487550: W tensorflow/core/framework/local_rendezvous.cc:404] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+Confusion matrix saved to experiments/official_split/val_seed_202506/confusion_matrix_best_model_CustomCNN_official_val_seed_202506_2026-10-05_23-00-49.png
+Sensitivity: 0.2668
+Specificity: 0.6593
+ICBHI Score: 0.4630
+Evaluation complete!

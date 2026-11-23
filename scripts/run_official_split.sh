@@ -20,6 +20,10 @@
 #   PROTOCOL    "standard" (default: validation set, checkpoint selected on validation) or
 #               "oracle" (RespireNet-like: no validation set, its patients go back to training,
 #               and the checkpoint is selected on the TEST set; results are optimistic)
+#   SAMPLE_RATE, HIGHCUT, FMAX
+#               feature extraction: sampling rate (Hz), upper cutoff of the bandpass filter (Hz,
+#               below SAMPLE_RATE / 2) and highest Mel frequency (Hz). Default to 8000, 2000 and
+#               2500 (the original features). Set VARIANT too, so the runs get their own names.
 #
 # If data/processed already holds the dataset of this split and duration (see .dataset_config),
 # generation and augmentation are skipped, since they do not depend on the training options.
@@ -51,6 +55,10 @@ elif [ "$PROTOCOL" != "standard" ]; then
     echo "Unknown protocol: $PROTOCOL (use standard or oracle)"; exit 1
 fi
 TRAIN_SEED="${TRAIN_SEED:-1234}"
+SAMPLE_RATE="${SAMPLE_RATE:-8000}"
+HIGHCUT="${HIGHCUT:-2000}"
+FMAX="${FMAX:-2500}"
+FEATURE_ARGS="--sample_rate $SAMPLE_RATE --highcut $HIGHCUT --fmax $FMAX"
 OFFICIAL_FILE="src/resources/ICBHI_challenge_train_test.txt"
 
 # Training script and checkpoint name (as saved by the ICBHI callback) of each model.
@@ -79,11 +87,14 @@ mkdir -p "$OUT_DIR" "models/${SPLIT_NAME}_split" models/custom_cnn models/pretra
 
 echo "========== $SPLIT_LABEL | $MODEL_NAME${VARIANT:+ | $VARIANT} | $SEED_LABEL $VAL_SEED | ${DURATION} s | $PROTOCOL | $(date '+%F %T') =========="
 [ -n "$TRAIN_ARGS" ] && echo "Training options: $TRAIN_ARGS"
+echo "Features: $SAMPLE_RATE Hz, bandpass 50-$HIGHCUT Hz, Mel 50-$FMAX Hz"
 
 DATA_TAG="${SPLIT_NAME}_${VAL_SEED}_${DURATION}s"
 [ "$PROTOCOL" = "oracle" ] && [ "$SPLIT_MODE" = "official" ] && DATA_TAG="official_oracle_${DURATION}s"
 [ "$PROTOCOL" = "oracle" ] && [ "$SPLIT_MODE" = "random" ] && DATA_TAG="random_${VAL_SEED}_oracle_${DURATION}s"
 [ "$PROTOCOL" = "oracle" ] && [ "$SPLIT_MODE" = "respirenet" ] && DATA_TAG="respirenet_oracle_${DURATION}s"
+# Non-default features get their own tag, so a dataset is never reused with other features.
+[ "$SAMPLE_RATE/$HIGHCUT/$FMAX" != "8000/2000/2500" ] && DATA_TAG="${DATA_TAG}_sr${SAMPLE_RATE}_hc${HIGHCUT}_fm${FMAX}"
 DATA_MARKER="data/processed/.dataset_config"
 
 if [ "$(cat "$DATA_MARKER" 2>/dev/null)" = "$DATA_TAG" ]; then
@@ -91,11 +102,11 @@ if [ "$(cat "$DATA_MARKER" 2>/dev/null)" = "$DATA_TAG" ]; then
 else
     # 1. Delete the previous dataset (keeping .gitkeep) and regenerate it with the official partition.
     find data/processed -mindepth 1 -maxdepth 1 ! -name .gitkeep -exec rm -rf {} +
-    python -m src.data.generate_dataset --seed "$VAL_SEED" --duration "$DURATION" --val_split "$VAL_SPLIT" --test_train_split 80 --split_mode "$SPLIT_MODE" --official_split_file "$OFFICIAL_FILE" > "$OUT_DIR/generate.log" 2>&1 || { echo "Generation failed"; exit 1; }
+    python -m src.data.generate_dataset --seed "$VAL_SEED" $FEATURE_ARGS --duration "$DURATION" --val_split "$VAL_SPLIT" --test_train_split 80 --split_mode "$SPLIT_MODE" --official_split_file "$OFFICIAL_FILE" > "$OUT_DIR/generate.log" 2>&1 || { echo "Generation failed"; exit 1; }
     grep -E "Warning|not found" "$OUT_DIR/generate.log"
 
     # 2. Augment only the official training patients that are not in the validation set.
-    python src/data/augment.py --seed "$VAL_SEED" --sample_rate 8000 --duration "$DURATION" --val_split "$VAL_SPLIT" --test_train_split 80 --split_mode "$SPLIT_MODE" --official_split_file "$OFFICIAL_FILE" > "$OUT_DIR/augment.log" 2>&1 || { echo "Augmentation failed"; exit 1; }
+    python src/data/augment.py --seed "$VAL_SEED" $FEATURE_ARGS --duration "$DURATION" --val_split "$VAL_SPLIT" --test_train_split 80 --split_mode "$SPLIT_MODE" --official_split_file "$OFFICIAL_FILE" > "$OUT_DIR/augment.log" 2>&1 || { echo "Augmentation failed"; exit 1; }
 
     # Record which dataset is now in data/processed, so later runs with the same split and duration can reuse it.
     echo "$DATA_TAG" > "$DATA_MARKER"

@@ -198,12 +198,12 @@ def select_balanced_and_random_respiratory_cycles(rng, control_file_path='/app/s
     # Concatenate the selected cycles from all classes into a single array.
     return np.concatenate(selected, axis=0)
 
-def apply_traditional_augmentation_process_file(cycle, input_path, output_path, sample_rate, length, rng, seed):
+def apply_traditional_augmentation_process_file(cycle, input_path, output_path, sample_rate, length, rng, seed, highcut=2000, fmax=2500):
     """
     Load an audio file and apply traditional augmentation to one respiratory cycle.
 
     The function receives a single respiratory cycle annotation, loads the
-    corresponding WAV recording at 8000 Hz, and applies the traditional
+    corresponding WAV recording at the given sampling rate, and applies the traditional
     augmentation pipeline to the audio segment defined by that cycle.
 
     Args:
@@ -226,12 +226,12 @@ def apply_traditional_augmentation_process_file(cycle, input_path, output_path, 
         raw_audio, sr = librosa.load(os.path.join(input_path, cycle[1] + ".wav"), sr=sample_rate)
 
         # Apply traditional augmentation to the loaded audio segment.
-        apply_traditional_augmentation(raw_audio=raw_audio, cycle=cycle, length=length, sample_rate=sr, output_path=output_path, rng=rng, seed=seed)
+        apply_traditional_augmentation(raw_audio=raw_audio, cycle=cycle, length=length, sample_rate=sr, output_path=output_path, rng=rng, seed=seed, highcut=highcut, fmax=fmax)
 
     except Exception as e:
         print(f"Error while processing {cycle[1]}: {e}")
 
-def apply_traditional_augmentation_process_files_parallel(input_path, output_path, sample_rate, length, cycles, rng, seed):
+def apply_traditional_augmentation_process_files_parallel(input_path, output_path, sample_rate, length, cycles, rng, seed, highcut=2000, fmax=2500):
     """
     Apply traditional augmentation to multiple respiratory cycles in parallel.
 
@@ -254,13 +254,13 @@ def apply_traditional_augmentation_process_files_parallel(input_path, output_pat
         None
     """
     # Build the argument tuples, passing the shared seed to each worker.
-    task_args = [(cycle, input_path, output_path, sample_rate, length, rng, seed) for cycle in cycles]
+    task_args = [(cycle, input_path, output_path, sample_rate, length, rng, seed, highcut, fmax) for cycle in cycles]
 
     # Launch a pool of workers to process files in parallel.
     with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
         pool.starmap(apply_traditional_augmentation_process_file, task_args)
 
-def apply_traditional_augmentation(raw_audio, rng, seed, sample_rate=8000, length=8, cycle=None, output_path='/app/data/processed/Train'):
+def apply_traditional_augmentation(raw_audio, rng, seed, sample_rate=8000, length=8, cycle=None, output_path='/app/data/processed/Train', highcut=2000, fmax=2500):
     """
     Generate and process augmented versions of a single respiratory cycle.
 
@@ -279,7 +279,7 @@ def apply_traditional_augmentation(raw_audio, rng, seed, sample_rate=8000, lengt
         seed (int): Random seed used by augmentation operations that require
             deterministic behaviour.
         sample_rate (int, optional): Sampling rate of the audio signal in Hz.
-            Defaults to 4096.
+            Defaults to 8000.
         length (float, optional): Target duration of the processed audio
             segments in seconds. Defaults to 8.
         cycle (np.ndarray, optional): Respiratory cycle annotation containing
@@ -287,6 +287,10 @@ def apply_traditional_augmentation(raw_audio, rng, seed, sample_rate=8000, lengt
             Defaults to None.
         output_path (str, optional): Directory where the extracted features
             are saved. Defaults to '/app/data/processed/Train'.
+        highcut (float, optional): Upper cutoff frequency of the bandpass
+            filter in Hz. Defaults to 2000.
+        fmax (float, optional): Highest frequency of the Mel filterbank in Hz.
+            Defaults to 2500.
 
     Returns:
         None
@@ -310,13 +314,13 @@ def apply_traditional_augmentation(raw_audio, rng, seed, sample_rate=8000, lengt
     for augmented_audio, augmentation_type in zip(augmented_audios, augmentation_types):
 
         # Apply the Butterworth bandpass filter to remove out-of-band noise.
-        segmented_audio = butter_bandpass_filter(augmented_audio, 50, 2000, sample_rate, order=5)
+        segmented_audio = butter_bandpass_filter(augmented_audio, 50, highcut, sample_rate, order=5)
 
         # Adjust the audio segment to the target duration via truncation or padding.
         segmented_audio = check_length_and_padding(segmented_audio, target_length)
 
         # Extract and save the Mel Spectrogram for the augmented audio segment.
-        extract_features(segmented_audio, sample_rate, output_path=output_path, label=cycle[6], patient=cycle[1], index_cycle=index_cycle, type=augmentation_type)
+        extract_features(segmented_audio, sample_rate, output_path=output_path, label=cycle[6], patient=cycle[1], index_cycle=index_cycle, type=augmentation_type, fmax=fmax)
 
     # Free memory after processing the audio file.
     gc.collect()
@@ -325,6 +329,8 @@ def apply_traditional_augmentation(raw_audio, rng, seed, sample_rate=8000, lengt
 parser = argparse.ArgumentParser(description='Augment dataset with a given random seed.')
 parser.add_argument('--seed', type=int, default=202506, help='Random seed for the patient-wise split')
 parser.add_argument('--sample_rate', type=int, default=8000, help='Sampling rate for audio processing')
+parser.add_argument('--highcut', type=float, default=2000, help='Upper cutoff frequency (Hz) of the bandpass filter; must be below sample_rate / 2')
+parser.add_argument('--fmax', type=float, default=2500, help='Highest frequency (Hz) of the Mel filterbank')
 parser.add_argument('--duration', type=int, default=8, help='Duration of each audio segment')
 parser.add_argument('--test_train_split', type=int, default=80, help='Percentage of patients used for training + validation')
 parser.add_argument('--val_split', type=int, default=15, help='Percentage of the training + validation patients used for validation')
@@ -355,4 +361,6 @@ apply_traditional_augmentation_process_files_parallel(input_path='/app/data/raw'
                                                       length=args.duration, 
                                                       cycles=cycles_selected, 
                                                       rng=rng, 
-                                                      seed=args.seed)
+                                                      seed=args.seed,
+                                                      highcut=args.highcut,
+                                                      fmax=args.fmax)
